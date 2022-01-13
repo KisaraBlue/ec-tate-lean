@@ -163,6 +163,10 @@ def tIsoV (r s t u : ℤ) (e : ValidModel ℤ) : ValidModel ℤ :=
     discr_non_zero := tIso_valid r s t u e }
 
 def all_quantities (e : ValidModel ℤ) : ℤ × ℤ × ℤ × ℤ × ℤ × ℤ × ℤ × (ℤ × ℕ) :=
+  let Δ := e.discr; let c4_3 := e.c_4 ^ 3; let div := Int.gcd c4_3 Δ;
+  (e.b_2, e.b_4, e.b_6, e.b_8, e.c_4, e.c_6, Δ,
+    (if Δ > 0 then c4_3 else -c4_3) / div, Int.natAbs (Δ / div))
+/-
   let (a1_2, a1a3, a3_2, a2x4) := (e.a1*e.a1, e.a1*e.a3, e.a3*e.a3, 4*e.a2);
   let (b2, b4, b6) := (a1_2 + a2x4, a1a3 + 2*e.a4, a3_2 + 4*e.a6);
   let b8 := (a1_2 + a2x4)*e.a6 - (a1a3 + e.a4)*e.a4 + e.a2*a3_2;
@@ -171,6 +175,7 @@ def all_quantities (e : ValidModel ℤ) : ℤ × ℤ × ℤ × ℤ × ℤ × ℤ
   let c4_3 :=  e.c_4 ^ 3; let div := Int.gcd c4_3 Δ;
   (b2, b4, b6, b8, c4, -b2*b2_2 + 36*b2b4 - 216*b6, Δ,
   ((if Δ > 0 then c4_3 else -c4_3) / div, Int.natAbs (Δ / div)))
+-/
 
 partial def count_valuation (v : ℕ) (p : ℤ) (x : ℤ) :=
   if x % p ≠ 0 then v else count_valuation (v + 1) p (x / p)
@@ -309,11 +314,10 @@ instance [Repr R] : Repr (ValidModel R) := ⟨ λ (e : ValidModel R) n => repr e
 
 def i67star : ValidModel ℤ := ⟨ ⟨0,-1,0,-808051160,9376500497392⟩ , by simp⟩
 
-def test_model : ValidModel ℤ := ⟨ ⟨1,0,1,-1,0⟩ , by simp⟩
+def test_model : ValidModel ℤ := ⟨ ⟨1,0,1,9,90⟩ , by simp⟩
 
 #eval test_model.discr
-#eval valuation 7 (-28)
 #eval test_model.all_quantities
-#eval basic_tate_algorithm test_model 7
+#eval basic_tate_algorithm test_model 19
 
 end ValidModel

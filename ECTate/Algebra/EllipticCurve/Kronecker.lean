@@ -4,7 +4,7 @@ import Mathlib.Init.Data.Nat.Lemmas
 import Mathlib.Logic.Basic
 import Mathlib.Init.Algebra.Order
 
-open Int
+
 open Nat
 
 section Obvious
@@ -17,6 +17,7 @@ lemma div2_succ_succ_eq_succ_div2 (n : ℕ) : succ (succ n) / 2 = succ (n / 2) :
 
 end Obvious
 
+namespace Int
 
 lemma div2_lt_self {x : ℕ} (h : 0 < x) : x / 2 < x :=
   div_lt_self h (lt_succ_self 1)
@@ -178,3 +179,5 @@ def kronecker (a b : ℤ) : ℤ :=
 def ex_root_quad (a b c p : ℤ) : Bool :=
   let (a', b', c') := (a % p, b % p, c % p);
   kronecker ((b' * b' - 4 * a' * c') % p) p = 1
+
+end Int

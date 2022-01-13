@@ -162,7 +162,7 @@ by
   apply congrArg
   rw [add_comm (e.a3 * (r * e.a1)), add_comm, mul_comm e.a3 (r * e.a1), add_comm (2 * (r * (e.a1 * e.a3)))]
   simp only [←add_assoc, ←mul_assoc]
-  rw [←add_assoc, add_assoc _ (r * e.a1 * e.a3), add_self_eq_mul_two]
+  rw [add_assoc _ (r * e.a1 * e.a3), add_self_eq_mul_two]
   simp only [←add_assoc, ←mul_assoc, ←add_assoc (4 * e.a6)]
   apply congrArg (. + 2 * r * e.a1 * e.a3)
   rw [add_comm _ (e.a3 * 2 * t), mul_assoc, mul_comm]
@@ -199,21 +199,25 @@ by
   simp only [discr, rst_b2, rst_b4, rst_b6, rst_b8]
   sorry
 
+lemma decompose_iso (r s t u : R) (e : Model R) : iso r s t u e = u_iso u (rst_iso r s t e) := by
+  simp only [u_iso, rst_iso, iso, zero_mul, mul_zero, zero_add, add_zero, sub_zero, one_pow, one_mul]
+
 end Model
 
 structure ValidModel (R : Type u) [CommRing R] extends Model R where
   discr_not_zero : toModel.discr ≠ 0
 
-/-
 namespace ValidModel
 
-def div_model (e : Model R) (u : R) () : Prop :=
-u * a1' = e.a1 ∧ u ^ 2 * a2' = e.a2 ∧ u ^ 3 * a3' = e.a3 ∧ u ^ 4 * a4' = e.a4 ∧ u ^ 6 * a6' = e.a6
+def rst_iso (r s t : R) (e : ValidModel R) : ValidModel R := {
+  toModel := Model.rst_iso r s t e.toModel,
+  discr_not_zero := by
+    rw [Model.rst_discr]
+    exact e.discr_not_zero
+}
 
-def u_inv_iso {u : R} {e : Model R} (h : ai_divible u e) : Model R :=
-  match h with
-  | ⟨a1', a2', a3', a4', a6', x⟩ => {a1 := a1', a2 := a2', a3 := a3', a4 := a4', a6 := a6'}
-
+lemma rst_discr_valid (r s t : R) (e : ValidModel R) : (rst_iso r s t e).discr = e.discr :=
+by
+  exact Model.rst_discr r s t e.toModel
 
 end ValidModel
--/
