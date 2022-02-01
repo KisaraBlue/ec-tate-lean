@@ -220,4 +220,12 @@ lemma rst_discr_valid (r s t : R) (e : ValidModel R) : (rst_iso r s t e).discr =
 by
   exact Model.rst_discr r s t e.toModel
 
+def u_iso (u : R) (e : ValidModel R) (h : u ≠ 0) : ValidModel R := {
+  toModel := Model.u_iso u e.toModel,
+  discr_not_zero := by
+    rw [Model.u_discr]
+    --actually use a integral domain
+    sorry
+}
+
 end ValidModel
