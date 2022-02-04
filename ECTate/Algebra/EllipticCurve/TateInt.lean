@@ -25,6 +25,17 @@ inductive Kodaira where
 
 open Kodaira
 
+instance : Repr Kodaira where
+  reprPrec
+    | I m, _   => "I" ++ repr m
+    | II, _    => "II"
+    | III, _   => "III"
+    | IV, _    => "IV"
+    | Is m, _  => "I*" ++ repr m
+    | IIs, _   => "II*"
+    | IIIs, _  => "III*"
+    | IVs, _   => "VI*"
+
 namespace ValidModel
 
 variable (R : Type u) [CommRing R]
@@ -73,7 +84,7 @@ lemma val2_one : val2 1 = 0 := by rfl
 lemma val2_mone : val2 (-1) = 0 := by rfl
 lemma val2_sign (x : ℤ) : val2 (sign x) = 0 := by sorry
 
-
+/-
 def decrease_val_2 (mval : ℕ) (e: ValidModel ℤ) : ValidModel ℤ × ℕ × ℕ × ℕ :=
   let n := e.val_discr_to_nat ℤ nav2;
   let xa3 := (sub_val dvr2 e.a3 mval) % 2;
@@ -118,10 +129,11 @@ decreasing_by
   simp [measure, invImage, InvImage, Nat.lt_wfRel]
   rw [iso_rst_val_discr_to_nat, iso_rst_val_discr_to_nat]
   exact decreasing
+-/
 
 def modulo (a : ℤ) (p : ℕ) : ℤ := ((a % (p : ℤ)) + p) % (p : ℤ)
 
-def tate_big_prime {p : ℕ} (hp : nat_prime p) (e : ValidModel ℤ) : Kodaira × ℕ × ℕ × (ℤ × ℤ × ℤ × ℤ) :=
+def tate_big_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) : Kodaira × ℕ × ℕ × (ℤ × ℤ × ℤ × ℤ) :=
   let dvrp := primeDVR hp; let navp := dvrp.valtn; let valp := navp.v;
   let c4 := e.c4; let c6 := e.c6; let Δ := e.discr;
   let n := val_discr_to_nat ℤ navp e;
@@ -130,7 +142,7 @@ def tate_big_prime {p : ℕ} (hp : nat_prime p) (e : ValidModel ℤ) : Kodaira �
     | ofN v_c4 => if v_c4 < n then ((v_c4 : ℤ) - (n : ℤ), v_c4, false) else (v_c4 - n, n, true)
   let ⟨u, r, s, t⟩ :=
     if k < 12 then (1, 0, 0, 0) else
-    let u' := p ^ (k / 12); let s' := if e.a1 % 2 = 1 then (u' - e.a1) / 2 else - e.a1 / 2; let a2' := e.a2 - s' * e.a1 - s' * s'; let r' := if a2' % 3 = 0 then - a2' / 3 else if a2' % 3 = 1 then (u' * u' - a2') / 3 else - (u' * u' + a2') / 3; let a3' := e.a3 + r' * e.a1; let t' := if a3' % 2 = 1 then (u' * u' * u' - a3')/2 else -a3' / 2; (u', r', s', t');
+    let u' := p ^ (k / 12); let s' := if modulo e.a1 2 = 1 then (u' - e.a1) / 2 else - e.a1 / 2; let a2' := e.a2 - s' * e.a1 - s' * s'; let r' := if a2' % 3 = 0 then - a2' / 3 else if a2' % 3 = 1 then (u' * u' - a2') / 3 else - (u' * u' + a2') / 3; let a3' := e.a3 + r' * e.a1; let t' := if a3' % 2 = 1 then (u' * u' * u' - a3')/2 else -a3' / 2; (u', r', s', t');
   let k := k % 12; let Δ := Δ / ofNat (u ^ 12); let c6 := c6 / ofNat (u ^ 6); let c4 := c4 / ofNat (u ^ 4);
   if not integralInv then
     let ν := natAbs vpj; match k with
@@ -149,8 +161,36 @@ def tate_big_prime {p : ℕ} (hp : nat_prime p) (e : ValidModel ℤ) : Kodaira �
     | 10 => (IIs, 2, 1, (u, r, s, t))
     | _ => (I 0, 0, 0, (0, 0, 0, 0))
 
-unsafe def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0 t0 : ℤ) : Kodaira × ℕ × ℤ × (ℤ × ℤ × ℤ × ℤ) :=
-  if not (p = 2 || p = 3) then (I 0, 0, 0, (0, 0, 0, 0)) else
+def count_roots_cubic_aux (b c d : ℤ) (p : ℕ) (x : ℕ) : ℕ := match x with
+  | Nat.zero => if d = 0 then 1 else 0
+  | Nat.succ x' => (if ((x^3 : ℕ) + b * (x^2 : ℕ) + c * x + d) % (p : ℤ) = 0 then 1 else 0) + count_roots_cubic_aux b c d p x'
+
+def count_roots_cubic (b c d : ℤ) (p : ℕ) : ℕ :=
+  count_roots_cubic_aux (modulo b p) (modulo c p) (modulo d p) p (p - 1)
+
+unsafe def kodaira_type_Is (p : ℕ) (dvrp : DiscretelyValuedRing (ofNat p)) (valp : ℤ → ℕ∪∞) (e : ValidModel ℤ) (u0 r0 s0 t0 : ℤ) (m q : ℕ) :=
+  let (r, t) := (r0, t0);
+  let (a3q, a6q2) := (sub_val dvrp e.a3 q, sub_val dvrp e.a6 (2 * q));
+  if valp (a3q ^ 2 + 4 * a6q2) = 0 then
+    let c := if kronecker (a3q ^ 2 + 4 * a6q2) p = 1 then 4 else 2;
+    (m, c, (r, t))
+  else
+  let a := if p = 2 then modulo a6q2 2 else modulo (2 * -a3q) 3;
+  let e := ValidModel.rst_iso 0 0 (a * p ^ q) e;
+  let t := t + u0 ^ 3 * a * p ^ q;
+  let (a2p, a4pq, a6pq2) := (sub_val dvrp e.a2 1, sub_val dvrp e.a4 (q + 1), sub_val dvrp e.a6 (2 * q + 1));
+  if valp (a4pq ^ 2 - 4 * a2p * a6q2) = 0 then
+    let c := if kronecker (a4pq ^ 2 - 4 * a2p * a6q2) p = 1 then 4 else 2;
+    (m + 1, c, (r, t))
+  else
+  let a := if p = 2 then modulo a6pq2 2 else modulo (2 * a2p * -a4pq) 3;
+  let e := ValidModel.rst_iso (a * p ^ q) 0 0 e;
+  let r := r + u0 ^ 2 + a * p ^ q; let t := t + u0 ^ 2 * s0 * a * p ^ q;
+  kodaira_type_Is p dvrp valp e u0 r s0 t (m + 2) (q + 1)
+
+
+unsafe def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0 t0 : ℤ) : Kodaira × ℕ × ℕ × (ℤ × ℤ × ℤ × ℤ) :=
+  if smallp : p ≠ 2 ∧ p ≠ 3 then (I 0, 0, 0, (0, 0, 0, 0)) else
   let (u, r, s, t) := (u0, r0, s0, t0);
   let dvrp := primeDVR hp; let navp := dvrp.valtn; let valp := navp.v;
   let Δ := e.discr; let n := val_discr_to_nat ℤ navp e;
@@ -159,33 +199,42 @@ unsafe def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u
     let c := if kronecker (e.a1 ^ 2 + 4 * e.a2) p = 1 then n else gcd 2 n;
     (I n, 1, c, (u, r, s, t))
   else
-  --- adapt for p=3
-  let r1 := modulo e.a4 2; let s1 := (r1 + e.a2) % 2;
-  let t1 := (e.a6 + r1 * (e.a4 + s1)) % 2;
+  let (r1, s1, t1) := if p = 2 then
+    let r1' := modulo e.a4 2; let s1' := modulo (r1' + e.a2) 2;
+    (r1', s1', modulo (e.a6 + r1' * (e.a4 + s1')) 2)
+  else
+    let r1' := modulo (-e.b6) 3;
+    (r1', modulo e.a1 3, modulo (e.a3 + r1' * e.a1) 3);
   let e := ValidModel.rst_iso r1 s1 t1 e;
   let (r, s) := (r + r1 * u ^ 2, s + u * s1);
   let t := t + t1 * u ^ 3 + s * r1 * u ^ 2;
-  if not (lt_val navp 1 e.a6) then (II, n, 1, (u, r, s, t)) else
-  if not (lt_val navp 2 e.b8) then (III, n-1, 2, (u, r, s, t)) else
-  if not (lt_val navp 2 e.b6) then
+  if valp e.a6 < ofN 2 then (II, n, 1, (u, r, s, t)) else
+  if valp e.b8 < ofN 3 then (III, n-1, 2, (u, r, s, t)) else
+  if valp e.b6 < ofN 3 then
     let (a3p, a6p2) := (sub_val dvrp e.a3 1, sub_val dvrp e.a6 2);
     let c := if kronecker (a3p ^ 2 + 4 * a6p2) p = 1 then 3 else 1;
-    (IV, n-2, c, (u, r, s, t)) else
-  let k := if not (lt_val navp 2 e.a6) then 2 else 0;
+    (IV, n - 2, c, (u, r, s, t)) else
+  let k := if valp e.a6 < ofN 3 then if p = 2 then 2 else modulo e.a3 9 else 0;
   let e := ValidModel.rst_iso 0 0 k e; let t := t + k * u ^ 3;
   -- have p|a2, p2|a4, p3|a6
   let (a2p, a4p2, a6p3) := (sub_val dvrp e.a2 1, sub_val dvrp e.a4 2, sub_val dvrp e.a6 3);
   -- 18bcd – 4b³d + b²c² – 4c³ – 27d²
-  let Δcube := a2p ^ 2 * a4p2 ^ 2 - 27 * a6p3 ^ 2;
-  if modulo Δcube p != 0 then (Is 0, n - 4, 1 + 0, (u, r, s, t))
-  -- c is 1 + number of roots of a cubic polynomial
+  let Δcube := -4 * a2p^3 * a6p3 + a2p^2 * a4p2^2 - 4 * a4p2^3 - 27 * a6p3^2;
+  if modulo Δcube p != 0 then
+    let c := 1 + count_roots_cubic a2p a4p2 a6p3 p;
+    (Is 0, n - 4, c, (u, r, s, t))
   else
-  let a := modulo (a2p + a4p2) p;
+  let (a, d_root) := if p = 2 then
+    let a' := modulo (a2p + a4p2) p;
+    (a', a' != 0)
+  else
+    if modulo a2p p = 0 then (modulo (-a6p3) p, false)
+    else (modulo (a2p * a4p2) p, true);
   let e := ValidModel.rst_iso (a * p) 0 0 e;
   let r := r + u^2 * a * p; let t := t + u ^ 2 * s * a * p;
-  if a != 0 then
-    let (e, f, m, c) := decrease_val_2 0 e;
-    (I m, f, c, (u, r, s, t))
+  if d_root then
+    let (m, c, (r, t)) := kodaira_type_Is p dvrp valp e u r s t 1 2;
+    (I m, n - m - 4, c, (u, r, s, t))
   else
   -- have p2|a3, p4|a6
   let (a3p2, a6p4) := (sub_val dvrp e.a3 2, sub_val dvrp e.a6 4);
@@ -193,13 +242,30 @@ unsafe def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u
     let c := if kronecker (a3p2 ^ 2 + 4 * a6p4) p = 1 then 3 else 1;
     (IVs, n - 6, c, (u, r, s, t))
   else
-  let a := if p = 2 then modulo a6p4 2 else modulo (2 * a3p2) 3;
+  let a := if p = 2 then modulo a6p4 2 else modulo (2 * -a3p2) 3;
   let k := a * (p ^ 2 : ℕ);
   let e := ValidModel.rst_iso 0 0 k e; let t := t + k * u ^ 3;
-  if not (lt_val navp 3 e.a4) then (IIIs, n - 7, 2, (u, r, s, t)) else
-  if not (lt_val navp 5 e.a6) then (IIs, n - 8, 1, (u, r, s, t)) else
-  have pnz : (p : ℤ) ≠ 0 := sorry;
-  tate_small_prime p hp (ValidModel.u_iso (p : ℤ) e pnz) (p * u) r s t
+  if valp e.a4 < ofN 4 then (IIIs, n - 7, 2, (u, r, s, t)) else
+  if valp e.a6 < ofN 6 then (IIs, n - 8, 1, (u, r, s, t)) else
+  have pnz : p ≠ 0 := ne_of_lt (lt_trans Nat.zero_lt_one hp.left);
+  tate_small_prime p hp (ValidModel.u_iso (p : ℤ) e) (p * u) r s t
 
+unsafe def tate_algorithm (p : ℕ) (e : ValidModel ℤ) : Kodaira × ℕ × ℕ × (ℤ × ℤ × ℤ × ℤ) :=
+  if p = 2 then
+    tate_small_prime 2 (prime_2) e 1 0 0 0
+  else if p = 3 then
+    tate_small_prime 3 (prime_3) e 1 0 0 0
+  else
+  if hp : nat_prime p then
+    tate_big_prime p hp e
+  else
+    (I 0, 0, 0, (0, 0, 0, 0))
+
+def i67star : ValidModel ℤ := ⟨ ⟨0,-1,0,-808051160,9376500497392⟩ , by simp⟩
+
+def test_model : ValidModel ℤ := ⟨ ⟨1,0,1,-1,0⟩ , by simp⟩
+
+#eval test_model.discr
+#eval tate_algorithm 2 test_model
 
 end Int

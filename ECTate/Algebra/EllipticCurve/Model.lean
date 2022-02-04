@@ -20,6 +20,8 @@ structure Model (R : Type u) [CommRing R] where
 
 namespace Model
 
+instance [Repr R] : Repr (Model R) := ⟨ λ (e : Model R) n => repr (e.a1, e.a2, e.a3, e.a4, e.a6)⟩
+
 def b2 (e : Model R) : R := e.a1 * e.a1 + 4 * e.a2
 
 def b4 (e : Model R) : R := e.a1 * e.a3 + 2 * e.a4
@@ -209,6 +211,8 @@ structure ValidModel (R : Type u) [CommRing R] extends Model R where
 
 namespace ValidModel
 
+instance [Repr R] : Repr (ValidModel R) := ⟨ λ (e : ValidModel R) n => repr e.toModel⟩
+
 def rst_iso (r s t : R) (e : ValidModel R) : ValidModel R := {
   toModel := Model.rst_iso r s t e.toModel,
   discr_not_zero := by
@@ -220,7 +224,7 @@ lemma rst_discr_valid (r s t : R) (e : ValidModel R) : (rst_iso r s t e).discr =
 by
   exact Model.rst_discr r s t e.toModel
 
-def u_iso (u : R) (e : ValidModel R) (h : u ≠ 0) : ValidModel R := {
+def u_iso (u : R) (e : ValidModel R) : ValidModel R := {
   toModel := Model.u_iso u e.toModel,
   discr_not_zero := by
     rw [Model.u_discr]

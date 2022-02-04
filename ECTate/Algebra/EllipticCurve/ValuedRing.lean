@@ -63,6 +63,24 @@ lemma sub_val_ge {R : Type u} {p : R} (dvr : DiscretelyValuedRing p) {x : R} {n 
 
 def nat_prime (p : ℕ) : Prop := 1 < p ∧ (∀ a b : ℕ, (a * b) % p = 0 → a % p = 0 ∨ b % p = 0)
 
+lemma nat_prime_test (p : ℕ) : nat_prime p ↔ (1 < p ∧ (∀ a b : ℕ, a < p → b < p → (a * b) % p = 0 → a % p = 0 ∨ b % p = 0)) := by
+  apply Iff.intro
+  . intro H
+    apply And.intro (H.left)
+    intro a b ha hb
+    apply H.right a b
+  . intro H
+    apply And.intro (H.left)
+    intro a b p_div_ab
+    rw [Nat.mul_mod] at p_div_ab
+    have p_pos : p > 0 := lt_trans Nat.zero_lt_one H.left;
+    have h := H.right (a % p) (b % p) (Nat.mod_lt a p_pos) (Nat.mod_lt b p_pos) p_div_ab;
+    rw [Nat.mod_mod _ p, Nat.mod_mod _ p] at h
+    assumption
+
+instance : DecidablePred (nat_prime .) := sorry
+
+
 def fmul_eq_addf {R R' : Type u} [Mul R] [Add R'] (f : R → R') (x y : R) : Prop := f (x * y) = f x + f y
 
 namespace Int
