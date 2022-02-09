@@ -12,7 +12,7 @@ mathport src/data/int from mathlib
 
 
 import Mathlib.Algebra.Ring.Basic
-import Mathlib.Data.Int.Basic
+import Mathlib.Init.Data.Int.Basic
 import Mathlib.Data.Nat.Basic
 import Mathlib.Tactic.LibrarySearch
 

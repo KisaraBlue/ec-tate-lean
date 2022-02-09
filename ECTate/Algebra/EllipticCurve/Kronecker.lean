@@ -1,4 +1,4 @@
-import Mathlib.Data.Int.Basic
+import Mathlib.Init.Data.Int.Basic
 import Mathlib.Data.Nat.Basic
 import Mathlib.Init.Data.Nat.Lemmas
 import Mathlib.Logic.Basic
@@ -30,24 +30,28 @@ lemma div2_succ_le_self (x : ℕ) : succ x / 2 ≤ x := by
     exact le_trans ssxd2_le_s_sxd2 s_sxd2_le_sx
 
 
-
 def val_bin_nat (x : ℕ) : ℕ × ℕ :=
   if h : 0 < x ∧ x % 2 = 0 then
+    have decr := div2_lt_self h.left;
     let vbn_half := val_bin_nat (x / 2);
     (vbn_half.fst + 1, vbn_half.snd)
   else if 0 < x then
     (0, x)
   else
     (0, 0)
-termination_by
-  measure id
+termination_by _ =>
+  x
 decreasing_by
   simp [measure, invImage, InvImage, lt_wfRel]
   exact div2_lt_self h.left
 
+#eval val_bin_nat (65536*83)
+
 def val_bin (x : ℤ) : ℕ × ℤ :=
   let (v, r) := val_bin_nat (natAbs x);
   (v, sign x * r)
+
+#eval val_bin (-496)
 
 lemma odd_part_le_self_nat (x : ℕ) : (val_bin_nat x).2 ≤ x := by
   have acc : ∀ y, y ≤ x → (val_bin_nat y).2 ≤ x := by
@@ -154,10 +158,10 @@ def kronecker_odd (k : ℤ) (a b : ℕ) : ℤ :=
   if h : a = 0 then if b > 1 then 0 else k else
   let v_r := val_bin_nat a;
   let k' := if v_r.fst % 2 = 0 then k else k * (kronecker_2 b);
-  let k'' := if v_r.snd % 4 = 3 ∧ b % 4 = 3 then k' else -k';
+  let k'' := if v_r.snd % 4 = 3 ∧ b % 4 = 3 then -k' else k';
   kronecker_odd k'' (b % v_r.snd) v_r.snd
-termination_by
-  measure (fun ⟨k, a, b⟩ => a)
+termination_by _ =>
+  a
 decreasing_by
   simp [measure, invImage, InvImage, lt_wfRel]
   apply lt_of_lt_of_le _ (odd_part_le_self_nat _)
@@ -173,8 +177,10 @@ def kronecker (a b : ℤ) : ℤ :=
   let k := if v2b % 2 = 0 then 1 else kronecker_2 (natAbs a);
   let k' := if b' < 0 ∧ a < 0 then -k else k;
   let abs_b' := natAbs b';
-  let a_residue := natAbs (if a < 0 then a % ofNat abs_b' + abs_b' else a % ofNat abs_b');
+  let a_residue := natAbs ((a % ofNat abs_b' + abs_b') % ofNat abs_b');
   kronecker_odd k' a_residue abs_b'
+
+#eval kronecker 28 29
 
 def ex_root_quad (a b c p : ℤ) : Bool :=
   let (a', b', c') := (a % p, b % p, c % p);

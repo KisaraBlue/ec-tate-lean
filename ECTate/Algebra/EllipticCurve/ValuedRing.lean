@@ -4,7 +4,7 @@ import Mathlib.Algebra.Ring.Basic
 import Mathlib.Init.Data.Nat.Lemmas
 import Mathlib.Init.Data.Int.Lemmas
 import Mathlib.Data.Nat.Enat
-import Mathlib.Data.Int.Basic
+import Mathlib.Init.Data.Int.Basic
 
 --class ValueMonoid (A : Type u) extends AddCommMonoid A, LinearOrder A
 
@@ -78,7 +78,12 @@ lemma nat_prime_test (p : ℕ) : nat_prime p ↔ (1 < p ∧ (∀ a b : ℕ, a < 
     rw [Nat.mod_mod _ p, Nat.mod_mod _ p] at h
     assumption
 
-instance : DecidablePred (nat_prime .) := sorry
+instance : DecidablePred (nat_prime . : ℕ → Prop) := fun p =>
+match p with
+  | 0 => sorry --isFalse (not_and_of_not_left _ (not_lt_of_ge (le_of_lt Nat.zero_lt_one)))
+  | 1 => isFalse (not_and_of_not_left _ (not_lt_of_ge (le_of_eq rfl)))
+  | Nat.succ (Nat.succ p') => sorry
+
 
 
 def fmul_eq_addf {R R' : Type u} [Mul R] [Add R'] (f : R → R') (x y : R) : Prop := f (x * y) = f x + f y
@@ -92,10 +97,10 @@ def nat_valuation : ℕ → ℕ → ℕ∪∞
   | 0, (m+1) => ofN 0
   | 1, (m+1) => ∞
   | (q+2), (m+1) => if (m+1) % (q+2) ≠ 0 then ofN 0 else succ (nat_valuation (q+2) ((m+1) / (q+2)))
-termination_by
-  measure (fun ⟨p, k⟩ => k)
+termination_by nat_valuation p k =>
+  k
 decreasing_by
-  simp only [measure, invImage, InvImage, Nat.lt_wfRel]
+  simp [WellFoundedRelation.rel, measure, invImage, InvImage, Nat.lt_wfRel]
   apply Nat.div_lt_self
   . exact Nat.zero_lt_succ m
   . exact Nat.succ_lt_succ (Nat.zero_lt_succ q)

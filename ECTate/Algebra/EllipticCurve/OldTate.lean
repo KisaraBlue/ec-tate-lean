@@ -1,5 +1,5 @@
 import Mathlib.Algebra.Ring.Basic
-import Mathlib.Data.Int.Basic
+import Mathlib.Init.Data.Int.Basic
 import Mathlib.Tactic.LibrarySearch
 
 -- My lemmas

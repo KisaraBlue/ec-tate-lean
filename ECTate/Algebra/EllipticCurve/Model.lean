@@ -6,8 +6,8 @@ variable {R : Type u} [CommRing R]
 
 section Obvious
 
-lemma add4 : 2 + 2 = (4 : R) := by normNum
-lemma mul4 : 2 * 2 = (4 : R) := by normNum
+lemma add4 : 2 + 2 = (4 : R) := by norm_num
+lemma mul4 : 2 * 2 = (4 : R) := by norm_num
 
 end Obvious
 
@@ -109,7 +109,7 @@ by
   rw [←mul_assoc _ (u ^ 3), mul_comm _ (u ^ 3), ←mul_assoc _ (u ^ 3), mul_comm _ (u ^ 3), ←mul_assoc (u ^ 3), ←mul_assoc (u ^ 3), ←mul_assoc _ (u ^ 2)]
   conv in u ^ 4 * e.a4 * (u ^ 4 * e.a4) => rw [←mul_assoc, mul_comm _ (u ^ 4), ←mul_assoc]
   rw [←pow_add, ←pow_add, ←pow_add, ←pow_add]
-  rw [(show 6 + (1 + 1) = 8 by normNum)]
+  rw [(show 6 + (1 + 1) = 8 by norm_num)]
   rw [mul_assoc (u ^ 8), mul_assoc (u ^ 8), mul_assoc (u ^ 8), mul_assoc (u ^ 8), mul_assoc (u ^ 8), mul_assoc (u ^ 8), mul_assoc (u ^ 8), mul_assoc (u ^ 8), mul_assoc (u ^ 8)]
   rw [←mul_sub, ←mul_add, ←mul_add, ←mul_sub]
 
@@ -120,7 +120,7 @@ by
   rw [mul_pow (u ^ 4) (b4 e), ←mul_assoc 8, mul_comm 8]
   rw [←mul_assoc 27, ←mul_assoc _ (u ^ 6), mul_comm 27, mul_comm _ (u ^ 6), ←mul_assoc, ←mul_assoc]
   rw [←mul_assoc 9, ←mul_assoc _ (u ^ 4), mul_comm 9, mul_comm _ (u ^ 4), ←mul_assoc, mul_comm (u ^ 4 * (u ^ 2 * 9 * b2 e) * b4 e), ←mul_assoc, ←mul_assoc, ←mul_assoc, ←mul_assoc]
-  rw [←pow_add, ←pow_add, ←pow_mul, ←pow_add, ←pow_add, ←pow_add, (show 8 + 2 + 2 = 12 by normNum), (show 4 * 3 = 12 by normNum)]
+  rw [←pow_add, ←pow_add, ←pow_mul, ←pow_add, ←pow_add, ←pow_add, (show 8 + 2 + 2 = 12 by norm_num), (show 4 * 3 = 12 by norm_num)]
   rw [mul_assoc (u ^ 12), mul_assoc (u ^ 12), mul_assoc (u ^ 12), mul_assoc (u ^ 12), mul_assoc (u ^ 12), mul_assoc (u ^ 12), mul_assoc (u ^ 12), mul_assoc (u ^ 12)]
   rw [←mul_sub (u ^ 12), ←mul_sub (u ^ 12), ←mul_add (u ^ 12)]
 
@@ -130,10 +130,10 @@ lemma rst_b2 (r s t : R) (e : Model R) : (rst_iso r s t e).b2 = e.b2 + 12*r :=
 by
   simp only [rst_iso, iso, b2, one_mul, one_pow]
   rw [mul_add, mul_sub, mul_add, mul_sub, add_mul, add_mul]
-  rw [←mul_assoc, mul_comm e.a1 2, ←add_assoc, add_assoc (e.a1 * e.a1), mul_assoc, mul_assoc, mul_comm _ s, ←add_mul, ←mul_assoc (2 * s), mul_comm _ 2, ←mul_assoc 2, (show 2 * 2 = (4 : R) by normNum), mul_assoc 4]
+  rw [←mul_assoc, mul_comm e.a1 2, ←add_assoc, add_assoc (e.a1 * e.a1), mul_assoc, mul_assoc, mul_comm _ s, ←add_mul, ←mul_assoc (2 * s), mul_comm _ 2, ←mul_assoc 2, (show 2 * 2 = (4 : R) by norm_num), mul_assoc 4]
   rw [sub_eq_add_neg, sub_eq_add_neg, add_comm _ (-(4 * (s * s))), ←add_assoc, add_assoc _ (4 * (s * s)), add_right_neg (4 * (s * s))]
-  rw [add_zero, (show 2 + 2 = (4 : R) by normNum), add_assoc, add_comm (4 * e.a2), ←add_assoc (4 * (s * e.a1)), ←add_assoc (4 * (s * e.a1)), add_right_neg (4 * (s * e.a1)), zero_add]
-  rw [←mul_assoc, (show 4 * 3 = (12 : R) by normNum), ←add_assoc]
+  rw [add_zero, (show 2 + 2 = (4 : R) by norm_num), add_assoc, add_comm (4 * e.a2), ←add_assoc (4 * (s * e.a1)), ←add_assoc (4 * (s * e.a1)), add_right_neg (4 * (s * e.a1)), zero_add]
+  rw [←mul_assoc, (show 4 * 3 = (12 : R) by norm_num), ←add_assoc]
 
 lemma rst_b4 (r s t : R) (e : Model R) :
 (rst_iso r s t e).b4 = e.b4 + r * (e.b2 + 6 * r) :=
@@ -144,7 +144,7 @@ by
   simp only [←add_assoc, ←neg_mul_right, ←mul_assoc]
   simp only [add_assoc]
   rw [mul_comm (2 * s) 2, ←mul_assoc, add_left_neg (2 * 2 * s * t), add_zero]
-  simp only [←add_assoc, (show 2 * 3 = (6 : R) by normNum), mul_comm 6 r]
+  simp only [←add_assoc, (show 2 * 3 = (6 : R) by norm_num), mul_comm 6 r]
   apply congrArg (. + r * 6 * r)
   rw [add_comm _ (-(2 * s * e.a3))]
   simp only [←add_assoc, add_left_neg (2 * s * e.a3), zero_add]
@@ -155,7 +155,7 @@ by
   simp only [←add_assoc, add_left_neg (2 * s * r * e.a1), zero_add]
   rw [add_comm, mul_comm _ e.a1, ←mul_assoc]
   simp only [←add_assoc, add_left_neg (e.a1 * 2 * t), zero_add]
-  rw [(show 2 * 2 = (4 : R) by normNum), mul_comm 4]
+  rw [(show 2 * 2 = (4 : R) by norm_num), mul_comm 4]
 
 lemma rst_b6 (r s t : R) (e : Model R) :
 (rst_iso r s t e).b6 = e.b6 + 2*r*e.b4 + r*r*e.b2 + 4*r*r*r :=
@@ -169,7 +169,7 @@ by
   apply congrArg (. + 2 * r * e.a1 * e.a3)
   rw [add_comm _ (e.a3 * 2 * t), mul_assoc, mul_comm]
   simp only [←add_assoc]
-  have add4 : 2 + 2 = (4 : R) := by normNum;
+  have add4 : 2 + 2 = (4 : R) := by norm_num;
   rw [mul_assoc 2 t e.a3, ←add_mul, add4, add_comm _ (-(4 * t * e.a3)), ←mul_assoc]
   simp only [←add_assoc, add_left_neg (4 * t * e.a3), zero_add]
   rw [add_comm _ (r * r * e.a1 * e.a1), mul_comm _ r, ←mul_assoc]
@@ -177,7 +177,7 @@ by
   apply congrArg
   rw [mul_comm _ 2, mul_assoc 2 _ t, mul_comm (r * e.a1), mul_assoc 2, mul_assoc 2, ←mul_assoc t r, ←add_mul, add4, add_comm]
   simp only [←add_assoc, ←mul_assoc, add_left_neg (4 * t * r * e.a1), zero_add]
-  have mul4 : 2 * 2 = (4 : R) := by normNum;
+  have mul4 : 2 * 2 = (4 : R) := by norm_num;
   rw [mul_comm _ 2, ←mul_assoc, mul4, add_comm]
   simp only [←add_assoc, add_left_neg (4 * t * t), zero_add]
   simp only [add_assoc]
