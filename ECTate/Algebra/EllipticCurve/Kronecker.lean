@@ -180,10 +180,21 @@ def kronecker (a b : ℤ) : ℤ :=
   let a_residue := natAbs ((a % ofNat abs_b' + abs_b') % ofNat abs_b');
   kronecker_odd k' a_residue abs_b'
 
-#eval kronecker 28 29
-
+-- previous function, fails for p = 2
 def ex_root_quad (a b c p : ℤ) : Bool :=
   let (a', b', c') := (a % p, b % p, c % p);
   kronecker ((b' * b' - 4 * a' * c') % p) p = 1
+
+def quad_root_in_ZpZ (a b c : ℤ) (p : ℕ) : Bool :=
+match p with
+  | 0 => unreachable!
+  | 1 => unreachable!
+  | 2 => match a % 2 with
+    | 0 => unreachable!
+    | _ => (b % 2 = 0) || (c % 2 = 0)
+  | _ => match a % (p : ℤ) with
+    | 0 => unreachable!
+    | a' => kronecker ((b * b - 4 * a' * c) % (p : ℤ)) (p : ℤ) = 1
+
 
 end Int

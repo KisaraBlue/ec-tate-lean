@@ -185,8 +185,12 @@ match n, m with
   | ∞, ofN a     => isFalse (fun h => by cases h)
   | ofN a, ∞     => isFalse (fun h => by cases h)
 
-instance : DecidableRel ((. < . ) : ℕ∪∞ → ℕ∪∞ → Prop) := by sorry
-
+instance : Preorder ℕ∪∞ :=
+{ le               := le,
+  le_refl          := le_refl,
+  le_trans         := @le_trans,
+  lt_iff_le_not_le := @lt_iff_le_not_le,
+  lt               := lt}
 
 theorem eq_zero_or_pos : ∀ (n : ℕ∪∞), n = ofN 0 ∨ n > ofN 0
   | ofN 0   => Or.inl rfl

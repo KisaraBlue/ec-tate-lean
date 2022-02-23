@@ -53,7 +53,36 @@ instance : Repr Kodaira where
     | Is m, _  => "I*" ++ repr m
     | IIs, _   => "II*"
     | IIIs, _  => "III*"
-    | IVs, _   => "VI*"
+    | IVs, _   => "IV*"
+
+lemma eq_I_Nat (m n : Nat) : m = n ↔ I m = I n := by
+  apply Iff.intro
+  intro h
+  exact congrArg I h
+  intro h
+  cases h
+  rfl
+
+lemma eq_Is_Nat (m n : Nat) : m = n ↔ Is m = Is n := by
+  apply Iff.intro
+  intro h
+  exact congrArg Is h
+  intro h
+  cases h
+  rfl
+
+instance : DecidableRel ((. = . ) : Kodaira → Kodaira → Prop) :=
+  fun k k' => match k, k' with
+  | I n, I n' => decidable_of_decidable_of_iff inferInstance (eq_I_Nat n n')
+  | II, II => isTrue rfl
+  | III, III => isTrue rfl
+  | IV, IV => isTrue rfl
+  | Is n, Is n' => decidable_of_decidable_of_iff inferInstance (eq_Is_Nat n n')
+  | IIs, IIs => isTrue rfl
+  | IIIs, IIIs => isTrue rfl
+  | IVs, IVs => isTrue rfl
+  | _, _ => isFalse sorry
+
 
 namespace ValidModel
 
@@ -152,6 +181,13 @@ decreasing_by
 
 def modulo (a : ℤ) (p : ℕ) : ℤ := ((a % (p : ℤ)) + p) % (p : ℤ)
 
+def count_roots_cubic_aux (a b c d : ℤ) (p : ℕ) (x : ℕ) : ℕ := match x with
+  | Nat.zero => if d = 0 then 1 else 0
+  | Nat.succ x' => (if (a * (x^3 : ℕ) + b * (x^2 : ℕ) + c * x + d) % (p : ℤ) = 0 then 1 else 0) + count_roots_cubic_aux a b c d p x'
+
+def count_roots_cubic (a b c d : ℤ) (p : ℕ) : ℕ :=
+  count_roots_cubic_aux (modulo a p) (modulo b p) (modulo c p) (modulo d p) p (p - 1)
+
 def tate_big_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) : Kodaira × ℕ × ℕ × (ℤ × ℤ × ℤ × ℤ) :=
   let dvrp := primeDVR hp; let navp := dvrp.valtn; let valp := navp.v;
   let c4 := e.c4; let c6 := e.c6; let Δ := e.discr;
@@ -179,33 +215,26 @@ def tate_big_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) : Kodaira �
     | 2 => (II,   2, 1, (u, r, s, t))
     | 3 => (III,  2, 2, (u, r, s, t))
     | 4 => (IV,   2, natAbs (2 + kronecker (-6 * c6 / (p * p)) p), (u, r, s, t))
-    | 6 => (Is 0, 2, 1 + 0, (u, r, s, t)) --nb of roots of a cubic
+    | 6 => (Is 0, 2, 1 + count_roots_cubic 4 0 (-3 * c4 / (p * p)) (-c6 / (p * p * p)) p, (u, r, s, t))
     | 8 => (IVs,  2, natAbs (2 + kronecker (-6 * c6 / (p ^ 4 : ℕ)) p), (u, r, s, t))
     | 9 => (IIIs, 2, 2, (u, r, s, t))
     | 10 => (IIs, 2, 1, (u, r, s, t))
     | _ => (I 0, 0, 0, (0, 0, 0, 0))
-
-def count_roots_cubic_aux (b c d : ℤ) (p : ℕ) (x : ℕ) : ℕ := match x with
-  | Nat.zero => if d = 0 then 1 else 0
-  | Nat.succ x' => (if ((x^3 : ℕ) + b * (x^2 : ℕ) + c * x + d) % (p : ℤ) = 0 then 1 else 0) + count_roots_cubic_aux b c d p x'
-
-def count_roots_cubic (b c d : ℤ) (p : ℕ) : ℕ :=
-  count_roots_cubic_aux (modulo b p) (modulo c p) (modulo d p) p (p - 1)
 
 unsafe
 def kodaira_type_Is (p : ℕ) (dvrp : DiscretelyValuedRing (ofNat p)) (valp : ℤ → ℕ∪∞) (e : ValidModel ℤ) (u0 r0 s0 t0 : ℤ) (m q : ℕ) :=
   let (r, t) := (r0, t0);
   let (a3q, a6q2) := (sub_val dvrp e.a3 q, sub_val dvrp e.a6 (2 * q));
   if valp (a3q ^ 2 + 4 * a6q2) = 0 then
-    let c := if kronecker (a3q ^ 2 + 4 * a6q2) p = 1 then 4 else 2;
+    let c := if quad_root_in_ZpZ 1 a3q (-a6q2) p then 4 else 2;
     (m, c, (r, t))
   else
   let a := if p = 2 then modulo a6q2 2 else modulo (2 * -a3q) 3;
   let e := ValidModel.rst_iso 0 0 (a * p ^ q) e;
   let t := t + u0 ^ 3 * a * p ^ q;
   let (a2p, a4pq, a6pq2) := (sub_val dvrp e.a2 1, sub_val dvrp e.a4 (q + 1), sub_val dvrp e.a6 (2 * q + 1));
-  if valp (a4pq ^ 2 - 4 * a2p * a6q2) = 0 then
-    let c := if kronecker (a4pq ^ 2 - 4 * a2p * a6q2) p = 1 then 4 else 2;
+  if valp (a4pq ^ 2 - 4 * a2p * a6pq2) = 0 then
+    let c := if quad_root_in_ZpZ a2p a4pq a6pq2 p then 4 else 2;
     (m + 1, c, (r, t))
   else
   let a := if p = 2 then modulo a6pq2 2 else modulo (2 * a2p * -a4pq) 3;
@@ -222,7 +251,15 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
   let Δ := e.discr; let n := val_discr_to_nat ℤ navp e;
   if n = 0 then (I 0, 0, 1, (u, r, s, t)) else
   if valp e.b2 = 0 then
-    let c := if kronecker (e.a1 ^ 2 + 4 * e.a2) p = 1 then n else gcd 2 n;
+    let (r1, t1) := if p = 2 then
+      (modulo e.a3 2, modulo (e.a3 + e.a4) 2)
+    else
+      let r1' := modulo (-e.b2 * e.b4) 3;
+      (r1', modulo (e.a1 * r1' + e.a3) 3);
+    let e := ValidModel.rst_iso r1 0 t1 e;
+    let r := r + r1 * u ^ 2;
+    let t := t + t1 * u ^ 3 + s * r1 * u ^ 2;
+    let c := if quad_root_in_ZpZ 1 e.a1 (-e.a2) p then n else gcd 2 n;
     (I n, 1, c, (u, r, s, t))
   else
   let (r1, s1, t1) := if p = 2 then
@@ -238,7 +275,7 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
   if valp e.b8 < ofN 3 then (III, n-1, 2, (u, r, s, t)) else
   if valp e.b6 < ofN 3 then
     let (a3p, a6p2) := (sub_val dvrp e.a3 1, sub_val dvrp e.a6 2);
-    let c := if kronecker (a3p ^ 2 + 4 * a6p2) p = 1 then 3 else 1;
+    let c := if quad_root_in_ZpZ 1 a3p (-a6p2) p then 3 else 1;
     (IV, n - 2, c, (u, r, s, t)) else
   let k := if valp e.a6 < ofN 3 then if p = 2 then 2 else modulo e.a3 9 else 0;
   let e := ValidModel.rst_iso 0 0 k e; let t := t + k * u ^ 3;
@@ -246,10 +283,11 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
   let (a2p, a4p2, a6p3) := (sub_val dvrp e.a2 1, sub_val dvrp e.a4 2, sub_val dvrp e.a6 3);
   -- 18bcd – 4b³d + b²c² – 4c³ – 27d²
   let Δcube := -4 * a2p^3 * a6p3 + a2p^2 * a4p2^2 - 4 * a4p2^3 - 27 * a6p3^2;
-  if modulo Δcube p != 0 then
-    let c := 1 + count_roots_cubic a2p a4p2 a6p3 p;
+  if valp Δcube = 0 then
+    let c := 1 + count_roots_cubic 1 a2p a4p2 a6p3 p;
     (Is 0, n - 4, c, (u, r, s, t))
   else
+  /-
   let (a, d_root) := if p = 2 then
     let a' := modulo (a2p + a4p2) p;
     (a', a' != 0)
@@ -258,18 +296,25 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
     else (modulo (a2p * a4p2) p, true);
   let e := ValidModel.rst_iso (a * p) 0 0 e;
   let r := r + u^2 * a * p; let t := t + u ^ 2 * s * a * p;
-  if d_root then
+  -/
+  if valp (3 * a4p2 - a2p ^ 2) = 0 then
+    let r1 := p * (modulo (if p = 2 then a4p2 else a2p * a4p2) p);
+    let e := ValidModel.rst_iso r1 0 0 e;
+    let r := r + u^2 * r1; let t := t + u ^ 2 * s * r1;
     let (m, c, (r, t)) := kodaira_type_Is p dvrp valp e u r s t 1 2;
-    (I m, n - m - 4, c, (u, r, s, t))
+    (Is m, n - m - 4, c, (u, r, s, t))
   else
+  let r1 := p * (modulo (if p = 2 then -a2p else -a6p3) p);
+  let e := ValidModel.rst_iso r1 0 0 e;
+  let r := r + u^2 * r1; let t := t + u ^ 2 * s * r1;
   -- have p2|a3, p4|a6
   let (a3p2, a6p4) := (sub_val dvrp e.a3 2, sub_val dvrp e.a6 4);
   if valp (a3p2 ^ 2 + 4 * a6p4) = 0 then
-    let c := if kronecker (a3p2 ^ 2 + 4 * a6p4) p = 1 then 3 else 1;
+    let c := if quad_root_in_ZpZ 1 a3p2 (-a6p4) p then 3 else 1;
     (IVs, n - 6, c, (u, r, s, t))
   else
-  let a := if p = 2 then modulo a6p4 2 else modulo (2 * -a3p2) 3;
-  let k := a * (p ^ 2 : ℕ);
+  let a := if p = 2 then modulo a6p4 2 else modulo (2 * a3p2) 3;
+  let k := -a * (p ^ 2 : ℕ);
   let e := ValidModel.rst_iso 0 0 k e; let t := t + k * u ^ 3;
   if valp e.a4 < ofN 4 then (IIIs, n - 7, 2, (u, r, s, t)) else
   if valp e.a6 < ofN 6 then (IIs, n - 8, 1, (u, r, s, t)) else
@@ -283,19 +328,178 @@ def tate_algorithm (p : ℕ) (e : ValidModel ℤ) : Kodaira × ℕ × ℕ × (�
   else if p = 3 then
     tate_small_prime 3 (prime_3) e 1 0 0 0
   else
-  if hp : nat_prime p then
-    tate_big_prime p hp e
-  else
-    (I 0, 0, 0, (0, 0, 0, 0))
+    tate_big_prime p (prime_p p) e
 
-def i67star : ValidModel ℤ := ⟨ ⟨0,-1,0,-808051160,9376500497392⟩ , by simp⟩
 
 def test_model : ValidModel ℤ := ⟨ ⟨1, -1, 1, -23130, -1322503⟩ , by simp⟩
 
-set_option maxRecDepth 10000
 
-#eval test_model.discr
-#eval tate_big_prime 5 prime_5 test_model
-#eval tate_big_prime 3449 (prime_p 3449) test_model
+section test
+
+-- LMFDB label 318150.ej1
+--   2:  I_15   1  15
+--   3:   III   2   2
+--   5:    IV   2   3
+--   7:   I_1   1   1
+-- 101:   I_1   1   1
+def label_318150.ej1 : ValidModel ℤ := ⟨ ⟨1, -1, 1, -89030, 10246997⟩ , by simp⟩
+#eval tate_algorithm 2 label_318150.ej1
+#eval tate_algorithm 3 label_318150.ej1
+#eval tate_algorithm 5 label_318150.ej1
+#eval tate_algorithm 7 label_318150.ej1
+#eval tate_algorithm 101 label_318150.ej1
+
+-- LMFDB label 126960.cx2
+--  2:   I*_2   4   4
+--  3:    I_2   1   2
+--  5:    I_2   1   2
+-- 23:   I*_2   2   4
+def label_126960.cx2 : ValidModel ℤ := ⟨ ⟨0, 1, 0, -72120, -3739932⟩ , by simp⟩
+#eval tate_algorithm 2 label_126960.cx2
+#eval tate_algorithm 3 label_126960.cx2
+#eval tate_algorithm 5 label_126960.cx2
+#eval tate_algorithm 23 label_126960.cx2
+
+-- LMFDB label 144800.q1
+--   2:   I*_3   5   2
+--   5:   III*   2   2
+-- 181:    I_1   1   1
+def label_144800.q1 : ValidModel ℤ := ⟨ ⟨0, 0, 0, -329500, 72800000⟩ , by simp⟩
+#eval tate_algorithm 2 label_144800.q1
+#eval tate_algorithm 5 label_144800.q1
+#eval tate_algorithm 181 label_144800.q1
+
+-- LMFDB label 230976.t1
+--   2:   I*_7   6   4
+--   3:   III*   2   2
+-- 401:    I_1   1   1
+def label_230976.t1 : ValidModel ℤ := ⟨ ⟨0, 0, 0, -6156, -192240⟩ , by simp⟩
+#eval tate_algorithm 2 label_230976.t1
+#eval tate_algorithm 3 label_230976.t1
+#eval tate_algorithm 401 label_230976.t1
+
+-- LMFDB label 72912.dg1
+--   2:     II   4   1
+--   3:    I_8   1   8
+--   7:   I*_0   2   1
+--  31:    I_1   1   1
+def label_72912.dg1 : ValidModel ℤ := ⟨ ⟨0, 1, 0, 376, 29763⟩ , by simp⟩
+#eval tate_algorithm 2 label_72912.dg1
+#eval tate_algorithm 3 label_72912.dg1
+#eval tate_algorithm 7 label_72912.dg1
+#eval tate_algorithm 31 label_72912.dg1
+
+-- LMFDB label 268029.a1
+--   3:    IV*   5   1
+--1103:    I_2   1   2
+def label_268029.a1 : ValidModel ℤ := ⟨ ⟨0, 0, 1, -7371, -244600⟩ , by simp⟩
+#eval tate_algorithm 3 label_268029.a1
+#eval tate_algorithm 1103 label_268029.a1
+
+-- LMFDB label 242292.a1
+--   2:     IV   2   1
+--   3:   I_10   1   2
+--  61:    I_1   1   1
+-- 331:    I_3   1   1
+def label_242292.a1 : ValidModel ℤ := ⟨ ⟨0, -1, 0, 27434, 1324717⟩ , by simp⟩
+#eval tate_algorithm 2 label_242292.a1
+#eval tate_algorithm 3 label_242292.a1
+#eval tate_algorithm 61 label_242292.a1
+#eval tate_algorithm 331 label_242292.a1
+
+-- LMFDB label 70560.cb2
+--   2:  I*_0   5   1
+--   3: I*_20   2   4
+--   5:   I_1   1   1
+--   7:  I*_2   2   2
+def label_70560.cb2 : ValidModel ℤ := ⟨ ⟨0, 0, 0, -9832683, 7348530098⟩ , by simp⟩
+#eval tate_algorithm 2 label_70560.cb2
+#eval tate_algorithm 3 label_70560.cb2
+#eval tate_algorithm 5 label_70560.cb2
+#eval tate_algorithm 7 label_70560.cb2
+
+-- LMFDB label 69776.u2
+--   2:  I*_18   4   4
+--   7:   I*_0   2   2
+--  89:    I_1   1   1
+def label_69776.u2 : ValidModel ℤ := ⟨ ⟨0, -1, 0, -34904, 2173424⟩ , by simp⟩
+#eval tate_algorithm 2 label_69776.u2
+#eval tate_algorithm 7 label_69776.u2
+#eval tate_algorithm 89 label_69776.u2
+
+-- LMFDB label 25401600.mo1
+--   2:    III   8   2
+--   3:     IV   4   1
+--   5:   I*_4   2   2
+--   7:   I*_8   2   2
+def label_25401600.mo1 : ValidModel ℤ := ⟨ ⟨0, 0, 0, -26041050, -91316547000⟩ , by simp⟩
+#eval tate_algorithm 2 label_25401600.mo1
+#eval tate_algorithm 3 label_25401600.mo1
+#eval tate_algorithm 5 label_25401600.mo1
+#eval tate_algorithm 7 label_25401600.mo1
+
+-- LMFDB label 194628.b1
+--   2:    IV*   2   1
+--   3:    I_7   1   1
+--   7:    IV*   2   1
+-- 331:    I_1   1   1
+def label_194628.b1 : ValidModel ℤ := ⟨ ⟨0, -1, 0, -26868, 2321208⟩ , by simp⟩
+#eval tate_algorithm 2 label_194628.b1
+#eval tate_algorithm 3 label_194628.b1
+#eval tate_algorithm 7 label_194628.b1
+#eval tate_algorithm 331 label_194628.b1
+
+-- LMFDB label 117117.be1
+--   3:   I*_4   2   2
+--   7:   I_11   1   1
+--  11:    I_1   1   1
+--  13:     II   2   1
+def label_117117.be1 : ValidModel ℤ := ⟨ ⟨0, 0, 1, -52200174, 145163033239⟩ , by simp⟩
+#eval tate_algorithm 3 label_117117.be1
+#eval tate_algorithm 7 label_117117.be1
+#eval tate_algorithm 11 label_117117.be1
+#eval tate_algorithm 13 label_117117.be1
+
+-- LMFDB label 181545.a1
+--   3:   I_38   1   2
+--   5:    I_1   1   1
+--   7:    II*   2   1
+--  13:    I_1   1   1
+--  19:    I_1   1   1
+def label_181545.a1 : ValidModel ℤ := ⟨ ⟨0, -1, 1, 274130974, -32982113870014⟩ , by simp⟩
+#eval tate_algorithm 3 label_181545.a1
+#eval tate_algorithm 5 label_181545.a1
+#eval tate_algorithm 7 label_181545.a1
+#eval tate_algorithm 13 label_181545.a1
+#eval tate_algorithm 19 label_181545.a1
+
+-- LMFDB label 33800.a1
+--   2:    II*   3   1
+--   5:    IV*   2   3
+--  13:   I*_0   2   2
+def label_33800.a1 : ValidModel ℤ := ⟨ ⟨0, 0, 0, 21125, -2746250⟩ , by simp⟩
+#eval tate_algorithm 2 label_33800.a1
+#eval tate_algorithm 5 label_33800.a1
+#eval tate_algorithm 13 label_33800.a1
+
+-- LMFDB label 252333.c1
+--   3:  I*_11   2   2
+--  23:     IV   2   1
+--  53:    I_2   1   2
+def label_252333.c1 : ValidModel ℤ := ⟨ ⟨0, 0, 1, -177744, -32663502⟩ , by simp⟩
+#eval tate_algorithm 3 label_252333.c1
+#eval tate_algorithm 23 label_252333.c1
+#eval tate_algorithm 53 label_252333.c1
+
+-- LMFDB label 28224.fw1
+--   2:   I*_5   6   2
+--   3:   I*_3   2   4
+--   7:    IV*   2   3
+def label_28224.fw1 : ValidModel ℤ := ⟨ ⟨0, 0, 0, -127596, 17786608⟩ , by simp⟩
+#eval tate_algorithm 2 label_28224.fw1
+#eval tate_algorithm 3 label_28224.fw1
+#eval tate_algorithm 7 label_28224.fw1
+
+end test
 
 end Int
