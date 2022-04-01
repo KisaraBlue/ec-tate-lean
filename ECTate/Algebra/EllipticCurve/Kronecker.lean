@@ -42,6 +42,7 @@ def val_bin_nat (x : ℕ) : ℕ × ℕ :=
 termination_by _ =>
   x
 decreasing_by
+  --simp_wf
   simp [measure, invImage, InvImage, lt_wfRel]
   exact div2_lt_self h.left
 

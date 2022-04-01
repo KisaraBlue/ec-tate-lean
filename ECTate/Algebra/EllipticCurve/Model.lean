@@ -57,8 +57,8 @@ def c4 (e : Model R) : R := e.b2 ^ 2 - 24*e.b4
 def c6 (e : Model R) : R := -e.b2 ^ 3 + 36*e.b2*e.b4 - 216*e.b6
 
 def discr (e : Model R) : R :=
-  let (b2, b4, b6, b8) := (e.b2, e.b4, e.b6, e.b8);
-  -b2*b2*b8 - 8*(b4 ^ 3) - 27*b6*b6 + 9*b2*b4*b6
+  let (b2, b4, b6) := (e.b2, e.b4, e.b6);
+  -b2*b2*e.b8 - 8*(b4 ^ 3) - 27*b6*b6 + 9*b2*b4*b6
 
 lemma discr_identity (e : Model R) : 1728 * e.discr = e.c4 ^ 4 - e.c6 ^ 2 :=
 by

@@ -6,6 +6,7 @@ import Mathlib.Init.Data.Int.Lemmas
 import Mathlib.Data.Nat.Enat
 import Mathlib.Init.Data.Int.Basic
 
+import Mathlib.Tactic.PrintPrefix
 --class ValueMonoid (A : Type u) extends AddCommMonoid A, LinearOrder A
 
 section Obvious
@@ -17,7 +18,7 @@ end Obvious
 
 open Enat
 
-structure NormalizedAddValuation {R : Type u} (p : R) [CommRing R] where
+structure SurjVal {R : Type u} (p : R) [CommRing R] where
   v : R → ℕ∪∞
   v_uniformizer : v p = ofN 1
   v_mul_eq_add_v (a b : R) : v (a * b) = v a + v b
@@ -26,40 +27,83 @@ structure NormalizedAddValuation {R : Type u} (p : R) [CommRing R] where
 
 variable {R : Type u} [CommRing R]
 
-def nat_of_val {p : R} (nav : NormalizedAddValuation p) (a : R) (h : a ≠ 0) : ℕ :=
+section SurjVal
+
+lemma val_mul_ge_left {p : R} (nav : SurjVal p) (a b : R) : nav.v (a * b) ≥ nav.v a := Enat.le_trans (le_add_right (nav.v a) (nav.v b)) (le_of_eq (nav.v_mul_eq_add_v a b).symm)
+
+lemma val_mul_ge_right {p : R} (nav : SurjVal p) (a b : R) : nav.v (a * b) ≥ nav.v b := by
+  rw [mul_comm]
+  exact val_mul_ge_left nav b a
+
+lemma val_mul_ge_of_left_ge {p : R} (nav : SurjVal p) {a b : R} (ha : nav.v a ≥ n) : nav.v (a * b) ≥ n := Enat.le_trans ha (val_mul_ge_left nav a b)
+
+lemma val_mul_ge_of_right_ge {p : R} (nav : SurjVal p) {a b : R} (hb : nav.v b ≥ n) : nav.v (a * b) ≥ n := Enat.le_trans hb (val_mul_ge_right nav a b)
+
+lemma val_mul_ge_of_both_ge {p : R} (nav : SurjVal p) {a b : R} (ha : nav.v a ≥ m) (hb : nav.v b ≥ n) : nav.v (a * b) ≥ m + n := by
+  rw [nav.v_mul_eq_add_v]
+  apply add_le_add ha hb
+
+lemma val_add_ge_of_ge {p : R} (nav : SurjVal p) {a b : R} (ha : nav.v a ≥ n) (hb : nav.v b ≥ n) : nav.v (a + b) ≥ n := Enat.le_trans (le_min ha hb) (nav.v_add_ge_min_v a b)
+
+theorem v_add_eq_min_v {p : R} (nav : SurjVal p) {a b : R} (h : nav.v a < nav.v b) : nav.v (a + b) = nav.v a := sorry --possibly a result?
+
+def nat_of_val {p : R} (nav : SurjVal p) {a : R} (h : a ≠ 0) : ℕ :=
   match nav.v a with
   | ∞ =>
     by apply False.elim; apply h; rw [←nav.v_eq_top_iff_zero a]; sorry
   | ofN n => n
 
-def lt_val {p : R} (nav : NormalizedAddValuation p) (n : ℕ) (x : R) : Prop := ofN n < nav.v x
+lemma val_of_one {p : R} (nav : SurjVal p) : nav.v 1 = ofN 0 := by
+  apply Enat.add_right_cancel_ofN 1
+  rw [add_ofN, ←SurjVal.v_uniformizer nav, ←SurjVal.v_mul_eq_add_v nav, one_mul]
 
-instance {p : R} (nav : NormalizedAddValuation p) (n : ℕ) (x : R) : Decidable ((lt_val nav n x) : Prop) := by sorry
+lemma val_of_minus_one {p : R} (nav : SurjVal p) : nav.v (-1) = ofN 0 := by sorry
 
-lemma lt_val_add {p : R} (nav : NormalizedAddValuation p) (n : ℕ) (a b : R) (ha : lt_val nav n a) (hb : lt_val nav n b) : lt_val nav n (a + b) :=
-  by sorry
+lemma val_of_neg {p : R} (nav : SurjVal p) : nav.v (-x) = nav.v x := by
+  rw [←one_mul x, neg_mul_left, nav.v_mul_eq_add_v, val_of_minus_one, one_mul, Enat.zero_add]
 
-lemma lt_val_mul_left {p : R} (nav : NormalizedAddValuation p) (a b : R) (ha : lt_val nav n a) : lt_val nav n (a * b) :=
-  by sorry
+theorem val_of_pow_uniformizer {p : R} (nav : SurjVal p) : nav.v (p ^ n) = ofN n := by
+  induction n with
+  | zero      =>
+    rw [pow_zero]
+    exact val_of_one nav
+  | succ n ih =>
+    rw [pow_succ, SurjVal.v_mul_eq_add_v nav, ih, SurjVal.v_uniformizer nav, add_ofN]
 
-lemma lt_val_mul_right {p : R} (nav : NormalizedAddValuation p) (a b : R) (hb : lt_val nav n b) : lt_val nav n (a * b) :=
-  by sorry
+end SurjVal
 
-class DiscretelyValuedRing {R : Type u} (p : R) extends IntegralDomain R where
-  valtn : NormalizedAddValuation p
+class EnatValRing {R : Type u} (p : R) extends IntegralDomain R where
+  valtn : SurjVal p
   decr_val : R → R
   zero_valtn_decr {x : R} (h : valtn.v x = 0) : decr_val x = x
   pos_valtn_decr {x : R} (h : valtn.v x > 0) : x = p * decr_val x
 
-def sub_val {R : Type u} {p : R} (dvr : DiscretelyValuedRing p) (x : R) (n : ℕ) : R :=
-  match n, dvr.valtn.v x with
+def sub_val {R : Type u} {p : R} (evr : EnatValRing p) (x : R) (n : ℕ) : R :=
+  match n, evr.valtn.v x with
   | 0, _ => x
   | _, 0 => x
-  | Nat.succ n, _ => sub_val dvr (dvr.decr_val p x) n
+  | Nat.succ n, _ => sub_val evr (evr.decr_val p x) n
 
-lemma sub_val_lt {R : Type u} {p : R} (dvr : DiscretelyValuedRing p) {x : R} {n m : ℕ} (valx : dvr.valtn.v x = ofN m) (h : m < n) : sub_val dvr x n = sub_val dvr x m := by sorry
+lemma sub_val_x_zero {R : Type u} {p : R} (evr : EnatValRing p) (x : R) : sub_val evr x 0 = x := by sorry
+#print prefix sub_val
 
-lemma sub_val_ge {R : Type u} {p : R} (dvr : DiscretelyValuedRing p) {x : R} {n m : ℕ} (h : dvr.valtn.v x ≥ ofN n) : x = p ^ n * sub_val dvr x n := by sorry
+lemma val_sub_val {R : Type u} {p : R} (evr : EnatValRing p) (x : R) (n : ℕ) : evr.valtn.v (sub_val evr x n) = match evr.valtn.v x with | top => top | ofN m => ofN (m - n) := sorry
+
+lemma factor_p_of_le_val {R : Type u} {p : R} (evr : EnatValRing p) {x : R} {n : ℕ} (h : evr.valtn.v x ≥ ofN n) : x = p ^ n * sub_val evr x n := by sorry
+
+lemma factor_p_of_eq_val {R : Type u} {p : R} (evr : EnatValRing p) {x : R} {n : ℕ} (h : evr.valtn.v x = ofN n) : x = p ^ n * sub_val evr x n := factor_p_of_le_val evr (le_of_eq (Eq.symm h))
+
+lemma sub_val_p_mul {R : Type u} {p : R} (evr : EnatValRing p) (x : R) (n : ℕ) : sub_val evr (p ^ n * x) n = x := by
+  induction n with
+  | zero      =>
+    rw [pow_zero, one_mul]
+    exact sub_val_x_zero evr x
+  | succ n ih => cases eq_zero_or_pos (evr.valtn.v (p ^ Nat.succ n * x)) with
+    | inl => sorry
+    | inr => sorry
+
+
+
 
 def nat_prime (p : ℕ) : Prop := 1 < p ∧ (∀ a b : ℕ, (a * b) % p = 0 → a % p = 0 ∨ b % p = 0)
 
@@ -88,6 +132,8 @@ match p with
 
 def fmul_eq_addf {R R' : Type u} [Mul R] [Add R'] (f : R → R') (x y : R) : Prop := f (x * y) = f x + f y
 
+
+
 namespace Int
 
 lemma natAbs_mul (a b : ℤ) : natAbs (a * b) = natAbs a * natAbs b := by sorry
@@ -108,7 +154,6 @@ decreasing_by
 lemma nat_val_zero (p : ℕ) : nat_valuation p 0 = ∞ := by sorry
 lemma nat_val_succ (q m : ℕ) : nat_valuation (q+2) (m+1) = if (m+1) % (q+2) ≠ 0 then ofN 0 else succ (nat_valuation (q+2) ((m+1) / (q+2))) := by rfl
 
-lemma induction_nat_val_mul (p a b : ℕ) (h : nat_prime p) : (∀ (a' b' : ℕ), a' * b' <  a * b → fmul_eq_addf (nat_valuation p) a' b') → fmul_eq_addf (nat_valuation p) a b := by sorry
 
 def int_val (p : ℕ) (k : ℤ) : ℕ∪∞ :=
   nat_valuation p (natAbs k)
@@ -139,9 +184,11 @@ lemma int_val_mul_eq_add (p : ℕ) (prime : nat_prime p) (a b : ℤ) : fmul_eq_a
 
 lemma int_val_add_ge_min (p : ℕ) (a b : ℤ) : int_val p (a + b) ≥ min (int_val p a) (int_val p b) := by sorry
 
+lemma int_val_add_eq_min (p : ℕ) (a b : ℤ) (h : int_val p a < int_val p b) : int_val p (a + b) = (int_val p a) := by sorry
+
 lemma int_val_eq_top_iff_zero (p : ℕ) (gt1 : 1 < p) (a : ℤ) : int_val p a = ∞ ↔ a = 0 := by sorry
 
-def primeVal {p : ℕ} (hp : nat_prime p) : NormalizedAddValuation (ofNat p) := {
+def primeVal {p : ℕ} (hp : nat_prime p) : SurjVal (ofNat p) := {
   v := int_val p,
   v_uniformizer := int_val_uniformizer hp.left,
   v_mul_eq_add_v := int_val_mul_eq_add p hp,
@@ -156,12 +203,36 @@ def decr_val_p (p : ℕ) (val : ℤ → ℕ∪∞) (k : ℤ) : ℤ :=
 
 lemma zero_valtn_decr_p {p: ℕ} {k : ℤ} (val : ℤ → ℕ∪∞) (h : val k = 0) : decr_val_p p val k = k := by sorry
 
-def primeDVR {p : ℕ} (hp : nat_prime p) : DiscretelyValuedRing (p : ℤ) := {
+def primeEVR {p : ℕ} (hp : nat_prime p) : EnatValRing (p : ℤ) := {
   valtn := primeVal hp,
   decr_val := decr_val_p p (primeVal hp).v,
   zero_valtn_decr := zero_valtn_decr_p (primeVal hp).v,
   pos_valtn_decr := sorry
 }
+
+lemma prime_2 : nat_prime 2 := by
+  simp only [nat_prime, true_and]
+  sorry
+lemma prime_3 : nat_prime 3 := by
+  simp only [nat_prime, true_and]
+  sorry
+
+def modulo (x : ℤ) (p : ℕ) := (x % (p:ℤ) + p) % (p:ℤ)
+
+def inv_mod (x : ℤ) (p : ℕ) := modulo (x ^ (p - 2)) p
+
+def has_double_root (a b c : ℤ) {p : ℕ} (hp : nat_prime p) :=
+  let v_p := (primeEVR hp).valtn.v;
+  v_p a = 0 ∧ v_p (b ^ 2 - 4 * a * c) > 0
+
+def double_root (a b c : ℤ) (p : ℕ) :=
+  if p = 2 then
+    modulo c 2
+  else
+    modulo (-b * inv_mod (2 * a) p) p
+
+lemma val_poly_of_double_root {p : ℕ} (hp : nat_prime p) (a b c : ℤ) (H : has_double_root a b c hp) : let x := double_root a b c p; let v_p := (primeEVR hp).valtn.v; v_p (a*x^2 + b*x + c) > 0 ∧ v_p (2*a*x + b) > 0 := by sorry
+
 
 
 end Int
