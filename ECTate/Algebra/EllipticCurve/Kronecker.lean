@@ -3,15 +3,14 @@ import Mathlib.Data.Nat.Basic
 import Mathlib.Init.Data.Nat.Lemmas
 import Mathlib.Logic.Basic
 import Mathlib.Init.Algebra.Order
+import Mathlib.Tactic.LibrarySearch
 
 
 open Nat
 
 section Obvious
 
-lemma even_or_odd (n : ℕ) : n % 2 = 0 ∨ n % 2 = 1 := by sorry
-lemma le_zero {n : ℕ} (h : n ≤ 0) : n = 0 := by sorry
-  -- not_succ_le_zero
+
 lemma div_succ_le_succ_div (m n : ℕ) : succ m / succ n ≤ succ (m / succ n) := by sorry
 lemma div2_succ_succ_eq_succ_div2 (n : ℕ) : succ (succ n) / 2 = succ (n / 2) := by sorry
 
@@ -42,8 +41,7 @@ def val_bin_nat (x : ℕ) : ℕ × ℕ :=
 termination_by _ =>
   x
 decreasing_by
-  --simp_wf
-  simp [measure, invImage, InvImage, lt_wfRel]
+  simp_wf
   exact div2_lt_self h.left
 
 #eval val_bin_nat (65536*83)
@@ -59,13 +57,14 @@ lemma odd_part_le_self_nat (x : ℕ) : (val_bin_nat x).2 ≤ x := by
     induction x with
     | zero =>
       intro y h
-      rw [le_zero h]
+      rw [le_zero_eq] at h
+      rw [h]
       exact zero_le 0
     | succ x ih =>
       intro y y_le_sx
       cases y_le_sx with
       | refl =>
-        cases even_or_odd (succ x) with
+        cases mod_two_eq_zero_or_one (succ x) with
         | inl even =>
           have h : 0 < succ x ∧ succ x % 2 = 0 :=
           And.intro (zero_lt_succ x) even;
@@ -102,13 +101,14 @@ lemma odd_part_succ_pos (x : ℕ) : 0 < (val_bin_nat (succ x)).2 := by
     induction x with
     | zero =>
       intro y y_le_x
-      rw [le_zero y_le_x]
+      rw [le_zero_eq] at y_le_x
+      rw [y_le_x]
       exact lt_succ_self 0
     | succ x ih =>
       intro y y_le_sx
       cases y_le_sx with
       | refl =>
-        cases even_or_odd (succ (succ x)) with
+        cases mod_two_eq_zero_or_one (succ (succ x)) with
         | inl even =>
           have h : 0 < succ (succ x) ∧ succ (succ x) % 2 = 0 :=
           And.intro (zero_lt_succ (succ x)) even;
@@ -164,7 +164,7 @@ def kronecker_odd (k : ℤ) (a b : ℕ) : ℤ :=
 termination_by _ =>
   a
 decreasing_by
-  simp [measure, invImage, InvImage, lt_wfRel]
+  simp_wf
   apply lt_of_lt_of_le _ (odd_part_le_self_nat _)
   apply mod_lt
   apply odd_part_nat_pos
@@ -186,6 +186,7 @@ def ex_root_quad (a b c p : ℤ) : Bool :=
   let (a', b', c') := (a % p, b % p, c % p);
   kronecker ((b' * b' - 4 * a' * c') % p) p = 1
 
+--p > 1 and p /| a
 def quad_root_in_ZpZ (a b c : ℤ) (p : ℕ) : Bool :=
 match p with
   | 0 => unreachable!

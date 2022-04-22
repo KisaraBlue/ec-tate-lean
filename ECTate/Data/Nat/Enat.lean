@@ -220,14 +220,14 @@ lemma eq_ofN (m n : Nat) : m = n ↔ ofN m = ofN n := by
 instance : DecidableRel ((. ≤ . ) : ℕ∪∞ → ℕ∪∞ → Prop) := fun n m =>
 match n, m with
   | ofN b, ofN c =>
-  decidable_of_decidable_of_iff inferInstance (le_ofN b c)
+  decidable_of_decidable_of_iff (le_ofN b c)
   | _, ∞         => isTrue le.below_top
   | ∞, ofN a     => isFalse (fun h => by cases h)
 
 instance : DecidableRel ((. = . ) : ℕ∪∞ → ℕ∪∞ → Prop) := fun n m =>
 match n, m with
   | ofN b, ofN c =>
-  decidable_of_decidable_of_iff inferInstance (eq_ofN b c)
+  decidable_of_decidable_of_iff (eq_ofN b c)
   | ∞, ∞         => isTrue rfl
   | ∞, ofN a     => isFalse (fun h => by cases h)
   | ofN a, ∞     => isFalse (fun h => by cases h)
@@ -273,5 +273,7 @@ theorem add_right_cancel_ofN (a : ℕ) (b c : ℕ∪∞) : b + ofN a = c + ofN a
       assumption
 
 theorem add_left_inj_ofN (a : ℕ) {b c : ℕ∪∞} : b + ofN a = c + ofN a ↔ b = c := ⟨add_right_cancel_ofN a b c, λ h => h ▸ rfl⟩
+
+theorem lt_of_succ_le {n : ℕ} {m : ℕ∪∞} (h : succ (ofN n) ≤ m) : ofN n < m := And.intro (Enat.noConfusion) h
 
 end Enat

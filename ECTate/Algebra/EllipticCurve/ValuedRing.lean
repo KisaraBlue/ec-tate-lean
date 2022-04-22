@@ -87,7 +87,7 @@ def sub_val {R : Type u} {p : R} (evr : EnatValRing p) (x : R) (n : ℕ) : R :=
 lemma sub_val_x_zero {R : Type u} {p : R} (evr : EnatValRing p) (x : R) : sub_val evr x 0 = x := by sorry
 #print prefix sub_val
 
-lemma val_sub_val {R : Type u} {p : R} (evr : EnatValRing p) (x : R) (n : ℕ) : evr.valtn.v (sub_val evr x n) = match evr.valtn.v x with | top => top | ofN m => ofN (m - n) := sorry
+lemma val_sub_val {R : Type u} {p : R} (evr : EnatValRing p) (x : R) (n : ℕ) (h : evr.valtn.v x = ofN m) : evr.valtn.v (sub_val evr x n) = ofN (m - n) := sorry
 
 lemma factor_p_of_le_val {R : Type u} {p : R} (evr : EnatValRing p) {x : R} {n : ℕ} (h : evr.valtn.v x ≥ ofN n) : x = p ^ n * sub_val evr x n := by sorry
 
@@ -160,7 +160,7 @@ def int_val (p : ℕ) (k : ℤ) : ℕ∪∞ :=
 
 lemma int_val_uniformizer {p : ℕ} (gt1 : 1 < p) : int_val p p = ofN 1 := by
   delta int_val
-  rw [natAbs_ofNat]
+  simp
   match p with
   | 0 =>
     apply False.elim

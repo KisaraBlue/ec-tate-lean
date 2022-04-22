@@ -204,6 +204,19 @@ by
 lemma decompose_iso (r s t u : R) (e : Model R) : iso r s t u e = u_iso u (rst_iso r s t e) := by
   simp only [u_iso, rst_iso, iso, zero_mul, mul_zero, zero_add, add_zero, sub_zero, one_pow, one_mul]
 
+def model_fun (e : Model R) (x y : R) : R :=
+  y ^ 2 + e.a1 * x * y + e.a3 * y - x ^ 3 - e.a2 * x ^ 2 - e.a4 * x - e.a6
+
+--partial derivation library?
+
+def dmodel_fun_dx (e : Model R) (x y : R) : R :=
+  e.a1 * y - 3 * x ^ 2 - 2 * e.a2 * x - e.a4
+
+def dmodel_fun_dy (e : Model R) (x y : R) : R :=
+  2* y + e.a1 * x + e.a3
+
+
+
 end Model
 
 structure ValidModel (R : Type u) [CommRing R] extends Model R where
@@ -223,6 +236,29 @@ def rst_iso (r s t : R) (e : ValidModel R) : ValidModel R := {
 lemma rst_discr_valid (r s t : R) (e : ValidModel R) : (rst_iso r s t e).discr = e.discr :=
 by
   exact Model.rst_discr r s t e.toModel
+
+--more [simp] lemmas
+lemma rt_of_a1 (e : ValidModel R) (r t : R) : (rst_iso r 0 t e).a1 = e.a1 := by simp only [rst_iso, Model.rst_iso, Model.iso, mul_zero, add_zero, one_mul]
+
+lemma t_of_a2 (e : ValidModel R) (t : R) : (rst_iso 0 0 t e).a2 = e.a2 := by simp only [rst_iso, Model.rst_iso, Model.iso, one_pow, zero_mul, sub_zero, mul_zero, add_zero, one_mul]
+
+lemma r_of_a2 (e : ValidModel R) (r : R) : (rst_iso r 0 0 e).a2 = e.a2 + 3 * r := by simp only [rst_iso, Model.rst_iso, Model.iso, one_pow, zero_mul, sub_zero, mul_zero, add_zero, one_mul]
+
+lemma t_of_a3 (e : ValidModel R) (t : R) : (rst_iso 0 0 t e).a3 = e.a3 + 2 * t := by simp only [rst_iso, Model.rst_iso, Model.iso, one_pow, zero_mul, sub_zero, mul_zero, add_zero, one_mul]
+
+lemma r_of_a3 (e : ValidModel R) (r : R) : (rst_iso r 0 0 e).a3 = e.a3 + r * e.a1 := by simp only [rst_iso, Model.rst_iso, Model.iso, one_pow, zero_mul, sub_zero, mul_zero, add_zero, one_mul]
+
+lemma t_of_a4 (e : ValidModel R) (t : R) : (rst_iso 0 0 t e).a4 = e.a4 - t * e.a1 := by simp only [rst_iso, Model.rst_iso, Model.iso, one_pow, zero_mul, sub_zero, mul_zero, add_zero, one_mul]
+
+lemma r_of_a4 (e : ValidModel R) (r : R) : (rst_iso r 0 0 e).a4 = e.a4 + 2 * r * e.a2 + 3 * r ^ 2 := by simp only [rst_iso, Model.rst_iso, Model.iso, one_pow, zero_mul, sub_zero, mul_zero, one_mul, add_zero, mul_assoc, ←pow_two r]
+
+lemma t_of_a6 (e : ValidModel R) (t : R) : (rst_iso 0 0 t e).a6 = e.a6 - t * e.a3 - t ^ 2 := by simp only [rst_iso, Model.rst_iso, Model.iso, one_pow, zero_mul, sub_zero, mul_zero, one_mul, add_zero, mul_add, ←pow_two t, sub_eq_add_neg, neg_add, ←add_assoc]
+
+
+lemma r_of_a6 (e : ValidModel R) (r : R) : (rst_iso r 0 0 e).a6 = e.a6 + r * e.a4 + r ^ 2 * e.a2 + r ^ 3 := by simp only [rst_iso, Model.rst_iso, Model.iso, one_pow, zero_mul, sub_zero, mul_zero, one_mul, add_zero, mul_assoc, ←pow_two r, ←pow_succ]
+
+
+
 
 def u_iso (u : R) (e : ValidModel R) : ValidModel R := {
   toModel := Model.u_iso u e.toModel,
