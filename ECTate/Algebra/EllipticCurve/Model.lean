@@ -204,18 +204,24 @@ by
 lemma decompose_iso (r s t u : R) (e : Model R) : iso r s t u e = u_iso u (rst_iso r s t e) := by
   simp only [u_iso, rst_iso, iso, zero_mul, mul_zero, zero_add, add_zero, sub_zero, one_pow, one_mul]
 
-def model_fun (e : Model R) (x y : R) : R :=
-  y ^ 2 + e.a1 * x * y + e.a3 * y - x ^ 3 - e.a2 * x ^ 2 - e.a4 * x - e.a6
+def weierstrass (e : Model R) (P : R × R) : R :=
+  P.2 ^ 2 + e.a1 * P.1 * P.2 + e.a3 * P.2 - P.1 ^ 3 - e.a2 * P.1 ^ 2 - e.a4 * P.1 - e.a6
 
 --partial derivation library?
 
-def dmodel_fun_dx (e : Model R) (x y : R) : R :=
-  e.a1 * y - 3 * x ^ 2 - 2 * e.a2 * x - e.a4
+def dweierstrass_dx (e : Model R) (P : R × R) : R :=
+  e.a1 * P.2 - 3 * P.1 ^ 2 - 2 * e.a2 * P.1 - e.a4
 
-def dmodel_fun_dy (e : Model R) (x y : R) : R :=
-  2* y + e.a1 * x + e.a3
+def dweierstrass_dy (e : Model R) (P : R × R) : R :=
+  2 * P.2 + e.a1 * P.1 + e.a3
 
+def var_change (r s t : R) (P' : R × R) : R × R :=
+  (P'.1 + r, P'.2 + s * P'.1 + t)
 
+theorem weierstrass_iso_eq_var_change (e : Model R) (P : R × R) : weierstrass (rst_iso r s t e) P = weierstrass e (var_change r s t P) := sorry
+
+def rst_triple_to_iso (e : Model R) (rst : R × R × R) : Model R :=
+  rst_iso rst.fst rst.snd.fst rst.snd.snd e
 
 end Model
 

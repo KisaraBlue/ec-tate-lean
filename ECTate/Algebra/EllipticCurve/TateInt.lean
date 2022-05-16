@@ -273,8 +273,7 @@ decreasing_by
     exact Nat.lt_succ_self q
 
 
-lemma x : (0 < n ↔ 1 ≤ n) := by library_search
-
+--lemma x : (0 < n ↔ 1 ≤ n) := by library_search
 
 unsafe
 def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0 t0 : ℤ) : Kodaira × ℕ × ℕ × (ℤ × ℤ × ℤ × ℤ) :=
@@ -290,7 +289,7 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
     rw [(show ¬n = 0 ↔ 0 < n by simp [Nat.pos_iff_ne_zero]), lt_ofN, ofN_val_discr_to_nat] at testΔ
     exact succ_le_of_lt testΔ
 
-  if valtest1 : valp e.b2 = 0 then
+  if test_b2 : valp e.b2 = 0 then
     let (r1, t1) := if p = 2 then
       (modulo e.a3 2, modulo (e.a3 + e.a4) 2)
     else
@@ -303,44 +302,68 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
     (I n, 1, c, (u, r, s, t))
   else
 
-  let (r1, s1, t1) := if p = 2 then
+
+
+  let (r1, s1, t1) := @Model.move_singular_point_to_origin_triple ℤ p evrp e.toModel
+  /-
+  if p = 2 then
     let r1' := modulo e.a4 2
     let s1' := modulo (r1' + e.a2) 2
     (r1', s1', modulo (e.a6 + r1' * (e.a4 + s1')) 2)
   else
     let r1' := modulo (-e.b6) 3
     (r1', modulo e.a1 3, modulo (e.a3 + r1' * e.a1) 3)
-  let e := rst_iso r1 s1 t1 e
+  -/
+  let e := rst_iso r1 s1 t1 e -- rst_triple_to_iso
   let (r, s) := (r + r1 * u ^ 2, s + u * s1)
   let t := t + t1 * u ^ 3 + s * r1 * u ^ 2
+
+  have sing_origin : Model.local_singular_point navp e.toModel (0, 0) := sorry
+
   have h3 : valp e.a3 ≥ ofN 1 := by
+    delta Model.local_singular_point at sing_origin
+    have singular_dy := And.right (And.right sing_origin)
+    simp [Model.dweierstrass_dy] at singular_dy
+    rw [<-succ_ofN]
+    apply succ_le_of_lt singular_dy
 
-    sorry
-  have h4 : valp e.a4 ≥ ofN 1 := sorry
-  have h6 : valp e.a6 ≥ ofN 1 := sorry
-  have hb2 : valp e.b2 ≥ ofN 1 := sorry
+  have h4 : valp e.a4 ≥ ofN 1 := by
+    delta Model.local_singular_point at sing_origin
+    have singular_dx := And.left (And.right sing_origin)
+    simp [Model.dweierstrass_dx, pow_succ, sub_eq_add_neg, val_of_neg navp] at singular_dx
+    rw [<-succ_ofN]
+    apply succ_le_of_lt singular_dx
 
-  if valp e.a6 < ofN 2 then (II, n, 1, (u, r, s, t)) else
-  have h6 : valp e.a1 ≥ ofN 2 := sorry
+  have h6 : valp e.a6 ≥ ofN 1 := by
+    delta Model.local_singular_point at sing_origin
+    have singular := And.left sing_origin
+    simp [Model.weierstrass, pow_succ, sub_eq_add_neg, val_of_neg navp] at singular
+    rw [<-succ_ofN]
+    apply succ_le_of_lt singular
 
-  if valp e.b8 < ofN 3 then (III, n-1, 2, (u, r, s, t)) else
-  have hb8 : valp e.b8 ≥ ofN 3 := sorry
+  have hb2 : valp e.b2 ≥ ofN 1 := sorry --adapt test_b2 after change of coordinates
 
-  if valp e.b6 < ofN 3 then
+  if test_a6 : valp e.a6 < ofN 2 then (II, n, 1, (u, r, s, t)) else
+  have h6 : valp e.a1 ≥ ofN 2 := sorry --total order on test_a6
+
+  if test_b8 : valp e.b8 < ofN 3 then (III, n-1, 2, (u, r, s, t)) else
+  have hb8 : valp e.b8 ≥ ofN 3 := sorry --total order on test_b8
+
+  if test_b6 : valp e.b6 < ofN 3 then
     let (a3p, a6p2) := (sub_val evrp e.a3 1, sub_val evrp e.a6 2)
     let c := if quad_root_in_ZpZ 1 a3p (-a6p2) p then 3 else 1
     (IV, n - 2, c, (u, r, s, t))
   else
-  have hb6 : valp e.b6 ≥ ofN 3 := sorry
+  have hb6 : valp e.b6 ≥ ofN 3 := sorry --total order on test_b6
 
   let k := if valp e.a6 < ofN 3 then if p = 2 then 2 else modulo e.a3 9 else 0
   let e := rst_iso 0 0 k e
   let t := t + k * u ^ 3
-  have h1 : valp e.a1 ≥ ofN 1 := sorry
-  have h2 : valp e.a2 ≥ ofN 1 := sorry
-  have h3 : valp e.a3 ≥ ofN 2 := sorry
-  have h4 : valp e.a4 ≥ ofN 2 := sorry
-  have h6 : valp e.a6 ≥ ofN 3 := sorry
+  have h1 : valp e.a1 ≥ ofN 1 := sorry -- not sure for p=3
+  have h2 : valp e.a2 ≥ ofN 1 := sorry -- not sure (cf p370)
+  have h3 : valp e.a3 ≥ ofN 2 := sorry --from hb6
+  have h4 : valp e.a4 ≥ ofN 2 := sorry --
+  have h6 : valp e.a6 ≥ ofN 3 := sorry --
 
   let (a2p, a4p2, a6p3) := (sub_val evrp e.a2 1, sub_val evrp e.a4 2, sub_val evrp e.a6 3)
   -- 18bcd – 4b³d + b²c² – 4c³ – 27d²
@@ -354,11 +377,11 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
     let e := rst_iso r1 0 0 e
     let r := r + u^2 * r1
     let t := t + u ^ 2 * s * r1
-    have h1 : valp e.a1 ≥ ofN 1 := sorry
-    have h2 : valp e.a2 = ofN 1 := sorry
-    have h3 : valp e.a3 ≥ ofN 2 := sorry
-    have h4 : valp e.a4 ≥ ofN 3 := sorry
-    have h6 : valp e.a6 ≥ ofN 4 := sorry
+    have h1 : valp e.a1 ≥ ofN 1 := sorry --
+    have h2 : valp e.a2 = ofN 1 := sorry --
+    have h3 : valp e.a3 ≥ ofN 2 := sorry --
+    have h4 : valp e.a4 ≥ ofN 3 := sorry --
+    have h6 : valp e.a6 ≥ ofN 4 := sorry --
     let (m, c, (r, t)) := kodaira_type_Is p hp e u r s t 1 2 (Nat.lt_succ_self 1) h1 h2 h3 h4 h6
     (Is m, n - m - 4, c, (u, r, s, t))
   else

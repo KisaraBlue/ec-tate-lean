@@ -77,6 +77,8 @@ class EnatValRing {R : Type u} (p : R) extends IntegralDomain R where
   decr_val : R → R
   zero_valtn_decr {x : R} (h : valtn.v x = 0) : decr_val x = x
   pos_valtn_decr {x : R} (h : valtn.v x > 0) : x = p * decr_val x
+  residue_char : ℕ
+  norm_repr : R → R --generalization of modulo
 
 def sub_val {R : Type u} {p : R} (evr : EnatValRing p) (x : R) (n : ℕ) : R :=
   match n, evr.valtn.v x with
@@ -203,11 +205,15 @@ def decr_val_p (p : ℕ) (val : ℤ → ℕ∪∞) (k : ℤ) : ℤ :=
 
 lemma zero_valtn_decr_p {p: ℕ} {k : ℤ} (val : ℤ → ℕ∪∞) (h : val k = 0) : decr_val_p p val k = k := by sorry
 
+def norm_repr_p (p : ℕ) (x : ℤ) : ℤ := (x % (p : ℤ) + p) % (p : ℤ)
+
 def primeEVR {p : ℕ} (hp : nat_prime p) : EnatValRing (p : ℤ) := {
   valtn := primeVal hp,
   decr_val := decr_val_p p (primeVal hp).v,
   zero_valtn_decr := zero_valtn_decr_p (primeVal hp).v,
-  pos_valtn_decr := sorry
+  pos_valtn_decr := sorry,
+  residue_char := p,
+  norm_repr := norm_repr_p p
 }
 
 lemma prime_2 : nat_prime 2 := by
