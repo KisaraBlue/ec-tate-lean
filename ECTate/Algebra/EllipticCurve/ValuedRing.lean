@@ -5,6 +5,7 @@ import Mathlib.Init.Data.Nat.Lemmas
 import Mathlib.Init.Data.Int.Lemmas
 import Mathlib.Data.Nat.Enat
 import Mathlib.Init.Data.Int.Basic
+import Mathlib.Algebra.EllipticCurve.Kronecker
 
 import Mathlib.Tactic.PrintPrefix
 --class ValueMonoid (A : Type u) extends AddCommMonoid A, LinearOrder A
@@ -18,14 +19,14 @@ end Obvious
 
 open Enat
 
-structure SurjVal {R : Type u} (p : R) [CommRing R] where
+structure SurjVal {R : Type u} (p : R) [IntegralDomain R] where
   v : R → ℕ∪∞
   v_uniformizer : v p = ofN 1
   v_mul_eq_add_v (a b : R) : v (a * b) = v a + v b
   v_add_ge_min_v (a b : R) : v (a + b) ≥ min (v a) (v b)
   v_eq_top_iff_zero (a : R) : v a = ∞ ↔ a = 0
 
-variable {R : Type u} [CommRing R]
+variable {R : Type u} [IntegralDomain R]
 
 section SurjVal
 
@@ -78,7 +79,9 @@ class EnatValRing {R : Type u} (p : R) extends IntegralDomain R where
   zero_valtn_decr {x : R} (h : valtn.v x = 0) : decr_val x = x
   pos_valtn_decr {x : R} (h : valtn.v x > 0) : x = p * decr_val x
   residue_char : ℕ
+  def_char : ∀ n : ℕ, valtn.v (n : R) > 0 ↔ residue_char ∣ n
   norm_repr : R → R --generalization of modulo
+  quad_roots_in_residue_field : R → R → R → Bool
 
 def sub_val {R : Type u} {p : R} (evr : EnatValRing p) (x : R) (n : ℕ) : R :=
   match n, evr.valtn.v x with
@@ -87,7 +90,7 @@ def sub_val {R : Type u} {p : R} (evr : EnatValRing p) (x : R) (n : ℕ) : R :=
   | Nat.succ n, _ => sub_val evr (evr.decr_val p x) n
 
 lemma sub_val_x_zero {R : Type u} {p : R} (evr : EnatValRing p) (x : R) : sub_val evr x 0 = x := by sorry
-#print prefix sub_val
+--#print prefix sub_val
 
 lemma val_sub_val {R : Type u} {p : R} (evr : EnatValRing p) (x : R) (n : ℕ) (h : evr.valtn.v x = ofN m) : evr.valtn.v (sub_val evr x n) = ofN (m - n) := sorry
 
@@ -103,6 +106,10 @@ lemma sub_val_p_mul {R : Type u} {p : R} (evr : EnatValRing p) (x : R) (n : ℕ)
   | succ n ih => cases eq_zero_or_pos (evr.valtn.v (p ^ Nat.succ n * x)) with
     | inl => sorry
     | inr => sorry
+
+
+def has_double_root {R : Type u} {p : R} (evr : EnatValRing p) (a b c : R) :=
+  evr.valtn.v a = 0 ∧ evr.valtn.v (b ^ 2 - 4 * a * c) > 0
 
 
 
@@ -207,13 +214,17 @@ lemma zero_valtn_decr_p {p: ℕ} {k : ℤ} (val : ℤ → ℕ∪∞) (h : val k 
 
 def norm_repr_p (p : ℕ) (x : ℤ) : ℤ := (x % (p : ℤ) + p) % (p : ℤ)
 
+def def_char_p (p : ℕ) : ∀ n : ℕ, (primeVal hp).v n > 0 ↔ p ∣ n := sorry
+
 def primeEVR {p : ℕ} (hp : nat_prime p) : EnatValRing (p : ℤ) := {
   valtn := primeVal hp,
   decr_val := decr_val_p p (primeVal hp).v,
   zero_valtn_decr := zero_valtn_decr_p (primeVal hp).v,
   pos_valtn_decr := sorry,
   residue_char := p,
-  norm_repr := norm_repr_p p
+  def_char := def_char_p p,
+  norm_repr := norm_repr_p p,
+  quad_roots_in_residue_field := fun a b c => Int.quad_root_in_ZpZ a b c p
 }
 
 lemma prime_2 : nat_prime 2 := by

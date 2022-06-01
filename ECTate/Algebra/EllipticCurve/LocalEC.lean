@@ -5,39 +5,41 @@ import Mathlib.Data.Nat.Enat
 import Mathlib.Init.Data.Int.Basic
 import Mathlib.Init.Data.Int.Order
 import Mathlib.Tactic.LibrarySearch
+import Mathlib.Tactic.NormNum
 
 open Enat
 
 namespace Model
 
+variable {R : Type u}
+variable {p : R}
+
 section
 
-variable {R : Type u} [CommRing R]
+variable [IntegralDomain R]
 
-def local_singular_point {p : R} (valp : SurjVal p) (e : Model R) (P : R × R) : Prop := valp.v (weierstrass e P) > 0 ∧ valp.v (dweierstrass_dx e P) > 0 ∧ valp.v (dweierstrass_dy e P) > 0
+def local_singular_point (valp : SurjVal p) (e : Model R) (P : R × R) : Prop := valp.v (weierstrass e P) > 0 ∧ valp.v (dweierstrass_dx e P) > 0 ∧ valp.v (dweierstrass_dy e P) > 0
 
-lemma singular_of_val_discr {p : R} (valp : SurjVal p) (e : Model R) : valp.v e.discr > 0 → ∃ P, local_singular_point valp e P := by sorry
+lemma singular_of_val_discr (valp : SurjVal p) (e : Model R) : valp.v e.discr > 0 → ∃ P, local_singular_point valp e P := by sorry
 
 end
 
-variable {R : Type u}
-variable {p : R}
 variable [evrp : EnatValRing p]
 
 def move_singular_point_to_origin_triple (e : Model R) : R × R × R :=
   match evrp.residue_char with
-  | 2 => (evrp.norm_repr p e.a4, evrp.norm_repr p (e.a2 + e.a4), evrp.norm_repr p (e.a6 + e.a4 * e.a2))
-  | 3 => (evrp.norm_repr p (-e.b6), evrp.norm_repr p e.a1, evrp.norm_repr p (e.a3 - e.b6 * e.a1))
+  | 2 => (evrp.norm_repr p e.a4, 0, evrp.norm_repr p (e.a6 + e.a4 * e.a2))
+  | 3 => (evrp.norm_repr p (-e.b6), 0, evrp.norm_repr p (e.a3 - e.b6 * e.a1))
   | c => (0, 0, 0) --need to fill here
 
-def move_singular_point_to_origin_iso (e : Model R) : Model R := rst_triple_to_iso e (move_singular_point_to_origin_triple e)
+def move_singular_point_to_origin_iso (e : Model R) : Model R := rst_triple e (move_singular_point_to_origin_triple e)
 
-lemma move_singular_point_to_origin (e : Model R) : ∃ P, local_singular_point evrp.valtn e P → local_singular_point valp (move_singular_point_to_origin_iso e) (0, 0) := by sorry
+lemma move_singular_point_to_origin (e : Model R) : (∃ P, local_singular_point evrp.valtn e P) → local_singular_point valp (move_singular_point_to_origin_iso e) (0, 0) := by sorry
 
 
 end Model
 
-variable {R : Type u} [CommRing R]
+variable {R : Type u} [IntegralDomain R]
 
 namespace ValidModel
 
@@ -104,6 +106,44 @@ lemma v_discr_of_v_ai {p : R} (valp : SurjVal p) (e : ValidModel R) (hq : q > 1)
       exact Nat.add_le_add (Nat.succ_le_of_lt hq) (Nat.le_of_lt hq)
   . rw [(show 3 = 1 + (1 + 1) by rfl), ←add_ofN, ←add_ofN, mul_comm, mul_assoc 9]
     exact val_mul_ge_of_both_ge valp h6' (val_mul_ge_of_right_ge valp (val_mul_ge_of_both_ge valp h2' (Enat.le_trans ((le_ofN _ _).1 (Nat.add_le_add (Nat.le_of_lt hq) (le_of_eq rfl))) h4')))
+
+lemma small_char_div_12 {p : R} (hp : p = 2 ∨ p = 3) (valp : SurjVal p) : valp.v 12 ≥ ofN 1 := by
+  cases hp with
+  | inl p2 =>
+    rw [(show (12 : R) = 2 * 6 by norm_num)]
+    apply val_mul_ge_of_left_ge
+    rw [←p2]
+    exact le_of_eq (valp.v_uniformizer).symm
+  | inr p3 =>
+    rw [(show (12 : R) = 3 * 4 by norm_num)]
+    apply val_mul_ge_of_left_ge
+    rw [←p3]
+    exact le_of_eq (valp.v_uniformizer).symm
+
+
+lemma v_rst_b2_of_small_char {p : R} (valp : SurjVal p) (e : ValidModel R) (r s t : R) (h_b2 : valp.v e.b2 ≥ ofN 1) (h_p : valp.v 12 ≥ ofN 1) : valp.v (rst_iso r s t e).b2 ≥ ofN 1 := by
+  simp [rst_iso]
+  rw [Model.rst_b2]
+  apply val_add_ge_of_ge valp h_b2
+  exact val_mul_ge_of_left_ge valp h_p
+
+section cubic
+
+def Δcubic (b c d : R) : R := 18 * b * c * d - 4 * b ^ 3 * d + b ^ 2 * c ^ 2 - 4 * c ^ 3 - 27 * d ^ 2
+
+--def model_to_cubic
+
+def cubic_has_dinstinct_roots {p : R} (valp : SurjVal p) (b c d : R) : Prop := valp.v (Δcubic b c d) = 0
+
+def δmultiplicity (b c d : R) : R := 3 * c - b ^ 2
+
+def cubic_has_double_root {p : R} (valp : SurjVal p) (b c d : R) : Prop := valp.v (Δcubic b c d) > 0 ∧ valp.v (δmultiplicity b c d) = 0
+
+def cubic_has_triple_root {p : R} (valp : SurjVal p) (b c d : R) : Prop := valp.v (Δcubic b c d) > 0 ∧ valp.v (δmultiplicity b c d) > 0
+
+--def move_cubic_double_root_to_origin_iso {p : R} (evrp : EnatValRing p) (e : Model R) : Model R := rst_iso (p * (evrp.norm_repr p (if evrp.residue_char = 2 then a4p2 else a2p * a4p2))) 0 0 e
+
+end cubic
 
 
 end ValidModel

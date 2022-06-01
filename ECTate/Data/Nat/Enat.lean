@@ -120,6 +120,9 @@ theorem add_le_add_right {n m : ℕ∪∞} (h : n ≤ m) (k : ℕ∪∞) : n + k
 theorem add_le_add {a b c d : ℕ∪∞} (h₁ : a ≤ b) (h₂ : c ≤ d) : a + c ≤ b + d :=
   le_trans (add_le_add_right h₁ c) (add_le_add_left h₂ b)
 
+protected theorem le_of_add_le_add_left {a : ℕ} {b c : ℕ∪∞} (h : ofN a + b ≤ ofN a + c) : b ≤ c := by
+  sorry
+
 theorem le_of_lt {n m : ℕ∪∞} (h : n < m) : n ≤ m := by
   cases m with
   | ofN m =>

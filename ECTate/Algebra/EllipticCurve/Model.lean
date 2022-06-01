@@ -2,7 +2,7 @@ import Mathlib.Algebra.Ring.Basic
 import Mathlib.Tactic.NormNum
 import Mathlib.Tactic.Ring
 
-variable {R : Type u} [CommRing R]
+variable {R : Type u} [IntegralDomain R]
 
 section Obvious
 
@@ -11,7 +11,7 @@ lemma mul4 : 2 * 2 = (4 : R) := by norm_num
 
 end Obvious
 
-structure Model (R : Type u) [CommRing R] where
+structure Model (R : Type u) [IntegralDomain R] where
   a1 : R
   a2 : R
   a3 : R
@@ -220,12 +220,14 @@ def var_change (r s t : R) (P' : R × R) : R × R :=
 
 theorem weierstrass_iso_eq_var_change (e : Model R) (P : R × R) : weierstrass (rst_iso r s t e) P = weierstrass e (var_change r s t P) := sorry
 
-def rst_triple_to_iso (e : Model R) (rst : R × R × R) : Model R :=
+def rst_triple (e : Model R) (rst : R × R × R) : Model R :=
   rst_iso rst.fst rst.snd.fst rst.snd.snd e
+
+lemma rst_iso_to_triple (e : Model R) (r s t : R) : rst_iso r s t e = rst_triple e (r, s, t) := rfl
 
 end Model
 
-structure ValidModel (R : Type u) [CommRing R] extends Model R where
+structure ValidModel (R : Type u) [IntegralDomain R] extends Model R where
   discr_not_zero : toModel.discr ≠ 0
 
 namespace ValidModel
@@ -260,10 +262,22 @@ lemma r_of_a4 (e : ValidModel R) (r : R) : (rst_iso r 0 0 e).a4 = e.a4 + 2 * r *
 
 lemma t_of_a6 (e : ValidModel R) (t : R) : (rst_iso 0 0 t e).a6 = e.a6 - t * e.a3 - t ^ 2 := by simp only [rst_iso, Model.rst_iso, Model.iso, one_pow, zero_mul, sub_zero, mul_zero, one_mul, add_zero, mul_add, ←pow_two t, sub_eq_add_neg, neg_add, ←add_assoc]
 
-
 lemma r_of_a6 (e : ValidModel R) (r : R) : (rst_iso r 0 0 e).a6 = e.a6 + r * e.a4 + r ^ 2 * e.a2 + r ^ 3 := by simp only [rst_iso, Model.rst_iso, Model.iso, one_pow, zero_mul, sub_zero, mul_zero, one_mul, add_zero, mul_assoc, ←pow_two r, ←pow_succ]
 
+lemma st_of_a1 (e : ValidModel R) (s t : R) : (rst_iso 0 s t e).a1 = e.a1 + 2 * s := by simp only [rst_iso, Model.rst_iso, Model.iso, one_pow, mul_zero, one_mul]
 
+lemma st_of_a2 (e : ValidModel R) (s t : R) : (rst_iso 0 s t e).a2 = e.a2 - s * e.a1 - s ^ 2 := by simp only [rst_iso, Model.rst_iso, Model.iso, one_pow, mul_zero, one_mul, add_zero, mul_assoc, ←pow_two s]
+
+lemma st_of_a3 (e : ValidModel R) (s t : R) : (rst_iso 0 s t e).a3 = e.a3 + 2 * t := by simp only [rst_iso, Model.rst_iso, Model.iso, one_pow, mul_zero, one_mul, add_zero, mul_assoc, zero_mul]
+
+lemma st_of_a4 (e : ValidModel R) (s t : R) : (rst_iso 0 s t e).a4 = e.a4 - s * e.a3 - t * e.a1 - 2 * s * t := by simp only [rst_iso, Model.rst_iso, Model.iso, one_pow, mul_zero, one_mul, add_zero, mul_assoc, zero_mul]
+
+lemma st_of_a6 (e : ValidModel R) (s t : R) : (rst_iso 0 s t e).a6 = e.a6 - t * e.a3 - t ^ 2 := by simp only [rst_iso, Model.rst_iso, Model.iso, one_pow, mul_zero, one_mul, add_zero, mul_assoc, ←pow_two t, zero_mul, mul_add, sub_add]
+
+def rst_triple (e : ValidModel R) (rst : R × R × R) : ValidModel R :=
+  rst_iso rst.fst rst.snd.fst rst.snd.snd e
+
+lemma rst_iso_to_triple (e : ValidModel R) (r s t : R) : rst_iso r s t e = rst_triple e (r, s, t) := rfl
 
 
 def u_iso (u : R) (e : ValidModel R) : ValidModel R := {
