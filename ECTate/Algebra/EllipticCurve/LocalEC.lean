@@ -24,17 +24,17 @@ lemma singular_of_val_discr (valp : SurjVal p) (e : Model R) : valp.v e.discr > 
 
 end
 
-variable [evrp : EnatValRing p]
+variable [evr : EnatValRing p]
 
 def move_singular_point_to_origin_triple (e : Model R) : R × R × R :=
-  match evrp.residue_char with
-  | 2 => (evrp.norm_repr p e.a4, 0, evrp.norm_repr p (e.a6 + e.a4 * e.a2))
-  | 3 => (evrp.norm_repr p (-e.b6), 0, evrp.norm_repr p (e.a3 - e.b6 * e.a1))
+  match evr.residue_char with
+  | 2 => (evr.norm_repr p e.a4, 0, evr.norm_repr p (e.a6 + e.a4 * e.a2))
+  | 3 => (evr.norm_repr p (-e.b6), 0, evr.norm_repr p (e.a3 - e.b6 * e.a1))
   | c => (0, 0, 0) --need to fill here
 
 def move_singular_point_to_origin_iso (e : Model R) : Model R := rst_triple e (move_singular_point_to_origin_triple e)
 
-lemma move_singular_point_to_origin (e : Model R) : (∃ P, local_singular_point evrp.valtn e P) → local_singular_point valp (move_singular_point_to_origin_iso e) (0, 0) := by sorry
+lemma move_singular_point_to_origin (e : Model R) : (∃ P, local_singular_point evr.valtn e P) → local_singular_point valp (move_singular_point_to_origin_iso e) (0, 0) := by sorry
 
 
 end Model
@@ -129,19 +129,37 @@ lemma v_rst_b2_of_small_char {p : R} (valp : SurjVal p) (e : ValidModel R) (r s 
 
 section cubic
 
-def Δcubic (b c d : R) : R := 18 * b * c * d - 4 * b ^ 3 * d + b ^ 2 * c ^ 2 - 4 * c ^ 3 - 27 * d ^ 2
+def Δcubic (c : R × R × R) : R := 18 * c.1 * c.2.1 * c.2.2 - 4 * c.1 ^ 3 * c.2.2 + c.1 ^ 2 * c.2.1 ^ 2 - 4 * c.2.1 ^ 3 - 27 * c.2.2 ^ 2
 
---def model_to_cubic
+def model_to_cubic {R : Type u} {p : R} (evr : EnatValRing p) (e : ValidModel R) : R × R × R := (sub_val evr e.a2 1, sub_val evr e.a4 2, sub_val evr e.a6 3)
 
-def cubic_has_dinstinct_roots {p : R} (valp : SurjVal p) (b c d : R) : Prop := valp.v (Δcubic b c d) = 0
+def cubic_has_dinstinct_roots {R : Type u} {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop := evr.valtn.v (Δcubic (model_to_cubic evr e)) = 0
 
-def δmultiplicity (b c d : R) : R := 3 * c - b ^ 2
+def δmultiplicity (c : R × R × R) : R := 3 * c.2.1 - c.1 ^ 2
 
-def cubic_has_double_root {p : R} (valp : SurjVal p) (b c d : R) : Prop := valp.v (Δcubic b c d) > 0 ∧ valp.v (δmultiplicity b c d) = 0
+def cubic_has_double_root {R : Type u} {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop := evr.valtn.v (Δcubic (model_to_cubic evr e)) > 0 ∧ evr.valtn.v (δmultiplicity (model_to_cubic evr e)) = 0
 
-def cubic_has_triple_root {p : R} (valp : SurjVal p) (b c d : R) : Prop := valp.v (Δcubic b c d) > 0 ∧ valp.v (δmultiplicity b c d) > 0
+def cubic_has_triple_root {R : Type u} {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop := evr.valtn.v (Δcubic (model_to_cubic evr e)) > 0 ∧ evr.valtn.v (δmultiplicity (model_to_cubic evr e)) > 0
 
---def move_cubic_double_root_to_origin_iso {p : R} (evrp : EnatValRing p) (e : Model R) : Model R := rst_iso (p * (evrp.norm_repr p (if evrp.residue_char = 2 then a4p2 else a2p * a4p2))) 0 0 e
+def move_cubic_double_root_to_origin_iso {R : Type u} {p : R} (evr : EnatValRing p) (e : ValidModel R) : ValidModel R :=
+  let (a2p, a4p2, a6p3) := model_to_cubic evr e
+  rst_iso (p * (evr.norm_repr p (if evr.residue_char = 2 then a4p2 else a2p * a4p2))) 0 0 e
+
+def cubic_double_root_is_zero {R : Type u} {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop :=
+  let (a2p, a4p2, a6p3) := model_to_cubic evr e
+  evr.valtn.v a2p = 0 ∧ evr.valtn.v a4p2 > 0 ∧ evr.valtn.v a6p3 > 0
+
+lemma move_cubic_double_root_to_origin {R : Type u} {p : R} (evr : EnatValRing p) (e : ValidModel R) : cubic_has_double_root evr e → cubic_double_root_is_zero evr (move_cubic_double_root_to_origin_iso evr e) := sorry
+
+def move_cubic_triple_root_to_origin_iso {R : Type u} {p : R} (evr : EnatValRing p) (e : ValidModel R) : ValidModel R :=
+  let (a2p, a4p2, a6p3) := model_to_cubic evr e
+  rst_iso (p * (evr.norm_repr p (if evr.residue_char = 2 then -a2p else -a6p3))) 0 0 e
+
+def cubic_triple_root_is_zero {R : Type u} {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop :=
+  let (a2p, a4p2, a6p3) := model_to_cubic evr e
+  evr.valtn.v a2p > 0 ∧ evr.valtn.v a4p2 > 0 ∧ evr.valtn.v a6p3 > 0
+
+lemma move_cubic_triple_root_to_origin {R : Type u} {p : R} (evr : EnatValRing p) (e : ValidModel R) : cubic_has_triple_root evr e → cubic_triple_root_is_zero evr (move_cubic_triple_root_to_origin_iso evr e) := sorry
 
 end cubic
 
