@@ -72,61 +72,6 @@ def rst_iso (r s t : R) (e : Model R) : Model R := {
   a6 := e.a6 + r*e.a4 + r*r*e.a2 + r*r*r - t*(e.a3 + t + r*e.a1)
   }
 
-/-
---def u_iso (u : R) (e : Model R) : Model R := iso 0 0 0 u e
-
-lemma u_b2 (u : R) (e : Model R) : (u_iso u e).b2 = u ^ 2 * e.b2 :=
-by
-  simp only [u_iso, iso, b2, mul_zero, add_zero, sub_zero, zero_mul]
-  rw [←mul_assoc (u * e.a1), mul_assoc u, mul_comm e.a1, ←mul_assoc]
-  rw [←pow_one u, ←pow_add, mul_assoc, ←mul_assoc 4, mul_comm 4, mul_assoc _ 4]
-  rw [←pow_mul, ←mul_add]
-
-lemma u_b4 (u : R) (e : Model R) : (u_iso u e).b4 = u ^ 4 * e.b4 :=
-by
-  simp only [u_iso, iso, b4, mul_zero, add_zero, sub_zero, zero_mul]
-  rw [←mul_assoc (u * e.a1), mul_assoc u, mul_comm e.a1, ←mul_assoc]
-  rw [mul_comm u, ←pow_succ, mul_assoc, ←mul_assoc 2, mul_comm 2, mul_assoc _ 2]
-  rw [←mul_add]
-
-lemma u_b6 (u : R) (e : Model R) : (u_iso u e).b6 = u ^ 6 * e.b6 :=
-by
-  simp only [u_iso, iso, b6, mul_zero, add_zero, sub_zero, zero_mul]
-  rw [←mul_assoc (u ^ 3 * e.a3), mul_assoc (u ^ 3), mul_comm e.a3, ←mul_assoc]
-  rw [←pow_one u, ←pow_add, mul_assoc, ←mul_assoc 4, mul_comm 4, mul_assoc _ 4]
-  rw [←pow_mul, ←mul_add]
-
-lemma u_b8 (u : R) (e : Model R) : (u_iso u e).b8 = u ^ 8 * e.b8 :=
-by
-  simp only [u_iso, b8, iso, mul_zero, add_zero, sub_zero, zero_mul]
-  rw [←mul_assoc (u * e.a1), mul_assoc u, mul_comm e.a1, ←mul_assoc u u]
-  rw [←mul_assoc _ (u ^ 6), mul_comm _ (u ^ 6), ←mul_assoc, ←mul_assoc]
-  conv in u * u => rw [←pow_one u, ←pow_add]
-  rw [mul_assoc u, ←mul_assoc e.a1, mul_comm e.a1, ←mul_assoc u, ←mul_assoc u]
-  rw [←mul_assoc _ (u ^ 4), mul_comm _ (u ^ 4), ←mul_assoc (u ^ 4), ←mul_assoc (u ^ 4)]
-  conv in u * u ^ 3 => rw [←pow_one u, ←pow_mul, ←pow_add]
-  rw [←mul_assoc 4, mul_comm 4, ←mul_assoc _ (u ^ 6), mul_comm _ (u ^ 6), ←mul_assoc (u ^ 6), ←mul_assoc (u ^ 6)]
-  rw [←mul_assoc _ (u ^ 3), mul_comm _ (u ^ 3), ←mul_assoc _ (u ^ 3), mul_comm _ (u ^ 3), ←mul_assoc (u ^ 3), ←mul_assoc (u ^ 3), ←mul_assoc _ (u ^ 2)]
-  conv in u ^ 4 * e.a4 * (u ^ 4 * e.a4) => rw [←mul_assoc, mul_comm _ (u ^ 4), ←mul_assoc]
-  rw [←pow_add, ←pow_add, ←pow_add, ←pow_add]
-  rw [(show 6 + (1 + 1) = 8 by norm_num)]
-  rw [mul_assoc (u ^ 8), mul_assoc (u ^ 8), mul_assoc (u ^ 8), mul_assoc (u ^ 8), mul_assoc (u ^ 8), mul_assoc (u ^ 8), mul_assoc (u ^ 8), mul_assoc (u ^ 8), mul_assoc (u ^ 8)]
-  rw [←mul_sub, ←mul_add, ←mul_add, ←mul_sub]
-
-lemma u_discr (u : R) (e : Model R) : (u_iso u e).discr = u ^ 12 * e.discr :=
-by
-  simp only [discr, u_b2, u_b4, u_b6, u_b8]
-  rw [neg_mul_right, ←mul_assoc _ (u ^ 2), mul_comm _ (u ^ 2), mul_comm (u ^ 8), ←mul_assoc, mul_comm, ←mul_assoc, ←mul_assoc, ←mul_assoc, ←mul_assoc]
-  rw [mul_pow (u ^ 4) (b4 e), ←mul_assoc 8, mul_comm 8]
-  rw [←mul_assoc 27, ←mul_assoc _ (u ^ 6), mul_comm 27, mul_comm _ (u ^ 6), ←mul_assoc, ←mul_assoc]
-  rw [←mul_assoc 9, ←mul_assoc _ (u ^ 4), mul_comm 9, mul_comm _ (u ^ 4), ←mul_assoc, mul_comm (u ^ 4 * (u ^ 2 * 9 * b2 e) * b4 e), ←mul_assoc, ←mul_assoc, ←mul_assoc, ←mul_assoc]
-  rw [←pow_add, ←pow_add, ←pow_mul, ←pow_add, ←pow_add, ←pow_add, (show 8 + 2 + 2 = 12 by norm_num), (show 4 * 3 = 12 by norm_num)]
-  rw [mul_assoc (u ^ 12), mul_assoc (u ^ 12), mul_assoc (u ^ 12), mul_assoc (u ^ 12), mul_assoc (u ^ 12), mul_assoc (u ^ 12), mul_assoc (u ^ 12), mul_assoc (u ^ 12)]
-  rw [←mul_sub (u ^ 12), ←mul_sub (u ^ 12), ←mul_add (u ^ 12)]
-
-
-def rst_iso (r s t : R) (e : Model R) : Model R := iso r s t e
--/
 lemma rst_b2 (r s t : R) (e : Model R) : (rst_iso r s t e).b2 = e.b2 + 12*r := by
   simp [rst_iso, b2, one_mul, one_pow, sub_eq_add_neg, mul_add, add_mul]
   rw [mul_comm _ (2*s), mul_assoc 2, add_assoc (e.a1*e.a1), ←add_assoc (2*(s*e.a1)), ←add_mul, add4, ←neg_mul_right]
