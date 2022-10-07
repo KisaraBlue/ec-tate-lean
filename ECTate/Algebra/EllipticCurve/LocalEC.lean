@@ -9,43 +9,172 @@ import Mathlib.Tactic.NormNum
 
 open Enat
 
-namespace Model
-
-variable {R : Type u}
+variable {R : Type u} [inst : IntegralDomain R]
 variable {p : R}
 
-section
 
-variable [IntegralDomain R]
+namespace Model
+
 
 def local_singular_point (valp : SurjVal p) (e : Model R) (P : R × R) : Prop := valp.v (weierstrass e P) > 0 ∧ valp.v (dweierstrass_dx e P) > 0 ∧ valp.v (dweierstrass_dy e P) > 0
 
 lemma singular_of_val_discr (valp : SurjVal p) (e : Model R) : valp.v e.discr > 0 → ∃ P, local_singular_point valp e P := by sorry
 
-end
 
-variable [evr : EnatValRing p]
-
-def move_singular_point_to_origin_triple (e : Model R) : R × R × R :=
+def move_singular_point_to_origin_triple (evr : EnatValRing p) (e : Model R) : R × R × R :=
   match evr.residue_char with
-  | 2 => (evr.norm_repr p e.a4, 0, evr.norm_repr p (e.a6 + e.a4 * e.a2))
-  | 3 => (evr.norm_repr p (-e.b6), 0, evr.norm_repr p (e.a3 - e.b6 * e.a1))
+  | 2 => (evr.norm_repr e.a4, 0, evr.norm_repr (e.a6 + e.a4 * e.a2))
+  | 3 => (evr.norm_repr (-e.b6), 0, evr.norm_repr (e.a3 - e.b6 * e.a1))
   | c => (0, 0, 0) --need to fill here
 
-def move_singular_point_to_origin_iso (e : Model R) : Model R := rst_triple e (move_singular_point_to_origin_triple e)
+def move_singular_point_to_origin_iso (evr : EnatValRing p) (e : Model R) : Model R := rst_triple e (move_singular_point_to_origin_triple evr e)
 
-lemma move_singular_point_to_origin (e : Model R) : (∃ P, local_singular_point evr.valtn e P) → local_singular_point valp (move_singular_point_to_origin_iso e) (0, 0) := by sorry
+lemma move_singular_point_to_origin (evr : EnatValRing p) (e : Model R) : (∃ P, local_singular_point valp e P) → local_singular_point valp (move_singular_point_to_origin_iso evr e) (0, 0) := by sorry
 
+def pi_scaling (evr : EnatValRing p) (e : Model R) : Model R := {
+  a1 := evr.sub_val e.a1 1,
+  a2 := evr.sub_val e.a2 2,
+  a3 := evr.sub_val e.a3 3,
+  a4 := evr.sub_val e.a4 4,
+  a6 := evr.sub_val e.a6 6
+}
+
+lemma pi_scaling_of_b2 (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ ofN 1) (h2 : evr.valtn.v e.a2 ≥ ofN 2) : evr.sub_val e.b2 2 = evr.sub_val e.a1 1 * evr.sub_val e.a1 1 + 4 * evr.sub_val e.a2 2 := by
+  rw [←evr.sub_val_mul_right h1, ←evr.sub_val_mul_left h1, evr.sub_val_sub_val, ←evr.sub_val_mul_right h2, ←evr.sub_val_add _ _]
+  . rfl
+  . exact val_mul_ge_of_both_ge evr.valtn h1 h1
+  . exact val_mul_ge_of_right_ge evr.valtn h2
+
+lemma pi_scaling_of_b4 (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ ofN 1) (h3 : evr.valtn.v e.a3 ≥ ofN 3) (h4 : evr.valtn.v e.a4 ≥ ofN 4) : evr.sub_val e.b4 4 = evr.sub_val e.a1 1 * evr.sub_val e.a3 3 + 2 * evr.sub_val e.a4 4 := by
+  rw [←evr.sub_val_mul_right h3, ←evr.sub_val_mul_left h1, evr.sub_val_sub_val, ←evr.sub_val_mul_right h4, ←evr.sub_val_add _ _]
+  . rfl
+  . exact val_mul_ge_of_both_ge evr.valtn h1 h3
+  . exact val_mul_ge_of_right_ge evr.valtn h4
+
+lemma pi_scaling_of_b6 (evr : EnatValRing p) (e : Model R) (h3 : evr.valtn.v e.a3 ≥ ofN 3) (h6 : evr.valtn.v e.a6 ≥ ofN 6) : evr.sub_val e.b6 6 = evr.sub_val e.a3 3 * evr.sub_val e.a3 3 + 4 * evr.sub_val e.a6 6 := by
+  rw [←evr.sub_val_mul_right h3, ←evr.sub_val_mul_left h3, evr.sub_val_sub_val, ←evr.sub_val_mul_right h6, ←evr.sub_val_add _ _]
+  . rfl
+  . exact val_mul_ge_of_both_ge evr.valtn h3 h3
+  . exact val_mul_ge_of_right_ge evr.valtn h6
+
+lemma pi_scaling_of_b8 (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ ofN 1) (h2 : evr.valtn.v e.a2 ≥ ofN 2) (h3 : evr.valtn.v e.a3 ≥ ofN 3) (h4 : evr.valtn.v e.a4 ≥ ofN 4) (h6 : evr.valtn.v e.a6 ≥ ofN 6) : evr.sub_val e.b8 8 = evr.sub_val e.a1 1 * evr.sub_val e.a1 1 * evr.sub_val e.a6 6 - evr.sub_val e.a1 1 * evr.sub_val e.a3 3 * evr.sub_val e.a4 4 + 4 * evr.sub_val e.a2 2 * evr.sub_val e.a6 6 + evr.sub_val e.a2 2 * evr.sub_val e.a3 3 * evr.sub_val e.a3 3 - evr.sub_val e.a4 4 * evr.sub_val e.a4 4 := by
+  rw [←evr.sub_val_mul_right h1, ←evr.sub_val_mul_left h1, evr.sub_val_sub_val, ←evr.sub_val_mul_right h6, ←evr.sub_val_mul_left (val_mul_ge_of_both_ge evr.valtn h1 h1), evr.sub_val_sub_val]
+  rw [←evr.sub_val_mul_right h3, ←evr.sub_val_mul_left h1, evr.sub_val_sub_val, ←evr.sub_val_mul_right h4, ←evr.sub_val_mul_left (val_mul_ge_of_both_ge evr.valtn h1 h3), evr.sub_val_sub_val]
+  rw [←evr.sub_val_mul_right h2, ←evr.sub_val_mul_right h6, ←evr.sub_val_mul_left (val_mul_ge_of_right_ge evr.valtn h2), evr.sub_val_sub_val]
+  rw [←evr.sub_val_mul_left h2, ←evr.sub_val_mul_right h3, ←evr.sub_val_mul_right h3, evr.sub_val_sub_val, ←evr.sub_val_mul_left (val_mul_ge_of_both_ge evr.valtn h2 h3), evr.sub_val_sub_val]
+  rw [←evr.sub_val_mul_right h4, ←evr.sub_val_mul_left h4, evr.sub_val_sub_val]
+  have h116 := val_mul_ge_of_both_ge evr.valtn (val_mul_ge_of_both_ge evr.valtn h1 h1) h6
+  have h134 := (val_mul_ge_of_both_ge evr.valtn (val_mul_ge_of_both_ge evr.valtn h1 h3) h4)
+  have h26 := val_mul_ge_of_both_ge evr.valtn (@val_mul_ge_of_right_ge R _ (ofN 2) p evr.valtn 4 e.a2 h2) h6
+  have h233 := val_mul_ge_of_both_ge evr.valtn (val_mul_ge_of_both_ge evr.valtn h2 h3) h3
+  have h44 := val_mul_ge_of_both_ge evr.valtn h4 h4
+  simp only [add_ofN] at h116
+  rw [add_ofN, add_ofN, ←val_of_neg] at h134
+  simp only [add_ofN] at h26
+  simp only [add_ofN] at h233
+  rw [add_ofN, ←val_of_neg] at h44
+
+  rw [sub_eq_add_neg, sub_eq_add_neg, ←evr.sub_val_neg, ←evr.sub_val_neg, ←evr.sub_val_add h116 h134, ←evr.sub_val_add _ h26, ←evr.sub_val_add _ h233, ←evr.sub_val_add _ h44, ←sub_eq_add_neg, ←sub_eq_add_neg]
+  . rfl
+  . exact val_add_ge_of_ge evr.valtn (val_add_ge_of_ge evr.valtn (val_add_ge_of_ge evr.valtn h116 h134) h26) h233
+  . exact val_add_ge_of_ge evr.valtn (val_add_ge_of_ge evr.valtn h116 h134) h26
+  . exact val_add_ge_of_ge evr.valtn h116 h134
+
+lemma pi_scaling_of_discr (evr : EnatValRing p) (e : Model R) (hb2 : evr.valtn.v e.b2 ≥ ofN 2) (hb4 : evr.valtn.v e.b4 ≥ ofN 4) (hb6 : evr.valtn.v e.b6 ≥ ofN 6) (hb8 : evr.valtn.v e.b8 ≥ ofN 8) : evr.sub_val e.discr 12 = -evr.sub_val e.b2 2 * evr.sub_val e.b2 2 * evr.sub_val e.b8 8 - 8 * ((evr.sub_val e.b4 4) ^ 3) - 27 * evr.sub_val e.b6 6 * evr.sub_val e.b6 6 + 9 * evr.sub_val e.b2 2 * evr.sub_val e.b4 4 * evr.sub_val e.b6 6 := by
+  sorry
+
+lemma b2_of_pi_scaling (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ ofN 1) (h2 : evr.valtn.v e.a2 ≥ ofN 2) : (pi_scaling evr e).b2 = evr.sub_val e.b2 2 := by
+  simp [b2, pi_scaling]
+  exact (pi_scaling_of_b2 evr e h1 h2).symm
+
+lemma b4_of_pi_scaling (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ ofN 1) (h3 : evr.valtn.v e.a3 ≥ ofN 3) (h4 : evr.valtn.v e.a4 ≥ ofN 4) : (pi_scaling evr e).b4 = evr.sub_val e.b4 4 := by
+  simp [b4, pi_scaling]
+  exact (pi_scaling_of_b4 evr e h1 h3 h4).symm
+
+lemma b6_of_pi_scaling (evr : EnatValRing p) (e : Model R) (h3 : evr.valtn.v e.a3 ≥ ofN 3) (h6 : evr.valtn.v e.a6 ≥ ofN 6) : (pi_scaling evr e).b6 = evr.sub_val e.b6 6 := by
+  simp [b6, pi_scaling]
+  exact (pi_scaling_of_b6 evr e h3 h6).symm
+
+lemma b8_of_pi_scaling (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ ofN 1) (h2 : evr.valtn.v e.a2 ≥ ofN 2) (h3 : evr.valtn.v e.a3 ≥ ofN 3) (h4 : evr.valtn.v e.a4 ≥ ofN 4) (h6 : evr.valtn.v e.a6 ≥ ofN 6) : (pi_scaling evr e).b8 = evr.sub_val e.b8 8 := by
+  simp [b8, pi_scaling]
+  exact (pi_scaling_of_b8 evr e h1 h2 h3 h4 h6).symm
+
+lemma val_b2_of_val_a12 (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ ofN 1) (h2 : evr.valtn.v e.a2 ≥ ofN 2) : evr.valtn.v e.b2 ≥ ofN 2 := by
+  simp [b2]
+  apply val_add_ge_of_ge
+  . apply val_mul_ge_of_both_ge evr.valtn h1 h1
+  . apply val_mul_ge_of_right_ge evr.valtn h2
+
+lemma val_b4_of_val_a134 (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ ofN 1) (h3 : evr.valtn.v e.a3 ≥ ofN 3) (h4 : evr.valtn.v e.a4 ≥ ofN 4) : evr.valtn.v e.b4 ≥ ofN 4 := by
+  simp [b4]
+  apply val_add_ge_of_ge
+  . apply val_mul_ge_of_both_ge evr.valtn h1 h3
+  . apply val_mul_ge_of_right_ge evr.valtn h4
+
+lemma val_b6_of_val_a36 (evr : EnatValRing p) (e : Model R) (h3 : evr.valtn.v e.a3 ≥ ofN 3) (h6 : evr.valtn.v e.a6 ≥ ofN 6) : evr.valtn.v e.b6 ≥ ofN 6 := by
+  simp [b6]
+  apply val_add_ge_of_ge
+  . apply val_mul_ge_of_both_ge evr.valtn h3 h3
+  . apply val_mul_ge_of_right_ge evr.valtn h6
+
+lemma val_b8_of_val_ai (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ ofN 1) (h2 : evr.valtn.v e.a2 ≥ ofN 2) (h3 : evr.valtn.v e.a3 ≥ ofN 3) (h4 : evr.valtn.v e.a4 ≥ ofN 4) (h6 : evr.valtn.v e.a6 ≥ ofN 6) : evr.valtn.v e.b8 ≥ ofN 8 := by
+  simp [b8, sub_eq_add_neg]
+  apply val_add_ge_of_ge
+  . apply val_add_ge_of_ge
+    . apply val_add_ge_of_ge
+      . apply val_add_ge_of_ge
+        . apply val_mul_ge_of_both_ge _ (val_mul_ge_of_both_ge _ h1 h1) h6
+        . rw [val_of_neg]
+          apply val_mul_ge_of_both_ge _ (val_mul_ge_of_both_ge _ h1 h3) h4
+      . rw [mul_assoc]
+        apply val_mul_ge_of_right_ge _ (val_mul_ge_of_both_ge _ h2 h6)
+    . apply val_mul_ge_of_both_ge _ (val_mul_ge_of_both_ge _ h2 h3) h3
+  . rw [val_of_neg]
+    apply val_mul_ge_of_both_ge _ h4 h4
+
+lemma discr_of_pi_scaling (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ ofN 1) (h2 : evr.valtn.v e.a2 ≥ ofN 2) (h3 : evr.valtn.v e.a3 ≥ ofN 3) (h4 : evr.valtn.v e.a4 ≥ ofN 4) (h6 : evr.valtn.v e.a6 ≥ ofN 6) : (pi_scaling evr e).discr = evr.sub_val e.discr 12 := by
+  simp [discr, b2_of_pi_scaling evr e h1 h2, b4_of_pi_scaling evr e h1 h3 h4, b6_of_pi_scaling evr e h3 h6, b8_of_pi_scaling evr e h1 h2 h3 h4 h6]
+  exact (pi_scaling_of_discr evr e (val_b2_of_val_a12 evr e h1 h2) (val_b4_of_val_a134 evr e h1 h3 h4) (val_b6_of_val_a36 evr e h3 h6) (val_b8_of_val_ai evr e h1 h2 h3 h4 h6)).symm
+
+lemma val_discr_of_val_ai (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ ofN 1) (h2 : evr.valtn.v e.a2 ≥ ofN 2) (h3 : evr.valtn.v e.a3 ≥ ofN 3) (h4 : evr.valtn.v e.a4 ≥ ofN 4) (h6 : evr.valtn.v e.a6 ≥ ofN 6) : evr.valtn.v e.discr ≥ ofN 12 := by
+  have hb2 := val_b2_of_val_a12 evr e h1 h2
+  have hb4 := val_b4_of_val_a134 evr e h1 h3 h4
+  have hb6 := val_b6_of_val_a36 evr e h3 h6
+  have hb8 := val_b8_of_val_ai evr e h1 h2 h3 h4 h6
+  simp [discr, sub_eq_add_neg]
+  apply val_add_ge_of_ge
+  . apply val_add_ge_of_ge
+    . apply val_add_ge_of_ge
+      . rw [←neg_mul_left, ←neg_mul_left, val_of_neg]
+          apply val_mul_ge_of_both_ge _ (val_mul_ge_of_both_ge _ hb2 hb2) hb8
+      . rw [val_of_neg, pow_succ, pow_succ, pow_one]
+        apply val_mul_ge_of_right_ge _ (val_mul_ge_of_both_ge _ (val_mul_ge_of_both_ge _ hb4 hb4) hb4)
+    . rw [val_of_neg, mul_assoc]
+      apply val_mul_ge_of_right_ge _ (val_mul_ge_of_both_ge _ hb6 hb6)
+  . rw [mul_assoc, mul_assoc]
+    apply val_mul_ge_of_right_ge _ (val_mul_ge_of_both_ge _ hb2 (val_mul_ge_of_both_ge _ hb4 hb6))
 
 end Model
 
-variable {R : Type u} [IntegralDomain R]
 
 namespace ValidModel
+
+def pi_scaling (evr : EnatValRing p) (e : ValidModel R) (h1 : evr.valtn.v e.a1 ≥ ofN 1) (h2 : evr.valtn.v e.a2 ≥ ofN 2) (h3 : evr.valtn.v e.a3 ≥ ofN 3) (h4 : evr.valtn.v e.a4 ≥ ofN 4) (h6 : evr.valtn.v e.a6 ≥ ofN 6) : ValidModel R := {
+  toModel := Model.pi_scaling evr (e.toModel),
+  discr_not_zero := by
+    rw [Model.discr_of_pi_scaling evr e.toModel h1 h2 h3 h4 h6]
+    intro H
+    have H' := let_value_eq (fun (x:R) => p ^ 12 * x) H
+    simp at H'
+    rw [←evr.factor_p_of_le_val (Model.val_discr_of_val_ai evr e.toModel h1 h2 h3 h4 h6)] at H'
+    apply e.discr_not_zero H'
+}
 
 def val_discr_to_nat {p : R} (valp : SurjVal p) (e : ValidModel R) : ℕ := nat_of_val valp e.discr_not_zero
 
 @[simp]lemma iso_rst_val_discr_to_nat {p : R} (valp : SurjVal p) (r s t : R) (e : ValidModel R) : val_discr_to_nat valp (rst_iso r s t e) = val_discr_to_nat valp e := by sorry
+
+lemma pi_scaling_val_discr_to_nat {p : R} (evr : EnatValRing p) (e : ValidModel R) (h1 : evr.valtn.v e.a1 ≥ ofN 1) (h2 : evr.valtn.v e.a2 ≥ ofN 2) (h3 : evr.valtn.v e.a3 ≥ ofN 3) (h4 : evr.valtn.v e.a4 ≥ ofN 4) (h6 : evr.valtn.v e.a6 ≥ ofN 6) : val_discr_to_nat evr.valtn (pi_scaling evr e h1 h2 h3 h4 h6) = val_discr_to_nat evr.valtn e - 12 := by sorry
 
 lemma ofN_val_discr_to_nat {p : R} (valp : SurjVal p) (e : ValidModel R) : ofN (val_discr_to_nat valp e) = valp.v e.discr := by
   delta val_discr_to_nat
@@ -131,35 +260,35 @@ section cubic
 
 def Δcubic (c : R × R × R) : R := 18 * c.1 * c.2.1 * c.2.2 - 4 * c.1 ^ 3 * c.2.2 + c.1 ^ 2 * c.2.1 ^ 2 - 4 * c.2.1 ^ 3 - 27 * c.2.2 ^ 2
 
-def model_to_cubic {R : Type u} {p : R} (evr : EnatValRing p) (e : ValidModel R) : R × R × R := (sub_val evr e.a2 1, sub_val evr e.a4 2, sub_val evr e.a6 3)
+def model_to_cubic {p : R} (evr : EnatValRing p) (e : ValidModel R) : R × R × R := (evr.sub_val e.a2 1, evr.sub_val e.a4 2, evr.sub_val e.a6 3)
 
-def cubic_has_dinstinct_roots {R : Type u} {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop := evr.valtn.v (Δcubic (model_to_cubic evr e)) = 0
+def cubic_has_dinstinct_roots {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop := evr.valtn.v (Δcubic (model_to_cubic evr e)) = 0
 
 def δmultiplicity (c : R × R × R) : R := 3 * c.2.1 - c.1 ^ 2
 
-def cubic_has_double_root {R : Type u} {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop := evr.valtn.v (Δcubic (model_to_cubic evr e)) > 0 ∧ evr.valtn.v (δmultiplicity (model_to_cubic evr e)) = 0
+def cubic_has_double_root {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop := evr.valtn.v (Δcubic (model_to_cubic evr e)) > 0 ∧ evr.valtn.v (δmultiplicity (model_to_cubic evr e)) = 0
 
-def cubic_has_triple_root {R : Type u} {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop := evr.valtn.v (Δcubic (model_to_cubic evr e)) > 0 ∧ evr.valtn.v (δmultiplicity (model_to_cubic evr e)) > 0
+def cubic_has_triple_root {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop := evr.valtn.v (Δcubic (model_to_cubic evr e)) > 0 ∧ evr.valtn.v (δmultiplicity (model_to_cubic evr e)) > 0
 
-def move_cubic_double_root_to_origin_iso {R : Type u} {p : R} (evr : EnatValRing p) (e : ValidModel R) : ValidModel R :=
+def move_cubic_double_root_to_origin_iso {p : R} (evr : EnatValRing p) (e : ValidModel R) : ValidModel R :=
   let (a2p, a4p2, a6p3) := model_to_cubic evr e
-  rst_iso (p * (evr.norm_repr p (if evr.residue_char = 2 then a4p2 else a2p * a4p2))) 0 0 e
+  rst_iso (p * (evr.norm_repr (if evr.residue_char = 2 then a4p2 else a2p * a4p2))) 0 0 e
 
-def cubic_double_root_is_zero {R : Type u} {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop :=
+def cubic_double_root_is_zero {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop :=
   let (a2p, a4p2, a6p3) := model_to_cubic evr e
   evr.valtn.v a2p = 0 ∧ evr.valtn.v a4p2 > 0 ∧ evr.valtn.v a6p3 > 0
 
-lemma move_cubic_double_root_to_origin {R : Type u} {p : R} (evr : EnatValRing p) (e : ValidModel R) : cubic_has_double_root evr e → cubic_double_root_is_zero evr (move_cubic_double_root_to_origin_iso evr e) := sorry
+lemma move_cubic_double_root_to_origin {p : R} (evr : EnatValRing p) (e : ValidModel R) : cubic_has_double_root evr e → cubic_double_root_is_zero evr (move_cubic_double_root_to_origin_iso evr e) := sorry
 
-def move_cubic_triple_root_to_origin_iso {R : Type u} {p : R} (evr : EnatValRing p) (e : ValidModel R) : ValidModel R :=
+def move_cubic_triple_root_to_origin_iso {p : R} (evr : EnatValRing p) (e : ValidModel R) : ValidModel R :=
   let (a2p, a4p2, a6p3) := model_to_cubic evr e
-  rst_iso (p * (evr.norm_repr p (if evr.residue_char = 2 then -a2p else -a6p3))) 0 0 e
+  rst_iso (p * (evr.norm_repr (if evr.residue_char = 2 then -a2p else -a6p3))) 0 0 e
 
-def cubic_triple_root_is_zero {R : Type u} {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop :=
+def cubic_triple_root_is_zero {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop :=
   let (a2p, a4p2, a6p3) := model_to_cubic evr e
   evr.valtn.v a2p > 0 ∧ evr.valtn.v a4p2 > 0 ∧ evr.valtn.v a6p3 > 0
 
-lemma move_cubic_triple_root_to_origin {R : Type u} {p : R} (evr : EnatValRing p) (e : ValidModel R) : cubic_has_triple_root evr e → cubic_triple_root_is_zero evr (move_cubic_triple_root_to_origin_iso evr e) := sorry
+lemma move_cubic_triple_root_to_origin {p : R} (evr : EnatValRing p) (e : ValidModel R) : cubic_has_triple_root evr e → cubic_triple_root_is_zero evr (move_cubic_triple_root_to_origin_iso evr e) := sorry
 
 end cubic
 

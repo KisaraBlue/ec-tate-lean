@@ -40,28 +40,54 @@ instance : LT ℕ∪∞ where
 @[simp] theorem succ_ofN (a : Nat) : succ (ofN a) = ofN a.succ := rfl
 
 @[simp] theorem add_ofN (a b : Nat) : ofN a + ofN b = ofN (a + b) := rfl
-@[simp] theorem add_top (a : ℕ∪∞) : a + ∞ = ∞ := by
-  cases a
-  . rfl
-  . rfl
-@[simp] theorem top_add (a : ℕ∪∞) : ∞ + a = ∞ := by
-  cases a
-  . rfl
-  . rfl
+@[simp] theorem add_top (a : ℕ∪∞) : a + ∞ = ∞ := match a with
+  | top => rfl
+  | ofN a => rfl
+@[simp] theorem top_add (a : ℕ∪∞) : ∞ + a = ∞ := match a with
+  | top => rfl
+  | ofN a => rfl
 
-theorem add_assoc : ∀ (a b c : ℕ∪∞), a + b + c = a + (b + c) := by sorry
+theorem add_assoc (a b c : ℕ∪∞) : a + b + c = a + (b + c) := by
+  cases a with
+  | top => simp
+  | ofN a => cases b with
+    | top => simp
+    | ofN b => cases c with
+      | top => simp
+      | ofN c => simp [Nat.add_assoc]
 
-theorem add_zero : ∀ (a : ℕ∪∞), a + ofN 0 = a := by sorry
+theorem add_zero (a : ℕ∪∞) : a + ofN 0 = a := by
+  match a with
+  | top => exact top_add (ofN 0)
+  | ofN a => simp
 
-theorem zero_add : ∀ (a : ℕ∪∞), ofN 0 + a = a := by sorry
+theorem zero_add (a : ℕ∪∞) : ofN 0 + a = a := by
+  match a with
+  | top => exact add_top (ofN 0)
+  | ofN a => simp
 
 instance : Zero ℕ∪∞ := { zero := ofN 0 }
 
-theorem nsmul_zero' : ∀ (x : ℕ∪∞), nsmul_rec 0 x = ofN 0 := by sorry
+theorem nsmul_zero' (x : ℕ∪∞) : nsmul_rec 0 x = ofN 0 := by
+  simp [nsmul_rec]
+  rfl
 
-theorem nsmul_succ' : ∀ (n : ℕ) (x : ℕ∪∞), nsmul_rec (Nat.succ n) x = x + nsmul_rec n x := by sorry
+theorem nsmul_succ' (n : ℕ) (x : ℕ∪∞) : nsmul_rec (Nat.succ n) x = x + nsmul_rec n x := by
+  induction n with
+  | zero =>
+    simp [nsmul_rec, nsmul_zero']
+  | succ n ih =>
+    simp [nsmul_rec]
 
-theorem add_comm : ∀ (a b : ℕ∪∞), a + b = b + a := by sorry
+
+theorem add_comm (a b : ℕ∪∞) : a + b = b + a := by
+  cases a with
+  | top => simp
+  | ofN a => cases b with
+    | top => simp
+    | ofN b =>
+      simp [add_ofN]
+      exact Nat.add_comm a b
 
 instance : AddCommMonoid ℕ∪∞ :=
 { add_assoc   := add_assoc,
@@ -71,6 +97,18 @@ instance : AddCommMonoid ℕ∪∞ :=
   nsmul_zero' := nsmul_zero',
   nsmul_succ' := nsmul_succ',
   add_comm    := add_comm }
+
+theorem succ_add (a b : ℕ∪∞) : succ a + b = succ (a + b) := by
+  cases a with
+  | top => simp [succ]
+  | ofN a => cases b with
+    | top => simp [succ]
+    | ofN b =>
+      simp [add]
+      exact Nat.succ_add a b
+
+theorem add_succ (a b : ℕ∪∞) : a + succ b = succ (a + b) := by
+  rw [add_comm, succ_add b a, add_comm]
 
 
 theorem lt_top (n : ℕ) : LT.lt (ofN n) ∞ := by
@@ -110,7 +148,26 @@ theorem le_add_right (n k : ℕ∪∞) : n ≤ n + k := by cases n with
     | top   => rw [add_top]; exact le.below_top
     | ofN k => exact le.in_nat (Nat.le_add_right n k)
 
-theorem add_le_add_left {n m : ℕ∪∞} (h : n ≤ m) (k : ℕ∪∞) : k + n ≤ k + m := by sorry
+theorem le_add_left (n k : ℕ∪∞) : n ≤ k + n := by
+  rw [add_comm]
+  exact le_add_right n k
+
+theorem add_le_add_left {n m : ℕ∪∞} (h : n ≤ m) (k : ℕ∪∞) : k + n ≤ k + m := by
+  cases k with
+  | top =>
+    simp
+    exact le.below_top
+  | ofN k => cases n with
+    | top => exact le_trans h (le_add_left m (ofN k))
+    | ofN n => cases m with
+      | top =>
+        simp
+        exact le.below_top
+      | ofN m =>
+        simp
+        apply le.in_nat
+        cases h with
+          | in_nat h => exact Nat.add_le_add_left h k
 
 theorem add_le_add_right {n m : ℕ∪∞} (h : n ≤ m) (k : ℕ∪∞) : n + k ≤ m + k := by
   rw [add_comm n k, add_comm m k]
@@ -120,8 +177,29 @@ theorem add_le_add_right {n m : ℕ∪∞} (h : n ≤ m) (k : ℕ∪∞) : n + k
 theorem add_le_add {a b c d : ℕ∪∞} (h₁ : a ≤ b) (h₂ : c ≤ d) : a + c ≤ b + d :=
   le_trans (add_le_add_right h₁ c) (add_le_add_left h₂ b)
 
+theorem eq_top_of_top_le (a : ℕ∪∞) (h : ∞ ≤ a) : a = ∞ := by
+  cases h with
+  | below_top => rfl
+
+theorem eq_top_of_add_eq_top (a : ℕ∪∞) (n : ℕ) (h : a + ofN n = ∞) : a = ∞ := by
+  cases a with
+  | top => rfl
+  | ofN a => exact Enat.noConfusion h
+
 protected theorem le_of_add_le_add_left {a : ℕ} {b c : ℕ∪∞} (h : ofN a + b ≤ ofN a + c) : b ≤ c := by
-  sorry
+  cases b with
+  | top =>
+    simp [add_comm] at h
+    rw [eq_top_of_add_eq_top c a (eq_top_of_top_le _ h)]
+    exact le.below_top
+  | ofN b => cases c with
+    | top => exact le.below_top
+    | ofN c =>
+      apply le.in_nat
+      apply @Nat.le_of_add_le_add_left a b
+      cases h with
+      | in_nat h' => exact h'
+
 
 theorem le_of_lt {n m : ℕ∪∞} (h : n < m) : n ≤ m := by
   cases m with
@@ -214,11 +292,10 @@ theorem lt_ofN (m n : ℕ) : m < n ↔ ofN m < ofN n := by
 
 lemma eq_ofN (m n : Nat) : m = n ↔ ofN m = ofN n := by
   apply Iff.intro
-  intro h
-  exact congrArg ofN h
-  intro h
-  cases h
-  rfl
+  . exact congrArg ofN
+  . intro h
+    cases h
+    rfl
 
 instance : DecidableRel ((. ≤ . ) : ℕ∪∞ → ℕ∪∞ → Prop) := fun n m =>
 match n, m with
@@ -250,6 +327,12 @@ theorem eq_zero_or_pos : ∀ (n : ℕ∪∞), n = ofN 0 ∨ n > ofN 0
 lemma pos_of_ne_zero {n : ℕ∪∞} : n ≠ ofN 0 → ofN 0 < n :=
 Or.resolve_left (eq_zero_or_pos n)
 
+theorem pos_iff_ne_zero (n : ℕ∪∞) : n ≠ ofN 0 ↔ ofN 0 < n :=
+Iff.intro pos_of_ne_zero ne_of_gt
+
+lemma lt_add_right (a b c : ℕ∪∞) : a < b -> a < b + c :=
+  fun h => lt_of_lt_of_le h (le_add_right _ _)
+
 instance : LinearOrder ℕ∪∞ :=
 { le               := le,
   le_refl          := le_refl,
@@ -265,18 +348,23 @@ instance : LinearOrder ℕ∪∞ :=
 theorem add_right_cancel_ofN (a : ℕ) (b c : ℕ∪∞) : b + ofN a = c + ofN a → b = c := by
   cases b with
   | top   => cases c with
-    | top   => intro _; rfl
-    | ofN c => rw [top_add, add_ofN]; intro h; exact absurd h (Enat.noConfusion)
-  | ofN b => cases c with
-    | top   => rw [top_add, add_ofN]; intro h; exact absurd h (Enat.noConfusion)
+    | top   => intro; rfl
     | ofN c =>
-      rw [add_ofN, add_ofN]; intro h; apply congrArg ofN
-      apply @Nat.add_right_cancel _ a _
-      rw [eq_ofN]
-      assumption
+      rw [top_add, add_ofN]
+      exact fun h => absurd h (Enat.noConfusion)
+  | ofN b => cases c with
+    | top   => simp
+    | ofN c =>
+      simp
+      exact Nat.add_right_cancel
 
 theorem add_left_inj_ofN (a : ℕ) {b c : ℕ∪∞} : b + ofN a = c + ofN a ↔ b = c := ⟨add_right_cancel_ofN a b c, λ h => h ▸ rfl⟩
 
 theorem lt_of_succ_le {n : ℕ} {m : ℕ∪∞} (h : succ (ofN n) ≤ m) : ofN n < m := And.intro (Enat.noConfusion) h
+
+theorem enat_disjunction (a : ℕ∪∞) : a = ∞ ∨ ∃ n, a = ofN n :=
+  match a with
+  | top => Or.inl rfl
+  | ofN n => Or.inr (Exists.intro n rfl)
 
 end Enat

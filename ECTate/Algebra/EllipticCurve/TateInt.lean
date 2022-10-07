@@ -8,12 +8,15 @@ import Mathlib.Tactic.LibrarySearch
 import Mathlib.Algebra.EllipticCurve.LocalEC
 import Mathlib.Init.Algebra.Order
 
-lemma prime_p (p : ℕ) : nat_prime p := sorry
+
 lemma nat_cast_pow (p q : Nat) : ((p ^ q : ℕ) : ℤ) = (↑p) ^ q := by simp
+lemma nat_cast_pow_one (p : Nat) : (↑p) ^ 1 = ↑p := by simp
+
 
 
 
 open Enat
+open EnatValRing
 
 inductive Kodaira where
   | I     : Nat → Kodaira --for both I0 and In with n > 0
@@ -75,6 +78,8 @@ lemma factorize6 (p x b c) : p ^ 2 * x ^ 2 + p * x * (p ^ 1 * b) + p ^ 2 * -c = 
 lemma factorize7 (a b r p : R) : p ^ 2 * a + 2 * (p * r) * (p ^ 1 * b) + 3 * (p * r) ^ 2 = p ^ 2 * (a + 2 * r * b + 3 * r ^ 2) := by ring
 
 lemma factorize8 (a b c r p : R) : (p ^ 3 * a) + (p * r) * (p ^ 2 * b) + (p * r) ^ 2 * (p ^ 1 * c) + (p * r) ^ 3 = p ^ 3 * (a + r * b + r ^ 2 * c + r ^ 3) := by ring
+
+lemma factorize9 (a1 a2 a3 a4 a6 b8 p : R) : p ^ 1 * a1 * (p ^ 1 * a1) * (p ^ 3 * a6) + p ^ 1 * a1 * (p ^ 2 * a3) * -a4 + 4 * a2 * (p ^ 3 * a6) + a2 * (p ^ 2 * a3) * (p ^ 2 * a3) + p ^ 3 * -b8 = p ^ 3 * (p ^ 1 * a1 * (p ^ 1 * a1) * a6 + a1 * a3 * -a4 + 4 * a2 * a6 + a2 * a3 * (p ^ 1 * a3) + -b8) := by ring
 
 end ring_lemmas
 
@@ -197,7 +202,7 @@ def kodaira_type_Is (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0 
     apply Enat.le_trans _ (surjvalp.v_add_ge_min_v _ _)
     apply le_min h4
     rw [mul_assoc, val_of_neg, surjvalp.v_mul_eq_add_v, Enat.add_comm, surjvalp.v_mul_eq_add_v, nat_cast_pow, val_of_pow_uniformizer, ←add_ofN]
-    apply Enat.le_trans _ (le_add_right (ofN q + surjvalp.v e.toModel.a1) _)
+    apply Enat.le_trans _ (le_add_right (ofN q + surjvalp.v e.a1) _)
     exact add_le_add (le_of_eq rfl) h1
   have h6' : (primeEVR hp).valtn.v e1.a6 ≥ ofN (2 * q + 1) := by
     rw [t_of_a6, factor_p_of_le_val evrp h6, factor_p_of_le_val evrp h3, rw_a6, ←val_of_neg, sub_eq_add_neg, sub_eq_add_neg, neg_add, neg_add, neg_neg, neg_neg, neg_mul_right, nat_cast_pow, pow_two, Int.add_assoc, factorize1 a a3q (↑p) q, ←pow_add, add_self_eq_mul_two, ←mul_add, surjvalp.v_mul_eq_add_v, val_of_pow_uniformizer, ←add_ofN, add_mul, ←pow_two, ←one_mul (a ^ 2), Int.add_comm]
@@ -219,8 +224,8 @@ def kodaira_type_Is (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0 
   else
   have hdr' : has_double_root a2p a4pq a6pq2 hp := by
     have v_a2p : surjvalp.v a2p = 0 := by
-      rw [←rw_a2', val_sub_val evrp e1.a2 1 h2']
-      exact plift.down_up (ofN (1 - 1))
+      rw [←rw_a2', val_sub_val_eq evrp e1.a2 1 h2']
+      simp
     apply And.intro v_a2p _
     apply pos_of_ne_zero
     assumption
@@ -272,7 +277,6 @@ termination_by _ =>
   val_discr_to_nat (primeEVR hp).valtn e - (2 * q + 2)
 decreasing_by
   simp_wf
-  rw [iso_rst_val_discr_to_nat, iso_rst_val_discr_to_nat]
   apply Nat.sub_lt_sub_left _ _
   . rw [lt_ofN, ofN_val_discr_to_nat]
     have val_d := v_discr_of_v_ai surjvalp e hq h1 h2 h3 h4 h6
@@ -285,10 +289,22 @@ decreasing_by
 
 --lemma x : (0 < n ↔ 1 ≤ n) := by library_search
 --lemma x (a b c d : ℤ) : a = b → c = d → a + c = b + d := by library_search
+--lemma x (a b c d e : Int) : e + (a - b + c + d - e) = a - b + c + d := by ring
 
 --set_option maxHeartbeats 400000
 
-unsafe
+/-
+example : 1 + 3 = 1 := by
+  conv =>
+    congr
+    congr
+    skip
+    skip
+    rw [(sorry : 1 = 2)]
+  sorry
+-/
+
+
 def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0 t0 : ℤ) : Kodaira × ℕ × ℕ × (ℤ × ℤ × ℤ × ℤ) :=
   if smallp : (p : ℤ) ≠ 2 ∧ (p : ℤ) ≠ 3 then (I 0, 0, 0, (0, 0, 0, 0)) else
   have p_is_2_or_3 : (p : ℤ) = 2 ∨ (p : ℤ) = 3 := by
@@ -325,9 +341,10 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
   else
   have hb2 : navp.v e.b2 ≥ ofN 1 := le_of_not_lt test_b2
 
-  let r1s1t1 := @Model.move_singular_point_to_origin_triple ℤ p evrp e.toModel
+  let r1s1t1 := Model.move_singular_point_to_origin_triple evrp e.toModel
 
   let e1 := rst_triple e r1s1t1
+  have He1 : rst_triple e (Model.move_singular_point_to_origin_triple evrp e.toModel) = e1 := by rfl
   let (r, s) := (r + r1s1t1.fst * u ^ 2, s + u * r1s1t1.snd.fst)
   let t := t + r1s1t1.snd.snd * u ^ 3 + s * r1s1t1.fst * u ^ 2
 
@@ -376,7 +393,6 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
     apply v_rst_b2_of_small_char navp e r1s1t1.fst r1s1t1.snd.fst r1s1t1.snd.snd hb2
     exact small_char_div_12 p_is_2_or_3 navp
 
-  --let k := if navp.v e.a6 < ofN 3 then if p = 2 then 2 else modulo e.a3 9 else 0
   have hdr_b2 : has_double_root 1 e1.a1 (-e1.a2) hp := by
     apply And.intro (val_of_one navp) _
     apply lt_of_succ_le
@@ -398,6 +414,7 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
   let t1 := double_root 1 a3p (-a6p2) p
 
   let e2 := rst_iso 0 s1 (p * t1) e1
+  have He2 : rst_iso 0 s1 (p * t1) e1 = e2 := by rfl
 
   let t := t + t1 * u ^ 3
 
@@ -415,13 +432,32 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
     rw [←succ_ofN]
     exact succ_le_of_lt (val_poly_of_double_root hp 1 a3p (-a6p2) hdr_b6).2
 
-  have h4 : navp.v e2.a4 ≥ ofN 2 := sorry -- using pi³|b_8
+  have hb8 : navp.v e2.b8 ≥ ofN 3 := by
+    rw [st_of_b8]
+    exact hb8
 
   have h6 : navp.v e2.a6 ≥ ofN 3 := by
     rw [←val_of_neg, st_of_a6, sub_eq_add_neg, sub_eq_add_neg, neg_add, neg_add, neg_neg, neg_neg, Int.add_comm _ (_ ^ 2), Int.add_comm (-e1.a6), ←Int.add_assoc, mul_pow, factor_p_of_le_val evrp h3, factor_p_of_le_val evrp h6, neg_mul_right, factorize6, navp.v_mul_eq_add_v, (show 3 = 2 + 1 by rfl), ←add_ofN]
     apply add_le_add (le_of_eq (val_of_pow_uniformizer navp).symm)
     rw [←succ_ofN]
     exact succ_le_of_lt (val_poly_of_double_root hp 1 a3p (-a6p2) hdr_b6).1
+
+  have h4 : navp.v e2.a4 ≥ ofN 2 := by
+    have h4' : navp.v (e2.a4 ^ 2) ≥ ofN 3 := by
+      rw [←Int.add_zero (e2.a4 ^ 2), ←add_neg_self e2.b8, ←Int.add_assoc, Int.add_comm (_ ^ 2)]
+      delta Model.b8
+      rw [sub_eq_add_neg, Int.add_assoc _ _ (_ ^ 2), Int.add_comm _ (_ ^ 2), pow_two, add_neg_self, Int.add_zero, ←sub_eq_add_neg _ (_ * _), (show e2.a1 * e2.a1 * e2.a6 - e2.a1 * e2.a3 * e2.a4 + 4 * e2.a2 * e2.a6 + e2.a2 * e2.a3 * e2.a3 - e2.a4 * e2.a4 = e2.b8 by rfl), sub_eq_add_neg, neg_mul_right, factor_p_of_le_val evrp hb8, factor_p_of_le_val evrp h1, factor_p_of_le_val evrp h3', factor_p_of_le_val evrp h6, neg_mul_right, factorize9]
+      apply val_mul_ge_of_left_ge navp
+      exact le_of_eq (val_of_pow_uniformizer navp).symm
+    cases le_or_lt (navp.v e2.a4) (ofN 1) with
+    | inl v_a4_le_1 =>
+      apply False.elim
+      rw [pow_two, navp.v_mul_eq_add_v] at h4'
+      have x := Enat.le_trans h4' (add_le_add v_a4_le_1 v_a4_le_1)
+      rw [add_ofN, ←le_ofN] at x
+      exact Nat.not_succ_le_zero 0 (Nat.le_of_succ_le_succ (Nat.le_of_succ_le_succ x))
+    | inr v_a4_gt_1 =>
+      exact succ_le_of_lt v_a4_gt_1
 
   let (a2p, a4p2, a6p3) := model_to_cubic evrp e2
   -- 18bcd – 4b³d + b²c² – 4c³ – 27d²
@@ -499,6 +535,7 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
   --let r1 := p * (modulo (if p = 2 then -a2p else -a6p3) p)
   --let r := r + u ^ 2 * r1
   --let t := t + u ^ 2 * s * r1
+  have He3 : move_cubic_triple_root_to_origin_iso evrp e2 = e3 := by rfl
 
   have h2' : navp.v e3.a2 ≥ ofN 2 := by
     have h2'' : navp.v e3.a2 ≥ ofN 1 := by
@@ -547,9 +584,11 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
     exact discr_b6p4
 
   let a := double_root 1 a3p2 (-a6p4) p
+  have Ha : double_root 1 (sub_val evrp e3.a3 2) (-sub_val evrp e3.a6 4) p = a := by rfl
 
   let k := a * (p ^ 2 : ℕ)
   let e4 := rst_iso 0 0 k e3
+  have He4 : rst_iso 0 0 (a * (p:ℤ) ^ 2) e3 = e4 := by rfl
   let t := t + k * u ^ 3
   have h3 : navp.v e4.a3 ≥ ofN 3 := by
     rw [t_of_a3, ←mul_one 2, factor_p_of_le_val evrp h3, ←mul_assoc (2*1), mul_comm ((2*1) * _), Nat.cast_pow, ←mul_add, Int.add_comm, (show 3 = 2 + 1 by rfl), ←add_ofN, navp.v_mul_eq_add_v]
@@ -574,19 +613,36 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
     rw [t_of_a2]
     exact h2'
 
-  tate_small_prime p hp (u_iso (p : ℤ) e4) (p * u) r s t
+  tate_small_prime p hp (ValidModel.pi_scaling evrp e4 h1 h2 h3 h4 h6) (p * u) r s t
+termination_by _ =>
+  val_discr_to_nat (primeEVR hp).valtn e
+decreasing_by
+  simp_wf
+  simp only [He1, He2, He3, Ha]
+  simp only [He4]
+  rw [pi_scaling_val_discr_to_nat (primeEVR hp) e4 h1 h2 h3 h4 h6]
+  have discr_eq : val_discr_to_nat (primeEVR hp).valtn e4 = val_discr_to_nat (primeEVR hp).valtn e := by
+    rw [iso_rst_val_discr_to_nat]
+    simp only [move_cubic_triple_root_to_origin_iso]
+    rw [iso_rst_val_discr_to_nat, iso_rst_val_discr_to_nat]
+    simp only [rst_triple]
+    rw [iso_rst_val_discr_to_nat]
+  rw [discr_eq]
+  apply Nat.sub_lt_of_pos_le _ _ (Nat.zero_lt_succ 11)
+  rw [le_ofN, ←discr_eq, ofN_val_discr_to_nat, (show Nat.succ 11 = 12 by rfl)]
+
+  exact Model.val_discr_of_val_ai (primeEVR hp) e4.toModel h1 h2 h3 h4 h6
 
 
 
 
-unsafe
-def tate_algorithm (p : ℕ) (e : ValidModel ℤ) : Kodaira × ℕ × ℕ × (ℤ × ℤ × ℤ × ℤ) :=
+def tate_algorithm (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) : Kodaira × ℕ × ℕ × (ℤ × ℤ × ℤ × ℤ) :=
   if p = 2 then
     tate_small_prime 2 (Int.prime_2) e 1 0 0 0
   else if p = 3 then
     tate_small_prime 3 (Int.prime_3) e 1 0 0 0
   else
-    tate_big_prime p (prime_p p) e
+    tate_big_prime p hp e
 
 
 def test_model : ValidModel ℤ := ⟨ ⟨1, -1, 1, -23130, -1322503⟩ , by simp⟩

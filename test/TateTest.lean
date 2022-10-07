@@ -51,7 +51,7 @@ def test (N : ℕ) : IO Unit := do
     let m : Model ℤ := d.fst
     if Δnz : m.discr ≠ 0 then
       let p : ℕ := d.snd.fst; let res : Kodaira × ℕ × ℕ := d.snd.snd
-      match Int.tate_algorithm p ⟨m, Δnz⟩ with
+      match Int.tate_algorithm p sorry ⟨m, Δnz⟩ with
       | (k, f, c, _, _, _, _) =>
         if (k, f, c) ≠ res then println str else print ""
         if i = limit - 1 then println "All lines tested"
