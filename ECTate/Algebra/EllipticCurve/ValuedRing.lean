@@ -375,8 +375,7 @@ instance : DecidablePred (nat_prime . : ℕ → Prop) := fun p => sorry
 
 namespace Int
 
-lemma natAbs_mul (a b : ℤ) : natAbs (a * b) = natAbs a * natAbs b := by
-  sorry
+--lemma natAbs_mul (a b : ℤ) : natAbs (a * b) = natAbs a * natAbs b
 
 
 def nat_valuation : ℕ → ℕ → ℕ∪∞
@@ -435,8 +434,8 @@ lemma nat_val_mul_eq_add (p : ℕ) (prime : nat_prime p) (a b : ℕ) : nat_valua
           match Nat.le.dest (Nat.succ_le_of_lt prime.left) with
           | ⟨q, hq⟩ =>
             rw [(show Nat.succ 1 = 2 by rfl), Nat.add_comm] at hq
-            simp only [←hq, (show c.succ * d.succ = (c * d + c + d).succ by simp), nat_valuation]
-            simp only [hq, (show c * d + c + d + 1 = (c + 1) * (d + 1) by simp)]
+            simp only [←hq, (show c.succ * d.succ = (c * d + c + d).succ by rw [Nat.succ_eq_add_one, Nat.succ_eq_add_one, Nat.mul_add, Nat.add_mul, one_mul, mul_one, Nat.succ_eq_add_one]), nat_valuation]
+            simp only [hq, (show c * d + c + d + 1 = (c + 1) * (d + 1) by rfl)]
             cases Nat.eq_zero_or_pos ((c + 1) * (d + 1) % p) with
             | inl h =>
               rw [if_neg (not_not_intro h)]

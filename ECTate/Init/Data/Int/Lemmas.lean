@@ -13,7 +13,6 @@ namespace Int
 @[simp] lemma ofNat_zero_eq_zero : ofNat Nat.zero = 0 :=
 rfl
 
-lemma mod_add_div (m k : Int) : m % k + k * (m / k) = m := by
-  sorry
+--lemma mod_add_div (m k : Int) : m % k + k * (m / k) = m
 
 end Int
