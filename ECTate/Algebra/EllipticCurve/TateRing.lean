@@ -67,7 +67,8 @@ lemma factorize5 (b c p : R) : p ^ 1 * b * (p ^ 1 * b) + 4 * (p ^ 2 * c) = p ^ 2
 end ring_lemmas
 
 unsafe
-def tate_algorithm {R : Type u} {pi : R} [evr : EnatValRing pi] (e : ValidModel R) (u0 r0 s0 t0 : R) : Kodaira × ℕ × ℕ × (R × R × R × R) :=
+def tate_algorithm {R : Type u} [IntegralDomain R] {pi : R} (evr : EnatValRing pi)
+  (e : ValidModel R) (u0 r0 s0 t0 : R) : Kodaira × ℕ × ℕ × (R × R × R × R) :=
   let (u, r, s, t) := (u0, r0, s0, t0)
 
   let Δ := e.discr
@@ -79,19 +80,19 @@ def tate_algorithm {R : Type u} {pi : R} [evr : EnatValRing pi] (e : ValidModel 
 
   if test_b2 : evr.valtn.v e.b2 < ofN 1 then
     let (r1, t1) := if evr.residue_char = 2 then
-      (evr.norm_repr pi e.a3, evr.norm_repr pi (e.a3 + e.a4))
+      (evr.norm_repr e.a3, evr.norm_repr (e.a3 + e.a4))
     else
-      let r1' := evr.norm_repr pi (-e.b2 * e.b4)
-      (r1', evr.norm_repr pi (e.a1 * r1' + e.a3))
+      let r1' := evr.norm_repr (-e.b2 * e.b4)
+      (r1', evr.norm_repr (e.a1 * r1' + e.a3))
     let e := rst_iso r1 0 t1 e
     let r := r + r1 * u ^ 2
     let t := t + t1 * u ^ 3 + s * r1 * u ^ 2
-    let c := if evr.quad_roots_in_residue_field pi 1 e.a1 (-e.a2) then n else Int.gcd 2 n
+    let c := if evr.quad_roots_in_residue_field 1 e.a1 (-e.a2) then n else Int.gcd 2 n
     (I n, 1, c, (u, r, s, t))
   else
   have hb2 : evr.valtn.v e.b2 ≥ ofN 1 := le_of_not_lt test_b2
 
-  let r1s1t1 := @Model.move_singular_point_to_origin_triple R pi evr e.toModel
+  let r1s1t1 := Model.move_singular_point_to_origin_triple evr e.toModel
 
   let e' := rst_triple e r1s1t1
   let (r, s) := (r + r1s1t1.fst * u ^ 2, s + u * r1s1t1.snd.fst)
@@ -133,8 +134,8 @@ def tate_algorithm {R : Type u} {pi : R} [evr : EnatValRing pi] (e : ValidModel 
   have hb8 : evr.valtn.v e'.b8 ≥ ofN 3 := le_of_not_lt test_b8
 
   if test_b6 : evr.valtn.v e'.b6 < ofN 3 then
-    let (a3p, a6p2) := (sub_val evr e'.a3 1, sub_val evr e'.a6 2)
-    let c := if evr.quad_roots_in_residue_field pi 1 a3p (-a6p2) then 3 else 1
+    let (a3p, a6p2) := (evr.sub_val e'.a3 1, evr.sub_val e'.a6 2)
+    let c := if evr.quad_roots_in_residue_field 1 a3p (-a6p2) then 3 else 1
     (IV, n - 2, c, (u, r, s, t))
   else
   have hb6 : evr.valtn.v e'.b6 ≥ ofN 3 := le_of_not_lt test_b6
@@ -144,22 +145,22 @@ def tate_algorithm {R : Type u} {pi : R} [evr : EnatValRing pi] (e : ValidModel 
     apply v_rst_b2_of_small_char evr.valtn e r1s1t1.fst r1s1t1.snd.fst r1s1t1.snd.snd hb2
     exact small_char_div_12 p_is_2_or_3 evr.valtn
 
-  --let k := if evr.valtn.v e.a6 < ofN 3 then if p = 2 then 2 else evr.norm_repr pi e.a3 9 else 0
-  have hdr_b2 : has_double_root evr 1 e'.a1 (-e'.a2) := by
+  --let k := if evr.valtn.v e.a6 < ofN 3 then if p = 2 then 2 else evr.norm_repr e.a3 9 else 0
+  have hdr_b2 : evr.has_double_root 1 e'.a1 (-e'.a2) := by
     apply And.intro (val_of_one evr.valtn) _
     apply lt_of_succ_le
     rw [mul_one, ←neg_mul_right, sub_eq_add_neg, neg_neg (4 * e'.toModel.a2), succ_ofN, pow_succ, pow_one]
     assumption
 
-  let a3p := sub_val evr e'.a3 1
-  let a6p2 := sub_val evr e'.a6 2
+  let a3p := evr.sub_val e'.a3 1
+  let a6p2 := evr.sub_val e'.a6 2
 
-  have hdr_b6 : has_double_root evr 1 a3p (-a6p2) := by
+  have hdr_b6 : evr.has_double_root 1 a3p (-a6p2) := by
     apply And.intro (val_of_one evr.valtn) _
     apply lt_of_succ_le
     rw [mul_one, ←neg_mul_right, sub_eq_add_neg, neg_neg (4 * a6p2), succ_ofN, pow_succ, pow_one]
     simp only [Model.b6] at hb6
-    rw [factor_p_of_le_val evr h3, factor_p_of_le_val evr h6, factorize5, evr.valtn.v_mul_eq_add_v, val_of_pow_uniformizer, (show 3 = 2 + 1 by rfl), ←add_ofN] at hb6
+    rw [evr.factor_p_of_le_val h3, evr.factor_p_of_le_val h6, factorize5, evr.valtn.v_mul_eq_add_v, val_of_pow_uniformizer, (show 3 = 2 + 1 by rfl), ←add_ofN] at hb6
     exact Enat.le_of_add_le_add_left hb6
 
   let s1 := double_root 1 e'.a1 (-e'.a2) p
@@ -192,7 +193,7 @@ def tate_algorithm {R : Type u} {pi : R} [evr : EnatValRing pi] (e : ValidModel 
     (Is 0, n - 4, c, (u, r, s, t))
   else
   if evr.valtn.v (3 * a4p2 - a2p ^ 2) = 0 then
-    let r1 := p * (evr.norm_repr pi (if p = 2 then a4p2 else a2p * a4p2) p)
+    let r1 := p * (evr.norm_repr (if p = 2 then a4p2 else a2p * a4p2) p)
     let e := rst_iso r1 0 0 e
     let r := r + u^2 * r1
     let t := t + u ^ 2 * s * r1
@@ -205,7 +206,7 @@ def tate_algorithm {R : Type u} {pi : R} [evr : EnatValRing pi] (e : ValidModel 
     (Is m, n - m - 4, c, (u, r, s, t))
   else
 
-  let r1 := p * (evr.norm_repr pi (if p = 2 then -a2p else -a6p3) p)
+  let r1 := p * (evr.norm_repr (if p = 2 then -a2p else -a6p3) p)
   let e := rst_iso r1 0 0 e
   let r := r + u ^ 2 * r1
   let t := t + u ^ 2 * s * r1
@@ -219,7 +220,7 @@ def tate_algorithm {R : Type u} {pi : R} [evr : EnatValRing pi] (e : ValidModel 
     let c := if quad_root_in_ZpZ 1 a3p2 (-a6p4) p then 3 else 1
     (IVs, n - 6, c, (u, r, s, t))
   else
-  let a := if p = 2 then evr.norm_repr pi a6p4 else evr.norm_repr pi (2 * a3p2)
+  let a := if p = 2 then evr.norm_repr a6p4 else evr.norm_repr (2 * a3p2)
   let k := -a * (p ^ 2 : ℕ)
   let e := rst_iso 0 0 k e
   let t := t + k * u ^ 3

@@ -78,7 +78,7 @@ lemma rst_b2 (r s t : R) (e : Model R) : (rst_iso r s t e).b2 = e.b2 + 12*r := b
   rw [←mul_assoc (2*s), mul_comm _ 2, ←mul_assoc 2, mul4, ←neg_mul_right, mul_assoc 4 s s]
   rw [add_comm (4*(s*e.a1)), add_comm (4*e.a2), add_assoc, add_assoc, add_comm (4*(s*s)), ←add_assoc]
   simp [←add_assoc (4*(s*e.a1))]
-  rw [add_neg_self (4 * (s*e.a1)), add_assoc, add_assoc, neg_add_self (4*(s*s))]
+  rw [add_assoc, add_assoc, neg_add_self (4*(s*s))]
   ring
 
 lemma rst_b4 (r s t : R) (e : Model R) :

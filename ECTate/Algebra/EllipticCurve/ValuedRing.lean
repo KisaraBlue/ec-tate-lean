@@ -7,7 +7,7 @@ import Mathlib.Data.Nat.Enat
 import Mathlib.Init.Data.Int.Basic
 import Mathlib.Algebra.EllipticCurve.Kronecker
 import Mathlib.Tactic.LibrarySearch
-
+import Mathlib.Tactic.Ring
 import Mathlib.Tactic.PrintPrefix
 --class ValueMonoid (A : Type u) extends AddCommMonoid A, LinearOrder A
 
@@ -338,7 +338,7 @@ def nat_prime (p : ℕ) : Prop := 1 < p ∧ (∀ a b : ℕ, (a * b) % p = 0 → 
 lemma ndiv_mul_left (a b p : ℕ) : (a * b) % p ≠ 0 → a % p ≠ 0 := by
   intro hab ha
   apply hab
-  sorry --not in lean yet
+  simp [Nat.mul_mod, ha]
 
 lemma ndiv_mul_right (a b p : ℕ) : (a * b) % p ≠ 0 → b % p ≠ 0 := by
   rw [Nat.mul_comm]
@@ -348,7 +348,7 @@ lemma nat_prime_test (p : ℕ) : nat_prime p ↔ (1 < p ∧ (∀ a b : ℕ, a < 
   apply Iff.intro
   . intro H
     apply And.intro (H.left)
-    intro a b ha hb
+    intro a b _ _
     apply H.right a b
   . intro H
     apply And.intro (H.left)
@@ -375,13 +375,11 @@ instance : DecidablePred (nat_prime . : ℕ → Prop) := fun p => sorry
 
 namespace Int
 
---lemma natAbs_mul (a b : ℤ) : natAbs (a * b) = natAbs a * natAbs b
-
 
 def nat_valuation : ℕ → ℕ → ℕ∪∞
-  | p, 0 => ∞
-  | 0, (m+1) => ofN 0
-  | 1, (m+1) => ∞
+  | _, 0 => ∞
+  | 0, (_+1) => ofN 0
+  | 1, (_+1) => ∞
   | (q+2), (m+1) => if (m+1) % (q+2) ≠ 0 then ofN 0 else succ (nat_valuation (q+2) ((m+1) / (q+2)))
 termination_by nat_valuation p k => k
 decreasing_by
@@ -434,8 +432,8 @@ lemma nat_val_mul_eq_add (p : ℕ) (prime : nat_prime p) (a b : ℕ) : nat_valua
           match Nat.le.dest (Nat.succ_le_of_lt prime.left) with
           | ⟨q, hq⟩ =>
             rw [(show Nat.succ 1 = 2 by rfl), Nat.add_comm] at hq
-            simp only [←hq, (show c.succ * d.succ = (c * d + c + d).succ by rw [Nat.succ_eq_add_one, Nat.succ_eq_add_one, Nat.mul_add, Nat.add_mul, one_mul, mul_one, Nat.succ_eq_add_one]), nat_valuation]
-            simp only [hq, (show c * d + c + d + 1 = (c + 1) * (d + 1) by rfl)]
+            simp only [←hq, (show c.succ * d.succ = (c * d + c + d).succ by simp [Nat.succ_mul, Nat.mul_succ, Nat.add_succ]), nat_valuation]
+            simp only [hq, (show c * d + c + d + 1 = (c + 1) * (d + 1) by ring)]
             cases Nat.eq_zero_or_pos ((c + 1) * (d + 1) % p) with
             | inl h =>
               rw [if_neg (not_not_intro h)]
@@ -500,11 +498,12 @@ def decr_val_p (p : ℕ) (val : ℤ → ℕ∪∞) (k : ℤ) : ℤ :=
   | 0 => k
   | _ => k / p
 
-lemma zero_valtn_decr_p {p: ℕ} {k : ℤ} (val : ℤ → ℕ∪∞) (h : val k = 0) : decr_val_p p val k = k := by sorry
+lemma zero_valtn_decr_p {p: ℕ} {k : ℤ} (val : ℤ → ℕ∪∞) (h : val k = 0) : decr_val_p p val k = k :=
+by rw [decr_val_p, h]
 
 def norm_repr_p (p : ℕ) (x : ℤ) : ℤ := (x % (p : ℤ) + p) % (p : ℤ)
 
-def def_char_p (p : ℕ) : ∀ n : ℕ, (primeVal hp).v n > 0 ↔ p ∣ n := sorry
+lemma def_char_p (p : ℕ) : ∀ n : ℕ, (primeVal hp).v n > 0 ↔ p ∣ n := sorry
 
 def primeEVR {p : ℕ} (hp : nat_prime p) : EnatValRing (p : ℤ) := {
   valtn := primeVal hp,
