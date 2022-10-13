@@ -1,6 +1,6 @@
 import Init.System.IO
-import Mathlib.Algebra.EllipticCurve.TateInt
-import Mathlib.Algebra.EllipticCurve.Model
+import ECTate.Algebra.EllipticCurve.TateInt
+import ECTate.Algebra.EllipticCurve.Model
 import Mathlib.Data.Array.Defs
 
 open System
