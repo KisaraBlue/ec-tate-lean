@@ -9,12 +9,6 @@ open FS
 
 open Kodaira
 
-
-#eval String.split "SEDTSYKJGYOUGYSGAUFYIT" (λ c => c = 'S')
-
-#check "{0,-1,0,-808051160,9376500497392}&2&4&75&63&-71&2&0"
-#eval String.toInt! "-7846513"
-
 def kodaira_decode : ℤ → Kodaira
   | 0 => I 0 -- invalid code
   | 1 => I 0
@@ -42,9 +36,10 @@ def parsefunc (s : String) : Model ℤ × ℕ × Kodaira × ℕ × ℕ :=
 
 
 def test (N : ℕ) : IO Unit := do
+  -- lines of the csv (which is ampersand separated are)
+  -- model, p, conductor exponent f, disc exp, denom j exponent, kodaira type k, tamagawa c, root number]
   let l ← lines $ mkFilePath ["test/lmfdb.csv"]
   for str in l.zip (Array.range N) do
-    -- let str : String := l[i]'(_)
     let d : Model ℤ × ℕ × Kodaira × ℕ × ℕ := parsefunc str.1
     let m : Model ℤ := d.fst
     if Δnz : m.discr ≠ 0 then
@@ -54,8 +49,8 @@ def test (N : ℕ) : IO Unit := do
         if (k, f, c) ≠ res then println str else print ""
     else
       print ""
-  println "All lines tested"
+  println (toString N ++ " lines tested")
   -- l.foldl (λ t h => do t; println h) (return ())
   -- parseFile <| FilePath.mk "board1.txt"
 
-#eval test 300000
+#eval test 3000
