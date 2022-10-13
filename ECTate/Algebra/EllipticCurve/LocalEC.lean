@@ -1,7 +1,7 @@
-import Mathlib.Algebra.EllipticCurve.Kronecker
-import Mathlib.Algebra.EllipticCurve.Model
-import Mathlib.Algebra.EllipticCurve.ValuedRing
-import Mathlib.Data.Nat.Enat
+import ECTate.Algebra.EllipticCurve.Kronecker
+import ECTate.Algebra.EllipticCurve.Model
+import ECTate.Algebra.EllipticCurve.ValuedRing
+import ECTate.Data.Nat.Enat
 import Mathlib.Init.Data.Int.Basic
 import Mathlib.Tactic.LibrarySearch
 import Mathlib.Tactic.NormNum

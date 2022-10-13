@@ -1,4 +1,4 @@
-import Mathlib.Algebra.Ring.Basic
+import ECTate.Algebra.Ring.Basic
 import Mathlib.Tactic.NormNum
 import Mathlib.Tactic.Ring
 

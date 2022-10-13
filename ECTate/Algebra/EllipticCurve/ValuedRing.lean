@@ -1,11 +1,11 @@
 import Mathlib.Algebra.Group.Defs
 import Mathlib.Init.Algebra.Order
-import Mathlib.Algebra.Ring.Basic
+import ECTate.Algebra.Ring.Basic
 import Mathlib.Init.Data.Nat.Lemmas
-import Mathlib.Init.Data.Int.Lemmas
-import Mathlib.Data.Nat.Enat
+import ECTate.Init.Data.Int.Lemmas
+import ECTate.Data.Nat.Enat
 import Mathlib.Init.Data.Int.Basic
-import Mathlib.Algebra.EllipticCurve.Kronecker
+import ECTate.Algebra.EllipticCurve.Kronecker
 import Mathlib.Tactic.LibrarySearch
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.PrintPrefix

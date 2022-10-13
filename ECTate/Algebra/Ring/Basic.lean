@@ -1,11 +1,12 @@
 import Mathlib.Algebra.Ring.Basic
+import Mathlib.Tactic.Ring
 
 
 theorem pow_two {M} [Monoid M] (a : M) : a ^ (2:ℕ) = a * a :=
 by rw [pow_succ, pow_one]
 
 
-variable (R : Type _)
+variable {R : Type _}
 
 --theorem mul_add (a b c : R) : a * (b + c) = a * b + a * c := Semiring.mul_add a b c
 
@@ -69,7 +70,7 @@ end Ring
 
 
 section CommRing
-variable {R} [CommRing R]
+variable [CommRing R]
 
 
 theorem square_neg (a : R) : -a ^ 2 = a ^ 2 := by
@@ -79,10 +80,12 @@ theorem evenpow_neg {n m : ℕ} (a : R) (h : n = 2 * m) : -a ^ n = a ^ n := by
   rw [h, pow_mul, pow_mul, square_neg]
 
 theorem oddpow_neg {n m : ℕ} (a : R) (h : n = 2 * m + 1) : -a ^ n = -(a ^ n) := by
-  rw [h, pow_succ, evenpow_neg a (show 2 * m = 2 * m by rfl), ←neg_mul_right, ←pow_succ, Nat.add_one]
+  rw [h, pow_succ, evenpow_neg a (show 2 * m = 2 * m by rfl), ←neg_mul_right, ←pow_succ,
+    Nat.add_one]
 
 lemma square_add (a b : R) : (a + b) ^ 2 = a ^ 2 + 2 * (a * b) + b ^ 2 := by
-  rw [pow_two, mul_add, add_mul, add_mul, ←pow_two, ←pow_two, ←add_assoc, mul_comm b, ←one_mul (a * b), add_assoc (a ^ 2), ←add_mul, add_self_eq_mul_two 1, mul_one, one_mul]
+  rw [pow_two, mul_add, add_mul, add_mul, ←pow_two, ←pow_two, ←add_assoc, mul_comm b,
+    ←one_mul (a * b), add_assoc (a ^ 2), ←add_mul, add_self_eq_mul_two 1, mul_one, one_mul]
 
 lemma square_sub (a b : R) : (a - b) ^ 2 = a ^ 2 - 2 * (a * b) + b ^ 2 := by
   rw [sub_eq_add_neg, square_add, square_neg, ←neg_mul_right, ←neg_mul_right, ←sub_eq_add_neg]
@@ -94,7 +97,7 @@ class IntegralDomain (R : Type u) extends CommRing R where
   factors_nzero_mul_nzero {a b : R} : a ≠ 0 → b ≠ 0 → a * b ≠ 0
 
 section IntegralDomain
-variable {R} [IntegralDomain R]
+variable [IntegralDomain R]
 
 theorem non_trivial : ¬1 = 0 := IntegralDomain.non_trivial R
 
