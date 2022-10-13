@@ -1,0 +1,7 @@
+lib/
+bin/
+ir/
+/build
+/prelude/build
+/lean_packages/*
+!/lean_packages/manifest.json
