@@ -9,11 +9,11 @@ import Mathlib.Tactic.NormNum
 open Enat
 
 variable {R : Type u} [inst : IntegralDomain R]
-variable {p : R}
 
 
 namespace Model
 
+variable {p : R}
 
 def local_singular_point (valp : SurjVal p) (e : Model R) (P : R × R) : Prop := valp.v (weierstrass e P) > 0 ∧ valp.v (dweierstrass_dx e P) > 0 ∧ valp.v (dweierstrass_dy e P) > 0
 
@@ -24,7 +24,7 @@ def move_singular_point_to_origin_triple (evr : EnatValRing p) (e : Model R) : R
   match evr.residue_char with
   | 2 => (evr.norm_repr e.a4, 0, evr.norm_repr (e.a6 + e.a4 * e.a2))
   | 3 => (evr.norm_repr (-e.b6), 0, evr.norm_repr (e.a3 - e.b6 * e.a1))
-  | c => (0, 0, 0) --need to fill here
+  | _ => (0, 0, 0) --need to fill here
 
 def move_singular_point_to_origin_iso (evr : EnatValRing p) (e : Model R) : Model R := rst_triple e (move_singular_point_to_origin_triple evr e)
 
@@ -176,11 +176,12 @@ def val_discr_to_nat {p : R} (valp : SurjVal p) (e : ValidModel R) : ℕ := nat_
 lemma pi_scaling_val_discr_to_nat {p : R} (evr : EnatValRing p) (e : ValidModel R) (h1 : evr.valtn.v e.a1 ≥ ofN 1) (h2 : evr.valtn.v e.a2 ≥ ofN 2) (h3 : evr.valtn.v e.a3 ≥ ofN 3) (h4 : evr.valtn.v e.a4 ≥ ofN 4) (h6 : evr.valtn.v e.a6 ≥ ofN 6) : val_discr_to_nat evr.valtn (pi_scaling evr e h1 h2 h3 h4 h6) = val_discr_to_nat evr.valtn e - 12 := by sorry
 
 lemma ofN_val_discr_to_nat {p : R} (valp : SurjVal p) (e : ValidModel R) : ofN (val_discr_to_nat valp e) = valp.v e.discr := by
-  delta val_discr_to_nat
-  delta nat_of_val
-  cases valp.v e.discr with
-  | ofN n => simp
-  | top => sorry
+  cases h : valp.v e.discr with
+  | ofN n =>
+    rw [val_discr_to_nat, nat_of_val, ofN_to_nat_eq_self]
+    assumption
+  | top =>
+    sorry
 
 lemma v_b2_of_v_a1_a2 {p : R} (valp : SurjVal p) (e : ValidModel R) (h1 : valp.v e.a1 ≥ ofN 1) (h2 : valp.v e.a2 = ofN 1) : valp.v e.b2 ≥ ofN 1 :=
   val_add_ge_of_ge valp (val_mul_ge_of_left_ge valp h1) (val_mul_ge_of_right_ge valp (le_of_eq h2.symm))

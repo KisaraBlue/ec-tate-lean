@@ -156,7 +156,7 @@ def kronecker_2 (x : ℕ) : ℤ := match x % 8 with
 
 def kronecker_odd (k : ℤ) (a b : ℕ) : ℤ :=
   -- b is odd and a, b ≥ 0
-  if h : a = 0 then if b > 1 then 0 else k else
+  if a = 0 then if b > 1 then 0 else k else
   let v_r := val_bin_nat a;
   let k' := if v_r.fst % 2 = 0 then k else k * (kronecker_2 b);
   let k'' := if v_r.snd % 4 = 3 ∧ b % 4 = 3 then -k' else k';

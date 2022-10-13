@@ -367,4 +367,14 @@ theorem enat_disjunction (a : ℕ∪∞) : a = ∞ ∨ ∃ n, a = ofN n :=
   | top => Or.inl rfl
   | ofN n => Or.inr (Exists.intro n rfl)
 
+def to_nat {a : ℕ∪∞} (h : a ≠ ∞) : ℕ := by
+  cases a with
+  | top => exact False.elim (h (Eq.refl ∞))
+  | ofN n => exact n
+
+lemma ofN_to_nat_eq_self {a : ℕ∪∞} (h : a ≠ ∞) : ofN (to_nat h) = a := by
+  cases a with
+  | top => exact False.elim (h (Eq.refl ∞))
+  | ofN n => rfl
+
 end Enat

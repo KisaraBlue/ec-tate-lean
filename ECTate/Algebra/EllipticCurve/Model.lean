@@ -21,7 +21,7 @@ deriving Inhabited
 
 namespace Model
 
-instance [Repr R] : Repr (Model R) := ⟨ λ (e : Model R) n => repr (e.a1, e.a2, e.a3, e.a4, e.a6)⟩
+instance [Repr R] : Repr (Model R) := ⟨ λ (e : Model R) _ => repr (e.a1, e.a2, e.a3, e.a4, e.a6)⟩
 
 def b2 (e : Model R) : R := e.a1 * e.a1 + 4 * e.a2
 
@@ -62,7 +62,7 @@ def discr (e : Model R) : R :=
 
 lemma discr_identity (e : Model R) : 1728 * e.discr = e.c4 ^ 4 - e.c6 ^ 2 :=
 by
-  simp only [c4, c6]
+  simp only [c4, c6, discr]
   sorry
 
 def rst_iso (r s t : R) (e : Model R) : Model R := {
@@ -178,8 +178,9 @@ structure ValidModel (R : Type u) [IntegralDomain R] extends Model R where
   discr_not_zero : toModel.discr ≠ 0
 
 namespace ValidModel
+instance [Repr R] : Repr (ValidModel R) := ⟨ λ (e : ValidModel R) _ => repr e.toModel⟩
+-- #eval repr ({a1 := 0,a2 := 0, a3:=0,a4:=0,a6:=1, discr_not_zero := by norm_num : ValidModel ℤ})
 
-instance [Repr R] : Repr (ValidModel R) := ⟨ λ (e : ValidModel R) n => repr e.toModel⟩
 
 def rst_iso (r s t : R) (e : ValidModel R) : ValidModel R := {
   toModel := Model.rst_iso r s t e.toModel,

@@ -62,7 +62,6 @@ def count_roots_cubic (a b c d : ℤ) (p : ℕ) : ℕ :=
 def tate_big_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) : Kodaira × ℕ × ℕ × (ℤ × ℤ × ℤ × ℤ) :=
   let evrp := primeEVR hp
   let navp := evrp.valtn
-  let valp := navp.v
   let c4 := e.c4
   let c6 := e.c6
   let Δ := e.discr
@@ -145,8 +144,7 @@ def kodaira_type_Is (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0 
     rw [mul_one, ←neg_mul_right, sub_eq_add_neg, neg_neg]
     exact discr_1
   let a := double_root 1 a3q (-a6q2) p
-  let rw_a : double_root 1 a3q (-a6q2) p = a := rfl
-  --if p = 2 then modulo a6q2 2 else modulo (2 * -a3q) 3
+
   let e1 := rst_iso 0 0 (a * (p ^ q : ℕ)) e
   have h1' : surjvalp.v e1.a1 ≥ ofN 1 := by
     rw [rt_of_a1]
@@ -281,8 +279,6 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
   let (u, r, s, t) := (u0, r0, s0, t0)
   let evrp := primeEVR hp
   let navp := evrp.valtn
-  --let valp := navp.v
-  let Δ := e.discr
   let n := val_discr_to_nat navp e
   if testΔ : n = 0 then (I 0, 0, 1, (u, r, s, t)) else
   have hΔ : navp.v e.discr ≥ ofN 1 := by
@@ -306,7 +302,6 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
   let r1s1t1 := Model.move_singular_point_to_origin_triple evrp e.toModel
 
   let e1 := rst_triple e r1s1t1
-  have He1 : rst_triple e (Model.move_singular_point_to_origin_triple evrp e.toModel) = e1 := by rfl
   let (r, s) := (r + r1s1t1.fst * u ^ 2, s + u * r1s1t1.snd.fst)
   let t := t + r1s1t1.snd.snd * u ^ 3 + s * r1s1t1.fst * u ^ 2
 
@@ -323,6 +318,7 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
     rw [<-succ_ofN]
     apply succ_le_of_lt singular_dy
 
+  /- These two valuations can be proved at this point but are not used explicitely until stronger valuations are obtained
   have h4 : navp.v e1.a4 ≥ ofN 1 := by
     delta Model.local_singular_point at sing_origin
     have singular_dx := And.left (And.right sing_origin)
@@ -336,6 +332,7 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
     simp [Model.weierstrass, pow_succ, sub_eq_add_neg, val_of_neg navp] at singular
     rw [<-succ_ofN]
     apply succ_le_of_lt singular
+  -/
 
   if test_a6 : navp.v e1.a6 < ofN 2 then (II, n, 1, (u, r, s, t)) else
   have h6 : navp.v e1.a6 ≥ ofN 2 := le_of_not_lt test_a6
@@ -376,7 +373,6 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
   let t1 := double_root 1 a3p (-a6p2) p
 
   let e2 := rst_iso 0 s1 (p * t1) e1
-  have He2 : rst_iso 0 s1 (p * t1) e1 = e2 := by rfl
 
   let t := t + t1 * u ^ 3
 
@@ -589,7 +585,7 @@ termination_by _ =>
   val_discr_to_nat (primeEVR hp).valtn e
 decreasing_by
   simp_wf
-  simp only [He1, He2, He3, Ha]
+  simp only [He3, Ha]
   simp only [He4]
   rw [pi_scaling_val_discr_to_nat (primeEVR hp) e4 h1 h2 h3 h4 h6]
   have discr_eq : val_discr_to_nat (primeEVR hp).valtn e4 = val_discr_to_nat (primeEVR hp).valtn e := by
