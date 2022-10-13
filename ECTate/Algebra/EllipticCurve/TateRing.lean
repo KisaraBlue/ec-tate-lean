@@ -2,54 +2,15 @@ import ECTate.Algebra.EllipticCurve.Kronecker
 import ECTate.Algebra.EllipticCurve.Model
 import ECTate.Algebra.EllipticCurve.ValuedRing
 import ECTate.Algebra.EllipticCurve.LocalEC
+import ECTate.Algebra.EllipticCurve.KodairaTypes
 import ECTate.Data.Nat.Enat
 import Mathlib.Tactic.LibrarySearch
 import Mathlib.Init.Algebra.Order
 import Mathlib.Init.Data.Int.Basic
 
-inductive Kodaira where
-  | I     : Nat → Kodaira --for both I0 and In with n > 0
-  | II    : Kodaira
-  | III   : Kodaira
-  | IV    : Kodaira
-  | Is    : Nat → Kodaira
-  | IIs   : Kodaira
-  | IIIs  : Kodaira
-  | IVs   : Kodaira
-deriving DecidableEq
-
-open Kodaira
-
-instance : Repr Kodaira where
-  reprPrec
-    | I m, _   => "I" ++ repr m
-    | II, _    => "II"
-    | III, _   => "III"
-    | IV, _    => "IV"
-    | Is m, _  => "I*" ++ repr m
-    | IIs, _   => "II*"
-    | IIIs, _  => "III*"
-    | IVs, _   => "IV*"
-
-lemma eq_I_Nat (m n : Nat) : m = n ↔ I m = I n := by
-  apply Iff.intro
-  intro h
-  exact congrArg I h
-  intro h
-  cases h
-  rfl
-
-lemma eq_Is_Nat (m n : Nat) : m = n ↔ Is m = Is n := by
-  apply Iff.intro
-  intro h
-  exact congrArg Is h
-  intro h
-  cases h
-  rfl
-
 open ValidModel
 open Enat
-
+open Kodaira
 section ring_lemmas
 
 variable {R : Type u} [IntegralDomain R]

@@ -30,9 +30,9 @@ def parsefunc (s : String) : Model ℤ × ℕ × Kodaira × ℕ × ℕ :=
       match String.split lcldata (λ c => c = '&') with
       | ["", p, f, _, _, k, c, _] =>
         (⟨a1.toInt!, a2.toInt!, a3.toInt!, a4.toInt!, a6.toInt!⟩, p.toNat!, kodaira_decode k.toInt!, f.toNat!, c.toNat!)
-      | _ => (⟨0,0,0,0,0⟩,0,I 0,0,0)
-    | _ => (⟨0,0,0,0,0⟩,0,I 0,0,0)
-  | _ => (⟨0,0,0,0,0⟩,0,I 0,0,0)
+      | _ => unreachable!
+    | _ => unreachable!
+  | _ => unreachable!
 
 
 def test (N : ℕ) : IO Unit := do

@@ -17,6 +17,7 @@ structure Model (R : Type u) [IntegralDomain R] where
   a3 : R
   a4 : R
   a6 : R
+deriving Inhabited
 
 namespace Model
 
