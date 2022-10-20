@@ -60,8 +60,8 @@ theorem neg_add (a b : R) : - (a + b) = -a + -b := by
 theorem sub_add (a b c : R) : a - (b + c) = a - b - c := by
   rw [sub_eq_add_neg, neg_add, ←add_assoc, ←sub_eq_add_neg, ←sub_eq_add_neg]
 
-theorem sub_add_comm (n m k : R) : n + m - k = n - k + m := by
-  rw [sub_eq_add_neg, add_assoc, add_comm m, ←add_assoc, ←sub_eq_add_neg]
+-- theorem sub_add_comm (n m k : R) : n + m - k = n - k + m := by
+--   rw [sub_eq_add_neg, add_assoc, add_comm m, ←add_assoc, ←sub_eq_add_neg]
 
 @[simp] lemma square_neg_one : -1 ^ 2 = (1 : R) := by
   rw [pow_succ, pow_one, ←neg_mul_left, one_mul, neg_neg (1 : R)]

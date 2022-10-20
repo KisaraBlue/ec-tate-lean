@@ -1,6 +1,54 @@
 import ECTate.Algebra.Ring.Basic
 import Mathlib.Tactic.NormNum
 import Mathlib.Tactic.Ring
+import Mathlib.Tactic.SimpTrace
+import Mathlib.Tactic.LibrarySearch
+
+
+section ring_with_neg
+namespace ring_neg
+variable {R : Type _} [Ring R]
+lemma sub_add_comm {x y z : R} : (x - y) + z = x + z - y :=
+by rw [sub_eq_add_neg, sub_eq_add_neg, add_assoc, add_assoc, add_comm z]
+lemma neg_mul_neg {y z : R} : -y * -z = y * z :=
+by simp [← neg_mul_left, ← neg_mul_right, neg_neg]
+lemma neg_pow_three {y : R} : (- y)^3 = - (y ^ 3) :=
+by simp [pow_succ, mul_assoc]; simp [neg_mul_neg]; rw [neg_mul_left]
+lemma sub_sub {x y z : R} : (x - (y - z)) = x + z - y :=
+by simp [sub_eq_add_neg, neg_add, add_assoc, add_comm z]
+lemma add_sub {x y z : R} : (x + (y - z)) = x + y - z :=
+by simp [sub_eq_add_neg, add_assoc]
+-- lemma neg_pow_four {y : R} : (- y)^4 = (y ^ 4) :=
+-- by simp [pow_succ]; asso simp [neg_mul_neg]
+lemma neg_add_eq_sub {y z : R} : - y + z = z - y :=
+by rw [sub_eq_add_neg, add_comm z]
+lemma sub_add_cancel {y z : R} : y - z + z = y :=
+by rw [sub_eq_add_neg, add_assoc]; simp
+lemma add_sub_cancel {y z : R} : y + z - z = y :=
+by rw [sub_eq_add_neg, add_assoc]; simp
+
+lemma sub_eq_iff_eq_add {x y z : R} : y - z = x ↔ y = x + z :=
+by
+  constructor
+  . intro h
+    rw [← h]
+    simp [sub_add_cancel]
+  . intro h
+    rw [h]
+    simp [add_sub_cancel]
+
+lemma eq_sub_iff_add_eq {x y z : R} : x = y - z ↔ x + z = y :=
+by
+  constructor
+  . intro h
+    rw [h]
+    simp [sub_add_cancel]
+  . intro h
+    rw [← h]
+    simp [add_sub_cancel]
+
+end ring_neg
+end ring_with_neg
 
 variable {R : Type u} [IntegralDomain R]
 
@@ -32,26 +80,14 @@ def b6 (e : Model R) : R := e.a3 * e.a3 + 4 * e.a6
 def b8 (e : Model R) : R :=
   e.a1*e.a1*e.a6 - e.a1*e.a3*e.a4 + 4*e.a2*e.a6 + e.a2*e.a3*e.a3 - e.a4*e.a4
 
+open ring_neg in
 lemma b8_identity (e : Model R) : 4*e.b8 = e.b2*e.b6 - e.b4 ^ 2 :=
 by
-  simp only [b2, b4, b6]
-  rw [add_mul, mul_add, mul_add, pow_succ, pow_one, add_mul, mul_add, mul_add]
-  conv in e.a1 * e.a3 * (e.a1 * e.a3) => rw [←mul_assoc, mul_comm _ e.a1, ←mul_assoc, mul_assoc _ e.a3]
-  rw [sub_eq_add_neg, neg_add, neg_add]
-  simp only [←add_assoc]
-  rw [add_comm _ (-(e.a1 * e.a1 * (e.a3 * e.a3)))]
-  simp only [←add_assoc]
-  rw [add_left_neg (e.a1 * e.a1 * (e.a3 * e.a3)), zero_add]
-  conv in e.a1 * e.a1 * (4 * e.a6) => rw [←mul_assoc, mul_comm _ 4, mul_assoc]
-  rw [neg_add]
-  conv in -(e.a1 * e.a3 * (2 * e.a4)) => rw [←mul_assoc, mul_comm _ 2, mul_assoc, neg_mul_left]
-  conv in -(2 * e.a4 * (e.a1 * e.a3)) => rw [mul_assoc, mul_comm e.a4, neg_mul_left]
-  rw [←add_assoc, add_assoc _ _ (-2 * (e.a1 * e.a3 * e.a4)), ←add_mul, ←neg_add]
-  conv in -(2 * e.a4 * (2 * e.a4)) => rw [←mul_assoc, mul_comm _ 2, ←mul_assoc, mul_assoc, neg_mul_left]
-  rw [mul_assoc 4, ←mul_add 4, mul_assoc 4, ←mul_add 4]
-  simp only [←neg_mul_left, ←sub_eq_add_neg, add4, mul4]
-  rw [←mul_sub 4, ←mul_sub 4, sub_add_comm, sub_add_comm (e.a1 * e.a1 * e.a6), add_assoc _ (e.a2 * (e.a3 * e.a3)), add_comm (e.a2 * (e.a3 * e.a3)), ←add_assoc, ←mul_assoc, ←mul_assoc, mul_comm _ 4]
-  rfl
+  simp only [b2, b4, b6, b8]
+  simp [← sub_add_comm, neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
+    ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, sub_add]
+  simp [eq_sub_iff_add_eq, sub_eq_iff_eq_add, sub_add_comm]
+  ring
 
 def c4 (e : Model R) : R := e.b2 ^ 2 - 24*e.b4
 
@@ -59,11 +95,20 @@ def c6 (e : Model R) : R := -e.b2 ^ 3 + 36*e.b2*e.b4 - 216*e.b6
 
 def discr (e : Model R) : R :=
   -e.b2 * e.b2 * e.b8 - 8 * (e.b4 ^ 3) - 27 * e.b6 * e.b6 + 9 * e.b2 * e.b4 * e.b6
-
-lemma discr_identity (e : Model R) : 1728 * e.discr = e.c4 ^ 4 - e.c6 ^ 2 :=
+open ring_neg in
+lemma discr_identity (e : Model R) : 1728 * e.discr = e.c4 ^ 3 - e.c6 ^ 2 :=
 by
   simp only [c4, c6, discr]
-  sorry
+  -- this is a hacky way to get a version of ring with negs, we expand everything and move
+  -- the negatives to the other side, to get a purely additive expression
+  simp [← sub_add_comm, neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left, ← neg_mul_right,
+    mul_add, add_mul, mul_sub, sub_mul, sub_add]
+  rw [(by ring : 1728 * (e.b2 * e.b2 * e.b8) = 432 * (e.b2 * e.b2 * (4 * e.b8)))]
+  rw [b8_identity]
+  simp [← sub_add_comm, neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left, ← neg_mul_right,
+    mul_add, add_mul, mul_sub, sub_mul, sub_add, add_sub]
+  simp [eq_sub_iff_add_eq, sub_eq_iff_eq_add, sub_add_comm, neg_add_eq_sub, add_sub]
+  ring
 
 def rst_iso (r s t : R) (e : Model R) : Model R := {
   a1 := e.a1 + 2*s,
@@ -83,8 +128,9 @@ lemma rst_b2 (r s t : R) (e : Model R) : (rst_iso r s t e).b2 = e.b2 + 12*r := b
   ring
 
 lemma rst_b4 (r s t : R) (e : Model R) :
-(rst_iso r s t e).b4 = e.b4 + r * (e.b2 + 6 * r) :=
+  (rst_iso r s t e).b4 = e.b4 + r * (e.b2 + 6 * r) :=
 by
+  simp only [rst_iso, b2, b4, one_mul, one_pow, add_mul, mul_add, mul_sub, add_assoc, sub_eq_add_neg, neg_add]
   simp only [rst_iso, b2, b4, one_mul, one_pow, add_mul, mul_add, mul_sub, add_assoc, sub_eq_add_neg, neg_add, ←neg_mul_right, mul_assoc]
   apply congrArg
   rw [add_comm (2 * (s * (2 * t)))]
@@ -105,7 +151,7 @@ by
   rw [(show 2 * 2 = (4 : R) by norm_num), mul_comm 4]
 
 lemma rst_b6 (r s t : R) (e : Model R) :
-(rst_iso r s t e).b6 = e.b6 + 2*r*e.b4 + r*r*e.b2 + 4*r*r*r :=
+  (rst_iso r s t e).b6 = e.b6 + 2*r*e.b4 + r*r*e.b2 + 4*r*r*r :=
 by
   simp only [rst_iso, b2, b4, b6, one_mul, one_pow, add_mul, mul_add, mul_sub, add_assoc, sub_eq_add_neg, neg_add, ←neg_mul_right, mul_assoc]
   apply congrArg
@@ -136,20 +182,34 @@ by
   --simp only [←mul_assoc]
   ring
 
+open ring_neg in
 lemma rst_b8 (r s t : R) (e : Model R) :
-(rst_iso r s t e).b8 = e.b8 + 3*r*e.b6 + 3*r*r*e.b4 + r*r*r*e.b2 + 3*r*r*r*r :=
+  (rst_iso r s t e).b8 = e.b8 + 3*r*e.b6 + 3*r*r*e.b4 + r*r*r*e.b2 + 3*r*r*r*r :=
 by
   simp only [rst_iso, b2, b4, b6, b8, one_mul, one_pow]
-  --simp only [add_mul, mul_add, mul_sub, ←add_assoc, sub_eq_add_neg, neg_add, ←neg_mul_right, mul_assoc]
-  sorry
+  -- this is a hacky way to get a version of ring with negs, we expand everything and move
+  -- the negatives to the other side, to get a purely additive expression
+  simp [← sub_add_comm, neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
+    ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul]
+  simp [eq_sub_iff_add_eq, sub_eq_iff_eq_add, sub_add_comm, neg_add_eq_sub, add_sub, sub_add]
+  ring
 
+open ring_neg in
 lemma rst_discr (r s t : R) (e : Model R) : (rst_iso r s t e).discr = e.discr :=
 by
   simp only [discr, rst_b2, rst_b4, rst_b6, rst_b8]
-  sorry
-
-
-
+  -- this is a hacky way to get a version of ring with negs, we expand everything and move
+  -- the negatives to the other side, to get a purely additive expression
+  simp [← sub_add_comm, neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
+    ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul]
+  rw [(by ring : b2 e * (12 * r) * b8 e = b2 e * (3 * r) * (4 * b8 e)),
+      (by ring : 12 * r * b2 e * b8 e = 3 * r * b2 e * (4 * b8 e)),
+      (by ring : 12 * r * (12 * r) * b8 e = 3 * r * 12 * r * (4 * b8 e))]
+  simp only [b8_identity]
+  simp [← sub_add_comm, neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
+    ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul]
+  simp [eq_sub_iff_add_eq, sub_eq_iff_eq_add, sub_add_comm, neg_add_eq_sub, add_sub, sub_add]
+  ring
 
 def weierstrass (e : Model R) (P : R × R) : R :=
   P.2 ^ 2 + e.a1 * P.1 * P.2 + e.a3 * P.2 - P.1 ^ 3 - e.a2 * P.1 ^ 2 - e.a4 * P.1 - e.a6
@@ -165,7 +225,8 @@ def dweierstrass_dy (e : Model R) (P : R × R) : R :=
 def var_change (r s t : R) (P' : R × R) : R × R :=
   (P'.1 + r, P'.2 + s * P'.1 + t)
 
-theorem weierstrass_iso_eq_var_change (e : Model R) (P : R × R) : weierstrass (rst_iso r s t e) P = weierstrass e (var_change r s t P) := sorry
+theorem weierstrass_iso_eq_var_change (e : Model R) (P : R × R) :
+  weierstrass (rst_iso r s t e) P = weierstrass e (var_change r s t P) := sorry
 
 def rst_triple (e : Model R) (rst : R × R × R) : Model R :=
   rst_iso rst.fst rst.snd.fst rst.snd.snd e
@@ -194,33 +255,53 @@ by
   exact Model.rst_discr r s t e.toModel
 
 --more [simp] lemmas
-lemma rt_of_a1 (e : ValidModel R) (r t : R) : (rst_iso r 0 t e).a1 = e.a1 := by simp only [rst_iso, Model.rst_iso, mul_zero, add_zero, one_mul]
+lemma rt_of_a1 (e : ValidModel R) (r t : R) : (rst_iso r 0 t e).a1 = e.a1 :=
+by simp only [rst_iso, Model.rst_iso, mul_zero, add_zero, one_mul]
 
-lemma t_of_a2 (e : ValidModel R) (t : R) : (rst_iso 0 0 t e).a2 = e.a2 := by simp only [rst_iso, Model.rst_iso, one_pow, zero_mul, sub_zero, mul_zero, add_zero, one_mul]
+lemma t_of_a2 (e : ValidModel R) (t : R) : (rst_iso 0 0 t e).a2 = e.a2 :=
+by simp only [rst_iso, Model.rst_iso, one_pow, zero_mul, sub_zero, mul_zero, add_zero, one_mul]
 
-lemma r_of_a2 (e : ValidModel R) (r : R) : (rst_iso r 0 0 e).a2 = e.a2 + 3 * r := by simp only [rst_iso, Model.rst_iso, one_pow, zero_mul, sub_zero, mul_zero, add_zero, one_mul]
+lemma r_of_a2 (e : ValidModel R) (r : R) : (rst_iso r 0 0 e).a2 = e.a2 + 3 * r :=
+by simp only [rst_iso, Model.rst_iso, one_pow, zero_mul, sub_zero, mul_zero, add_zero, one_mul]
 
-lemma t_of_a3 (e : ValidModel R) (t : R) : (rst_iso 0 0 t e).a3 = e.a3 + 2 * t := by simp only [rst_iso, Model.rst_iso, one_pow, zero_mul, sub_zero, mul_zero, add_zero, one_mul]
+lemma t_of_a3 (e : ValidModel R) (t : R) : (rst_iso 0 0 t e).a3 = e.a3 + 2 * t :=
+by simp only [rst_iso, Model.rst_iso, one_pow, zero_mul, sub_zero, mul_zero, add_zero, one_mul]
 
-lemma r_of_a3 (e : ValidModel R) (r : R) : (rst_iso r 0 0 e).a3 = e.a3 + r * e.a1 := by simp only [rst_iso, Model.rst_iso, one_pow, zero_mul, sub_zero, mul_zero, add_zero, one_mul]
+lemma r_of_a3 (e : ValidModel R) (r : R) : (rst_iso r 0 0 e).a3 = e.a3 + r * e.a1 :=
+by simp only [rst_iso, Model.rst_iso, one_pow, zero_mul, sub_zero, mul_zero, add_zero, one_mul]
 
-lemma t_of_a4 (e : ValidModel R) (t : R) : (rst_iso 0 0 t e).a4 = e.a4 - t * e.a1 := by simp only [rst_iso, Model.rst_iso, one_pow, zero_mul, sub_zero, mul_zero, add_zero, one_mul]
+lemma t_of_a4 (e : ValidModel R) (t : R) : (rst_iso 0 0 t e).a4 = e.a4 - t * e.a1 :=
+by simp only [rst_iso, Model.rst_iso, one_pow, zero_mul, sub_zero, mul_zero, add_zero, one_mul]
 
-lemma r_of_a4 (e : ValidModel R) (r : R) : (rst_iso r 0 0 e).a4 = e.a4 + 2 * r * e.a2 + 3 * r ^ 2 := by simp only [rst_iso, Model.rst_iso, one_pow, zero_mul, sub_zero, mul_zero, one_mul, add_zero, mul_assoc, ←pow_two r]
+lemma r_of_a4 (e : ValidModel R) (r : R) : (rst_iso r 0 0 e).a4 = e.a4 + 2 * r * e.a2 + 3 * r ^ 2 :=
+by simp only [rst_iso, Model.rst_iso, one_pow, zero_mul,
+  sub_zero, mul_zero, one_mul, add_zero, mul_assoc, ←pow_two r]
 
-lemma t_of_a6 (e : ValidModel R) (t : R) : (rst_iso 0 0 t e).a6 = e.a6 - t * e.a3 - t ^ 2 := by simp only [rst_iso, Model.rst_iso, one_pow, zero_mul, sub_zero, mul_zero, one_mul, add_zero, mul_add, ←pow_two t, sub_eq_add_neg, neg_add, ←add_assoc]
+lemma t_of_a6 (e : ValidModel R) (t : R) : (rst_iso 0 0 t e).a6 = e.a6 - t * e.a3 - t ^ 2 :=
+by simp only [rst_iso, Model.rst_iso, one_pow, zero_mul, sub_zero, mul_zero,
+  one_mul, add_zero, mul_add, ←pow_two t, sub_eq_add_neg, neg_add, ←add_assoc]
 
-lemma r_of_a6 (e : ValidModel R) (r : R) : (rst_iso r 0 0 e).a6 = e.a6 + r * e.a4 + r ^ 2 * e.a2 + r ^ 3 := by simp only [rst_iso, Model.rst_iso, one_pow, zero_mul, sub_zero, mul_zero, one_mul, add_zero, mul_assoc, ←pow_two r, ←pow_succ]
+lemma r_of_a6 (e : ValidModel R) (r : R) :
+  (rst_iso r 0 0 e).a6 = e.a6 + r * e.a4 + r ^ 2 * e.a2 + r ^ 3 :=
+by simp only [rst_iso, Model.rst_iso, one_pow, zero_mul, sub_zero,
+  mul_zero, one_mul, add_zero, mul_assoc, ←pow_two r, ←pow_succ]
 
-lemma st_of_a1 (e : ValidModel R) (s t : R) : (rst_iso 0 s t e).a1 = e.a1 + 2 * s := by simp only [rst_iso, Model.rst_iso, one_pow, mul_zero, one_mul]
+lemma st_of_a1 (e : ValidModel R) (s t : R) : (rst_iso 0 s t e).a1 = e.a1 + 2 * s :=
+by simp only [rst_iso, Model.rst_iso, one_pow, mul_zero, one_mul]
 
-lemma st_of_a2 (e : ValidModel R) (s t : R) : (rst_iso 0 s t e).a2 = e.a2 - s * e.a1 - s ^ 2 := by simp only [rst_iso, Model.rst_iso, one_pow, mul_zero, one_mul, add_zero, mul_assoc, ←pow_two s]
+lemma st_of_a2 (e : ValidModel R) (s t : R) : (rst_iso 0 s t e).a2 = e.a2 - s * e.a1 - s ^ 2 :=
+by simp only [rst_iso, Model.rst_iso, one_pow, mul_zero, one_mul, add_zero, mul_assoc, ←pow_two s]
 
-lemma st_of_a3 (e : ValidModel R) (s t : R) : (rst_iso 0 s t e).a3 = e.a3 + 2 * t := by simp only [rst_iso, Model.rst_iso, one_pow, mul_zero, one_mul, add_zero, mul_assoc, zero_mul]
+lemma st_of_a3 (e : ValidModel R) (s t : R) : (rst_iso 0 s t e).a3 = e.a3 + 2 * t :=
+by simp only [rst_iso, Model.rst_iso, one_pow, mul_zero, one_mul, add_zero, mul_assoc, zero_mul]
 
-lemma st_of_a4 (e : ValidModel R) (s t : R) : (rst_iso 0 s t e).a4 = e.a4 - s * e.a3 - t * e.a1 - 2 * s * t := by simp only [rst_iso, Model.rst_iso, one_pow, mul_zero, one_mul, add_zero, mul_assoc, zero_mul]
+lemma st_of_a4 (e : ValidModel R) (s t : R) :
+  (rst_iso 0 s t e).a4 = e.a4 - s * e.a3 - t * e.a1 - 2 * s * t :=
+by simp only [rst_iso, Model.rst_iso, one_pow, mul_zero, one_mul, add_zero, mul_assoc, zero_mul]
 
-lemma st_of_a6 (e : ValidModel R) (s t : R) : (rst_iso 0 s t e).a6 = e.a6 - t * e.a3 - t ^ 2 := by simp only [rst_iso, Model.rst_iso, one_pow, mul_zero, one_mul, add_zero, mul_assoc, ←pow_two t, zero_mul, mul_add, sub_add]
+lemma st_of_a6 (e : ValidModel R) (s t : R) : (rst_iso 0 s t e).a6 = e.a6 - t * e.a3 - t ^ 2 :=
+by simp only [rst_iso, Model.rst_iso, one_pow, mul_zero, one_mul,
+  add_zero, mul_assoc, ←pow_two t, zero_mul, mul_add, sub_add]
 
 lemma st_of_b8 (e : ValidModel R) (s t : R) : (rst_iso 0 s t e).b8 = e.b8 := by
   rw [rst_iso, Model.rst_b8]
@@ -229,8 +310,7 @@ lemma st_of_b8 (e : ValidModel R) (s t : R) : (rst_iso 0 s t e).b8 = e.b8 := by
 def rst_triple (e : ValidModel R) (rst : R × R × R) : ValidModel R :=
   rst_iso rst.fst rst.snd.fst rst.snd.snd e
 
-lemma rst_iso_to_triple (e : ValidModel R) (r s t : R) : rst_iso r s t e = rst_triple e (r, s, t) := rfl
-
-
+lemma rst_iso_to_triple (e : ValidModel R) (r s t : R) : rst_iso r s t e = rst_triple e (r, s, t) :=
+rfl
 
 end ValidModel
