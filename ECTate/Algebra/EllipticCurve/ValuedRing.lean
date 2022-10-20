@@ -129,6 +129,7 @@ namespace EnatValRing
 
 variable {R : Type u} [IntegralDomain R]
 
+/-- reduce the element x by valuation n (by dividing by an appropriate power of the uniformizer) -/
 def sub_val {p : R} (evr : EnatValRing p) (x : R) (n : ℕ) : R :=
   match n with
   | 0 => x
@@ -300,7 +301,9 @@ lemma sub_val_mul_left {p : R} (evr : EnatValRing p) {x y : R} {n : ℕ} (hx : e
     exact Enat.le_trans hx (val_mul_ge_left evr.valtn x y)
 
 
-lemma sub_val_mul_right {p : R} (evr : EnatValRing p) {x y : R} {n : ℕ} (hy : evr.valtn.v y ≥ ofN n) : sub_val evr (x * y) n = x * sub_val evr y n := by
+lemma sub_val_mul_right {p : R} (evr : EnatValRing p) {x y : R} {n : ℕ} (hy : evr.valtn.v y ≥ ofN n) :
+  sub_val evr (x * y) n = x * sub_val evr y n :=
+by
   rw [mul_comm x y, sub_val_mul_left evr hy, mul_comm]
 
 lemma sub_val_sub_val {p : R} (evr : EnatValRing p) {x : R} {m n : ℕ} : sub_val evr (sub_val evr x m) n = sub_val evr x (m + n) := by

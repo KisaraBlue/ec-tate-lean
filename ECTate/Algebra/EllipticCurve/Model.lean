@@ -26,6 +26,9 @@ lemma sub_add_cancel {y z : R} : y - z + z = y :=
 by rw [sub_eq_add_neg, add_assoc]; simp
 lemma add_sub_cancel {y z : R} : y + z - z = y :=
 by rw [sub_eq_add_neg, add_assoc]; simp
+lemma sub_neg {y z : R} : y - -z = y + z :=
+by simp [sub_eq_add_neg]
+
 
 lemma sub_eq_iff_eq_add {x y z : R} : y - z = x ↔ y = x + z :=
 by
@@ -46,6 +49,11 @@ by
   . intro h
     rw [← h]
     simp [add_sub_cancel]
+
+lemma neg_eq_neg_iff {y z : R} : -z = -y ↔ y = z :=
+by rw [← zero_add (-z), ← sub_eq_add_neg,
+       ← zero_add (-y), ← sub_eq_add_neg,
+       sub_eq_iff_eq_add, sub_add_comm, eq_sub_iff_add_eq, zero_add, zero_add]
 
 end ring_neg
 end ring_with_neg
@@ -212,15 +220,90 @@ by
   ring
 
 def weierstrass (e : Model R) (P : R × R) : R :=
-  P.2 ^ 2 + e.a1 * P.1 * P.2 + e.a3 * P.2 - P.1 ^ 3 - e.a2 * P.1 ^ 2 - e.a4 * P.1 - e.a6
+  P.2 ^ 2 + e.a1 * P.1 * P.2 + e.a3 * P.2 - (P.1 ^ 3 + e.a2 * P.1 ^ 2 + e.a4 * P.1 + e.a6)
 
 --partial derivation library?
 
 def dweierstrass_dx (e : Model R) (P : R × R) : R :=
-  e.a1 * P.2 - 3 * P.1 ^ 2 - 2 * e.a2 * P.1 - e.a4
+  e.a1 * P.2 - (3 * P.1 ^ 2 + 2 * e.a2 * P.1 + e.a4)
 
 def dweierstrass_dy (e : Model R) (P : R × R) : R :=
   2 * P.2 + e.a1 * P.1 + e.a3
+
+
+/-
+
+We can compute the discriminant in terms of these
+
+julia> using Singular
+
+julia> R, ( x, y, a1, a2, a3, a4, a6 ) = PolynomialRing( ZZ, [ "x", "y", "a1", "a2", "a3", "a4", "a6" ] )
+(Singular Polynomial Ring (ZZ),(x,y,a1,a2,a3,a4,a6),(dp(7),C), spoly{n_Z}[x, y, a1, a2, a3, a4, a6])
+
+julia> ideal = Ideal( R, [2*y + a1*x + a3,y*a1 - (3*x^2 + 2*a2*x + a4), y ^2 + a1*x*y + a3*y - (x^3 + a2*x^2 + a4*x + a6)] )
+Singular ideal over Singular Polynomial Ring (ZZ),(x,y,a1,a2,a3,a4,a6),(dp(7),C) with generators (x*a1 + 2*y + a3, -3*x^2 + y*a1 - 2*x*a2 - a4, -x^3 + x*y*a1 - x^2*a2 + y^2 + y*a3 - x*a4 - a6)
+
+julia> IE = eliminate(eliminate(ideal, x), y)
+Singular ideal over Singular Polynomial Ring (ZZ),(x,y,a1,a2,a3,a4,a6),(dp(7),C) with generators (a1^4*a2*a3^2 - a1^5*a3*a4 + a1^6*a6 + 8*a1^2*a2^2*a3^2 - a1^3*a3^3 - 8*a1^3*a2*a3*a4 - a1^4*a4^2 + 12*a1^4*a2*a6 + 16*a2^3*a3^2 - 36*a1*a2*a3^3 - 16*a1*a2^2*a3*a4 + 30*a1^2*a3^2*a4 - 8*a1^2*a2*a4^2 + 48*a1^2*a2^2*a6 - 36*a1^3*a3*a6 + 27*a3^4 - 72*a2*a3^2*a4 - 16*a2^2*a4^2 + 96*a1*a3*a4^2 + 64*a2^3*a6 - 144*a1*a2*a3*a6 - 72*a1^2*a4*a6 + 64*a4^3 + 216*a3^2*a6 - 288*a2*a4*a6 + 432*a6^2)
+
+julia> lift(ideal, IE)[1][1]
+-x^2*a1^5*gen(1)+y*a1^6*gen(1)-x*a1^5*a2*gen(1)-x*y*a1^4*gen(1)-y*a1^5*gen(2)-a1^6*gen(3)-9*x^2*a1^3*a2*gen(1)+x*a1^4*a2*gen(2)+11*y*a1^4*a2*gen(1)-10*x*a1^3*a2^2*gen(1)+x*a1^4*a3*gen(1)+a1^4*a2*a3*gen(1)-a1^5*a4*gen(1)-4*x*y*a1^3*gen(2)-6*y^2*a1^3*gen(1)-8*x*y*a1^2*a2*gen(1)-10*y*a1^3*a2*gen(2)-12*a1^4*a2*gen(3)-24*x^2*a1*a2^2*gen(1)+8*x*a1^2*a2^2*gen(2)+40*y*a1^2*a2^2*gen(1)-32*x*a1*a2^3*gen(1)+30*x^2*a1^2*a3*gen(1)-2*x*a1^3*a3*gen(2)-35*y*a1^3*a3*gen(1)+38*x*a1^2*a2*a3*gen(1)-a1^3*a2*a3*gen(2)+8*a1^2*a2^2*a3*gen(1)-a1^3*a3^2*gen(1)+3*x*a1^3*a4*gen(1)+a1^4*a4*gen(2)-9*a1^3*a2*a4*gen(1)+12*y*a1^3*gen(3)-32*x*y*a1*a2*gen(2)-48*y^2*a1*a2*gen(1)+32*x^2*a2^2*gen(2)+48*x*y*a2^2*gen(1)-32*y*a1*a2^2*gen(2)-48*a1^2*a2^2*gen(3)+32*x*a2^3*gen(2)+32*y*a2^3*gen(1)+24*x*y*a1*a3*gen(1)+28*y*a1^2*a3*gen(2)+36*a1^3*a3*gen(3)+30*x^2*a2*a3*gen(1)-46*x*a1*a2*a3*gen(2)-134*y*a1*a2*a3*gen(1)+76*x*a2^2*a3*gen(1)-8*a1*a2^2*a3*gen(2)+16*a2^3*a3*gen(1)-27*x*a1*a3^2*gen(1)+a1^2*a3^2*gen(2)-36*a1*a2*a3^2*gen(1)+60*x^2*a1*a4*gen(1)-58*y*a1^2*a4*gen(1)+84*x*a1*a2*a4*gen(1)+8*a1^2*a2*a4*gen(2)-24*a1*a2^2*a4*gen(1)+31*a1^2*a3*a4*gen(1)+96*y*a1*a2*gen(3)-96*x*a2^2*gen(3)-64*a2^3*gen(3)+96*x*y*a3*gen(2)+144*y^2*a3*gen(1)+52*y*a2*a3*gen(2)+168*a1*a2*a3*gen(3)+84*x*a3^2*gen(2)+198*y*a3^2*gen(1)+38*a2*a3^2*gen(2)+27*a3^3*gen(1)-96*x^2*a4*gen(2)-144*x*y*a4*gen(1)+56*y*a1*a4*gen(2)+60*a1^2*a4*gen(3)-112*x*a2*a4*gen(2)-120*y*a2*a4*gen(1)+16*a2^2*a4*gen(2)-168*x*a3*a4*gen(1)-36*a1*a3*a4*gen(2)-34*a2*a3*a4*gen(1)+60*a1*a4^2*gen(1)+36*x*a1*a6*gen(1)+12*a1^2*a6*gen(2)+24*a1*a2*a6*gen(1)-288*y*a3*gen(3)-252*a3^2*gen(3)+288*x*a4*gen(3)+240*a2*a4*gen(3)-64*a4^2*gen(2)+144*x*a6*gen(2)+216*y*a6*gen(1)+48*a2*a6*gen(2)-36*a3*a6*gen(1)-432*a6*gen(3)
+-/
+
+open ring_neg in
+lemma discr_eq_neg_singular (e : Model R) : e.discr = -(
+  e.a1^4*e.a2*e.a3^2 - e.a1^5*e.a3*e.a4 + e.a1^6*e.a6 + 8*e.a1^2*e.a2^2*e.a3^2 - e.a1^3*e.a3^3
+    - 8*e.a1^3*e.a2*e.a3*e.a4 - e.a1^4*e.a4^2 + 12*e.a1^4*e.a2*e.a6 + 16*e.a2^3*e.a3^2
+    - 36*e.a1*e.a2*e.a3^3 - 16*e.a1*e.a2^2*e.a3*e.a4 + 30*e.a1^2*e.a3^2*e.a4 - 8*e.a1^2*e.a2*e.a4^2
+    + 48*e.a1^2*e.a2^2*e.a6 - 36*e.a1^3*e.a3*e.a6 + 27*e.a3^4 - 72*e.a2*e.a3^2*e.a4
+    - 16*e.a2^2*e.a4^2 + 96*e.a1*e.a3*e.a4^2 + 64*e.a2^3*e.a6 - 144*e.a1*e.a2*e.a3*e.a6
+    - 72*e.a1^2*e.a4*e.a6 + 64*e.a4^3 + 216*e.a3^2*e.a6 - 288*e.a2*e.a4*e.a6 + 432*e.a6^2)
+ :=
+by
+  simp [discr, weierstrass, dweierstrass_dx, dweierstrass_dy, b2, b4, b6, b8]
+  -- this is a hacky way to get a version of ring with negs, we expand everything and move
+  -- the negatives to the other side, to get a purely additive expression
+  simp [sub_add_comm, neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
+    ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul]
+  simp only [eq_sub_iff_add_eq, sub_eq_iff_eq_add, sub_add_comm, neg_add_eq_sub,
+    add_sub, sub_add, ← sub_eq_add_neg]
+  simp only [sub_add_comm, neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
+    ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, sub_neg]
+  simp only [sub_add_comm, eq_sub_iff_add_eq, sub_eq_iff_eq_add]
+  ring
+
+open ring_neg in
+set_option maxHeartbeats 2000000 in
+lemma discr_in_jacobian_ideal (e : Model R) (P : R × R) : e.discr =
+  -((48*P.1*P.2*e.a2^2 +24*e.a1*e.a2*e.a6 +216*P.2*e.a6 +P.2*e.a1^6 +11*P.2*e.a1^4*e.a2 +P.1*e.a1^4*e.a3 +38*P.1*e.a1^2*e.a2*e.a3 +8*e.a1^2*e.a2^2*e.a3
+  +e.a1^4*e.a2*e.a3 +40*P.2*e.a1^2*e.a2^2 +32*P.2*e.a2^3 +24*P.1*P.2*e.a1*e.a3 +30*P.1^2*e.a2*e.a3 +3*P.1*e.a1^3*e.a4 +60*P.1^2*e.a1*e.a4 +30*P.1^2*e.a1^2*e.a3
+  +31*e.a1^2*e.a3*e.a4 +144*P.2^2*e.a3 +198*P.2*e.a3^2 +27*e.a3^3 +60*e.a1*e.a4^2 +36*P.1*e.a1*e.a6 +76*P.1*e.a2^2*e.a3 +16*e.a2^3*e.a3 +84*P.1*e.a1*e.a2*e.a4
+  -(36*e.a3*e.a6 +P.1^2*e.a1^5 +P.1*e.a1^5*e.a2 +P.1*P.2*e.a1^4 +9*P.1^2*e.a1^3*e.a2 +10*P.1*e.a1^3*e.a2^2 +e.a1^5*e.a4 +6*P.2^2*e.a1^3 +8*P.1*P.2*e.a1^2*e.a2
+  +24*P.1^2*e.a1*e.a2^2 +32*P.1*e.a1*e.a2^3 +35*P.2*e.a1^3*e.a3 +e.a1^3*e.a3^2 +9*e.a1^3*e.a2*e.a4 +48*P.2^2*e.a1*e.a2 +134*P.2*e.a1*e.a2*e.a3 +27*P.1*e.a1*e.a3^2 +36*e.a1*e.a2*e.a3^2
+  +58*P.2*e.a1^2*e.a4 +24*e.a1*e.a2^2*e.a4 +144*P.1*P.2*e.a4 +120*P.2*e.a2*e.a4 +168*P.1*e.a3*e.a4 +34*e.a2*e.a3*e.a4))*(dweierstrass_dy e P)
+
+  +(e.a1^2*e.a3^2 +12*e.a1^2*e.a6 +16*e.a2^2*e.a4 +32*P.1*e.a2^3 +e.a1^4*e.a4 +144*P.1*e.a6 +48*e.a2*e.a6 +P.1*e.a1^4*e.a2 +84*P.1*e.a3^2 +56*P.2*e.a1*e.a4 +8*e.a1^2*e.a2*e.a4 +28*P.2*e.a1^2*e.a3 +52*P.2*e.a2*e.a3
+  +96*P.1*P.2*e.a3 +8*P.1*e.a1^2*e.a2^2 +38*e.a2*e.a3^2 +32*P.1^2*e.a2^2
+  -(2*P.1*e.a1^3*e.a3 +112*P.1*e.a2*e.a4 +e.a1^3*e.a2*e.a3 +36*e.a1*e.a3*e.a4 +96*P.1^2*e.a4 +32*P.1*P.2*e.a1*e.a2 +32*P.2*e.a1*e.a2^2 +64*e.a4^2
+  +4*P.1*P.2*e.a1^3 +10*P.2*e.a1^3*e.a2 +P.2*e.a1^5 +8*e.a1*e.a2^2*e.a3 +46*P.1*e.a1*e.a2*e.a3))*(dweierstrass_dx e P)
+
+  +(60*e.a1^2*e.a4 +288*P.1*e.a4 +240*e.a2*e.a4 +12*P.2*e.a1^3 +36*e.a1^3*e.a3 +96*P.2*e.a1*e.a2 +168*e.a1*e.a2*e.a3
+  -(432*e.a6 +e.a1^6 +288*P.2*e.a3 +252*e.a3^2 +12*e.a1^4*e.a2 +48*e.a1^2*e.a2^2 +96*P.1*e.a2^2 +64*e.a2^3))*(weierstrass e P))
+ :=
+by
+  rw [discr_eq_neg_singular]
+  rw [neg_eq_neg_iff]
+  simp only [weierstrass, dweierstrass_dx, dweierstrass_dy]
+  -- this is a hacky way to get a version of ring with negs, we expand everything and move
+  -- the negatives to the other side, to get a purely additive expression
+  simp [sub_add_comm, neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
+    ← neg_mul_right, mul_sub, sub_mul]
+  simp only [eq_sub_iff_add_eq, sub_eq_iff_eq_add, sub_add_comm, neg_add_eq_sub,
+    add_sub, sub_add, ← sub_eq_add_neg]
+  simp only [sub_add_comm, neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
+    ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, sub_neg]
+  simp only [sub_add_comm, eq_sub_iff_add_eq, sub_eq_iff_eq_add]
+  ring
 
 def var_change (r s t : R) (P' : R × R) : R × R :=
   (P'.1 + r, P'.2 + s * P'.1 + t)

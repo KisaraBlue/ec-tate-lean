@@ -59,28 +59,28 @@ def tate_algorithm {R : Type u} [IntegralDomain R] {pi : R} (evr : EnatValRing p
   let (r, s) := (r + r1s1t1.fst * u ^ 2, s + u * r1s1t1.snd.fst)
   let t := t + r1s1t1.snd.snd * u ^ 3 + s * r1s1t1.fst * u ^ 2
 
-  have sing_origin : Model.local_singular_point evr.valtn e'.toModel (0, 0) := by
+  have sing_origin : Model.is_local_singular_point evr.valtn e'.toModel (0, 0) := by
     simp [rst_iso]
     apply Model.move_singular_point_to_origin
     apply Model.singular_of_val_discr
     apply lt_of_succ_le hΔ
 
   have h3 : evr.valtn.v e'.a3 ≥ ofN 1 := by
-    delta Model.local_singular_point at sing_origin
+    delta Model.is_local_singular_point at sing_origin
     have singular_dy := And.right (And.right sing_origin)
     simp [Model.dweierstrass_dy] at singular_dy
     rw [<-succ_ofN]
     apply succ_le_of_lt singular_dy
 
   have h4 : evr.valtn.v e'.a4 ≥ ofN 1 := by
-    delta Model.local_singular_point at sing_origin
+    delta Model.is_local_singular_point at sing_origin
     have singular_dx := And.left (And.right sing_origin)
     simp [Model.dweierstrass_dx, pow_succ, sub_eq_add_neg, val_of_neg evr.valtn] at singular_dx
     rw [<-succ_ofN]
     apply succ_le_of_lt singular_dx
 
   have h6 : evr.valtn.v e'.a6 ≥ ofN 1 := by
-    delta Model.local_singular_point at sing_origin
+    delta Model.is_local_singular_point at sing_origin
     have singular := And.left sing_origin
     simp [Model.weierstrass, pow_succ, sub_eq_add_neg, val_of_neg evr.valtn] at singular
     rw [<-succ_ofN]
