@@ -225,8 +225,18 @@ def dweierstrass_dy (e : Model R) (P : R × R) : R :=
 def var_change (r s t : R) (P' : R × R) : R × R :=
   (P'.1 + r, P'.2 + s * P'.1 + t)
 
+-- TODO probably the proof should be more conceptual
+open ring_neg in
 theorem weierstrass_iso_eq_var_change (e : Model R) (P : R × R) :
-  weierstrass (rst_iso r s t e) P = weierstrass e (var_change r s t P) := sorry
+  weierstrass (rst_iso r s t e) P = weierstrass e (var_change r s t P) :=
+by
+  simp [weierstrass, rst_iso, var_change]
+  -- this is a hacky way to get a version of ring with negs, we expand everything and move
+  -- the negatives to the other side, to get a purely additive expression
+  simp [← sub_add_comm, neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
+    ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul]
+  simp [eq_sub_iff_add_eq, sub_eq_iff_eq_add, sub_add_comm, neg_add_eq_sub, add_sub, sub_add]
+  ring
 
 def rst_triple (e : Model R) (rst : R × R × R) : Model R :=
   rst_iso rst.fst rst.snd.fst rst.snd.snd e
