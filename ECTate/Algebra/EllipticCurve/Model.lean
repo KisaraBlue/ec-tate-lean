@@ -231,26 +231,29 @@ def dweierstrass_dy (e : Model R) (P : R × R) : R :=
   2 * P.2 + e.a1 * P.1 + e.a3
 
 
-/-
+open ring_neg in
+/--
 
-We can compute the discriminant in terms of these
+The discriminant is
 
-julia> using Singular
+We can compute the discriminant in terms of these using `Singular.jl`, part of `OSCAR`
+
+```julia
+julia> using Oscar
 
 julia> R, ( x, y, a1, a2, a3, a4, a6 ) = PolynomialRing( ZZ, [ "x", "y", "a1", "a2", "a3", "a4", "a6" ] )
 (Singular Polynomial Ring (ZZ),(x,y,a1,a2,a3,a4,a6),(dp(7),C), spoly{n_Z}[x, y, a1, a2, a3, a4, a6])
 
-julia> ideal = Ideal( R, [2*y + a1*x + a3,y*a1 - (3*x^2 + 2*a2*x + a4), y ^2 + a1*x*y + a3*y - (x^3 + a2*x^2 + a4*x + a6)] )
+julia> I = Ideal( R, [2*y + a1*x + a3,y*a1 - (3*x^2 + 2*a2*x + a4), y ^2 + a1*x*y + a3*y - (x^3 + a2*x^2 + a4*x + a6)] )
 Singular ideal over Singular Polynomial Ring (ZZ),(x,y,a1,a2,a3,a4,a6),(dp(7),C) with generators (x*a1 + 2*y + a3, -3*x^2 + y*a1 - 2*x*a2 - a4, -x^3 + x*y*a1 - x^2*a2 + y^2 + y*a3 - x*a4 - a6)
 
-julia> IE = eliminate(eliminate(ideal, x), y)
+julia> IE = eliminate(eliminate(I, x), y)
 Singular ideal over Singular Polynomial Ring (ZZ),(x,y,a1,a2,a3,a4,a6),(dp(7),C) with generators (a1^4*a2*a3^2 - a1^5*a3*a4 + a1^6*a6 + 8*a1^2*a2^2*a3^2 - a1^3*a3^3 - 8*a1^3*a2*a3*a4 - a1^4*a4^2 + 12*a1^4*a2*a6 + 16*a2^3*a3^2 - 36*a1*a2*a3^3 - 16*a1*a2^2*a3*a4 + 30*a1^2*a3^2*a4 - 8*a1^2*a2*a4^2 + 48*a1^2*a2^2*a6 - 36*a1^3*a3*a6 + 27*a3^4 - 72*a2*a3^2*a4 - 16*a2^2*a4^2 + 96*a1*a3*a4^2 + 64*a2^3*a6 - 144*a1*a2*a3*a6 - 72*a1^2*a4*a6 + 64*a4^3 + 216*a3^2*a6 - 288*a2*a4*a6 + 432*a6^2)
 
-julia> lift(ideal, IE)[1][1]
+julia> lift(I, IE)[1][1]
 -x^2*a1^5*gen(1)+y*a1^6*gen(1)-x*a1^5*a2*gen(1)-x*y*a1^4*gen(1)-y*a1^5*gen(2)-a1^6*gen(3)-9*x^2*a1^3*a2*gen(1)+x*a1^4*a2*gen(2)+11*y*a1^4*a2*gen(1)-10*x*a1^3*a2^2*gen(1)+x*a1^4*a3*gen(1)+a1^4*a2*a3*gen(1)-a1^5*a4*gen(1)-4*x*y*a1^3*gen(2)-6*y^2*a1^3*gen(1)-8*x*y*a1^2*a2*gen(1)-10*y*a1^3*a2*gen(2)-12*a1^4*a2*gen(3)-24*x^2*a1*a2^2*gen(1)+8*x*a1^2*a2^2*gen(2)+40*y*a1^2*a2^2*gen(1)-32*x*a1*a2^3*gen(1)+30*x^2*a1^2*a3*gen(1)-2*x*a1^3*a3*gen(2)-35*y*a1^3*a3*gen(1)+38*x*a1^2*a2*a3*gen(1)-a1^3*a2*a3*gen(2)+8*a1^2*a2^2*a3*gen(1)-a1^3*a3^2*gen(1)+3*x*a1^3*a4*gen(1)+a1^4*a4*gen(2)-9*a1^3*a2*a4*gen(1)+12*y*a1^3*gen(3)-32*x*y*a1*a2*gen(2)-48*y^2*a1*a2*gen(1)+32*x^2*a2^2*gen(2)+48*x*y*a2^2*gen(1)-32*y*a1*a2^2*gen(2)-48*a1^2*a2^2*gen(3)+32*x*a2^3*gen(2)+32*y*a2^3*gen(1)+24*x*y*a1*a3*gen(1)+28*y*a1^2*a3*gen(2)+36*a1^3*a3*gen(3)+30*x^2*a2*a3*gen(1)-46*x*a1*a2*a3*gen(2)-134*y*a1*a2*a3*gen(1)+76*x*a2^2*a3*gen(1)-8*a1*a2^2*a3*gen(2)+16*a2^3*a3*gen(1)-27*x*a1*a3^2*gen(1)+a1^2*a3^2*gen(2)-36*a1*a2*a3^2*gen(1)+60*x^2*a1*a4*gen(1)-58*y*a1^2*a4*gen(1)+84*x*a1*a2*a4*gen(1)+8*a1^2*a2*a4*gen(2)-24*a1*a2^2*a4*gen(1)+31*a1^2*a3*a4*gen(1)+96*y*a1*a2*gen(3)-96*x*a2^2*gen(3)-64*a2^3*gen(3)+96*x*y*a3*gen(2)+144*y^2*a3*gen(1)+52*y*a2*a3*gen(2)+168*a1*a2*a3*gen(3)+84*x*a3^2*gen(2)+198*y*a3^2*gen(1)+38*a2*a3^2*gen(2)+27*a3^3*gen(1)-96*x^2*a4*gen(2)-144*x*y*a4*gen(1)+56*y*a1*a4*gen(2)+60*a1^2*a4*gen(3)-112*x*a2*a4*gen(2)-120*y*a2*a4*gen(1)+16*a2^2*a4*gen(2)-168*x*a3*a4*gen(1)-36*a1*a3*a4*gen(2)-34*a2*a3*a4*gen(1)+60*a1*a4^2*gen(1)+36*x*a1*a6*gen(1)+12*a1^2*a6*gen(2)+24*a1*a2*a6*gen(1)-288*y*a3*gen(3)-252*a3^2*gen(3)+288*x*a4*gen(3)+240*a2*a4*gen(3)-64*a4^2*gen(2)+144*x*a6*gen(2)+216*y*a6*gen(1)+48*a2*a6*gen(2)-36*a3*a6*gen(1)-432*a6*gen(3)
+```
 -/
-
-open ring_neg in
 lemma discr_eq_neg_singular (e : Model R) : e.discr = -(
   e.a1^4*e.a2*e.a3^2 - e.a1^5*e.a3*e.a4 + e.a1^6*e.a6 + 8*e.a1^2*e.a2^2*e.a3^2 - e.a1^3*e.a3^3
     - 8*e.a1^3*e.a2*e.a3*e.a4 - e.a1^4*e.a4^2 + 12*e.a1^4*e.a2*e.a6 + 16*e.a2^3*e.a3^2
@@ -407,3 +410,37 @@ lemma rst_iso_to_triple (e : ValidModel R) (r s t : R) : rst_iso r s t e = rst_t
 rfl
 
 end ValidModel
+
+namespace Characteristic
+open Classical
+variable (R)
+noncomputable
+def characteristic := if h : _ then Nat.find (fun n => n ≠ 0 ∧ (n : R) = 0) h else 0
+end Characteristic
+
+namespace Model
+
+variable {p : R}
+
+def is_singular_point (e : Model R) (P : R × R) : Prop :=
+weierstrass e P = 0 ∧ dweierstrass_dx e P = 0 ∧ dweierstrass_dy e P = 0
+lemma discr_eq_zero_of_singular (e : Model R) {P} (h : is_singular_point e P) :
+  e.discr = 0 := sorry
+
+lemma singular_of_val_discr (e : Model R) (h : e.discr = 0) :
+  ∃ P, is_singular_point e P :=
+by
+  sorry
+
+
+open Characteristic
+
+def move_singular_point_to_origin_triple (e : Model R) : R × R × R :=
+  match characteristic R with
+  | 2 => (evr.norm_repr e.a4, 0, evr.norm_repr (e.a6 + e.a4 * e.a2))
+  | 3 => (evr.norm_repr (-e.b6), 0, evr.norm_repr (e.a3 - e.b6 * e.a1))
+  | _ => (0, 0, 0) --need to fill here
+
+def move_singular_point_to_origin_iso (e : Model R) : Model R := rst_triple e (move_singular_point_to_origin_triple e)
+
+lemma move_singular_point_to_origin (e : Model R) : (∃ P, is_local_singular_point e P) → is_local_singular_point (move_singular_point_to_origin_iso evr e) (0, 0) := by sorry
