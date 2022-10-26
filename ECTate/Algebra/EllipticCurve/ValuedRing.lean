@@ -112,6 +112,7 @@ theorem val_of_pow_uniformizer {p : R} (nav : SurjVal p) : nav.v (p ^ n) = ofN n
     exact val_of_one nav
   | succ n ih =>
     rw [pow_succ, SurjVal.v_mul_eq_add_v nav, ih, SurjVal.v_uniformizer nav, add_ofN]
+    simp [Nat.succ_eq_add_one, add_comm]
 
 end SurjVal
 
@@ -257,7 +258,7 @@ lemma factor_p_of_le_val {p : R} (evr : EnatValRing p) {x : R} {n : ℕ} (h : ev
   induction n with
   | zero => simp [sub_val]
   | succ n ih =>
-    rw [sub_val_val_pos_succ, sub_val_decr_val_comm, pow_succ, mul_assoc]
+    rw [sub_val_val_pos_succ, sub_val_decr_val_comm, pow_succ', mul_assoc]
     have pos_val : evr.valtn.v (sub_val evr x n) > 0 := by
       have h' := val_sub_val_le evr x n h
       rw [Nat.succ_eq_add_one, Nat.add_sub_self_left] at h'
@@ -278,11 +279,11 @@ lemma sub_val_p_mul {p : R} (evr : EnatValRing p) (x : R) (n : ℕ) : sub_val ev
     rw [pow_zero, one_mul]
     exact sub_val_x_zero evr x
   | succ n ih =>
-    rw [sub_val_val_pos_succ evr, pow_succ, mul_comm _ p, mul_assoc, decr_val_p_mul]
+    rw [sub_val_val_pos_succ evr, pow_succ, mul_assoc, decr_val_p_mul]
     exact ih
     apply ne_of_gt
     apply lt_of_succ_le
-    rw [pow_succ, mul_comm _ p, mul_assoc, succ_ofN, ←evr.valtn.v_uniformizer]
+    rw [pow_succ, mul_assoc, succ_ofN, ←evr.valtn.v_uniformizer]
     apply val_mul_ge_left evr.valtn
 
 
