@@ -1,6 +1,6 @@
 import Mathlib.Algebra.Group.Defs
 import Mathlib.Init.Algebra.Order
---import Mathlib.Algebra.Ring.Basic
+import Mathlib.Algebra.Ring.Basic
 import Mathlib.Init.Data.Nat.Lemmas
 
 inductive Enat where
@@ -16,38 +16,38 @@ def succ : ℕ∪∞ → ℕ∪∞
   | ofN a => ofN (Nat.succ a)
   | ∞ => ∞
 
-def add : ℕ∪∞ → ℕ∪∞ → ℕ∪∞
-  | a, ∞ => ∞
-  | ∞, a => ∞
+protected def add : ℕ∪∞ → ℕ∪∞ → ℕ∪∞
+  | _, ∞ => ∞
+  | ∞, _ => ∞
   | ofN a, ofN b => ofN (a + b)
 
 instance : Add ℕ∪∞ where
-  add := add
+  add := Enat.add
 
-inductive le : ℕ∪∞ → ℕ∪∞ → Prop
-  | in_nat {n m : Nat} : Nat.le n m → le (ofN n) (ofN m)
-  | below_top          : le n ∞
+protected inductive le : ℕ∪∞ → ℕ∪∞ → Prop
+  | in_nat {n m : Nat} : Nat.le n m → Enat.le (ofN n) (ofN m)
+  | below_top          : Enat.le n ∞
 
 instance : LE ℕ∪∞ where
-  le := le
+  le := Enat.le
 
-def lt (n m : ℕ∪∞) : Prop :=
-  n ≠ ∞ ∧ le (succ n) m
+protected def lt (n m : ℕ∪∞) : Prop :=
+  n ≠ ∞ ∧ Enat.le (succ n) m
 
 instance : LT ℕ∪∞ where
-  lt := lt
+  lt := Enat.lt
 
 @[simp] theorem succ_ofN (a : Nat) : succ (ofN a) = ofN a.succ := rfl
 
 @[simp] theorem add_ofN (a b : Nat) : ofN a + ofN b = ofN (a + b) := rfl
 @[simp] theorem add_top (a : ℕ∪∞) : a + ∞ = ∞ := match a with
   | top => rfl
-  | ofN a => rfl
+  | ofN _ => rfl
 @[simp] theorem top_add (a : ℕ∪∞) : ∞ + a = ∞ := match a with
   | top => rfl
-  | ofN a => rfl
+  | ofN _ => rfl
 
-theorem add_assoc (a b c : ℕ∪∞) : a + b + c = a + (b + c) := by
+protected theorem add_assoc (a b c : ℕ∪∞) : a + b + c = a + (b + c) := by
   cases a with
   | top => simp
   | ofN a => cases b with
@@ -56,31 +56,31 @@ theorem add_assoc (a b c : ℕ∪∞) : a + b + c = a + (b + c) := by
       | top => simp
       | ofN c => simp [Nat.add_assoc]
 
-theorem add_zero (a : ℕ∪∞) : a + ofN 0 = a := by
+protected theorem add_zero (a : ℕ∪∞) : a + ofN 0 = a := by
   match a with
   | top => exact top_add (ofN 0)
   | ofN a => simp
 
-theorem zero_add (a : ℕ∪∞) : ofN 0 + a = a := by
+protected theorem zero_add (a : ℕ∪∞) : ofN 0 + a = a := by
   match a with
   | top => exact add_top (ofN 0)
   | ofN a => simp
 
 instance : Zero ℕ∪∞ := { zero := ofN 0 }
 
-theorem nsmul_zero' (x : ℕ∪∞) : nsmul_rec 0 x = ofN 0 := by
-  simp [nsmul_rec]
-  rfl
+-- theorem nsmul_zero' (x : ℕ∪∞) : nsmul_rec 0 x = ofN 0 := by
+--   simp [nsmul_rec]
+--   rfl
 
-theorem nsmul_succ' (n : ℕ) (x : ℕ∪∞) : nsmul_rec (Nat.succ n) x = x + nsmul_rec n x := by
-  induction n with
-  | zero =>
-    simp [nsmul_rec, nsmul_zero']
-  | succ n ih =>
-    simp [nsmul_rec]
+-- theorem nsmul_succ' (n : ℕ) (x : ℕ∪∞) : nsmul_rec (Nat.succ n) x = x + nsmul_rec n x := by
+--   induction n with
+--   | zero =>
+--     simp [nsmul_rec, nsmul_zero']
+--   | succ n ih =>
+--     simp [nsmul_rec]
 
 
-theorem add_comm (a b : ℕ∪∞) : a + b = b + a := by
+protected theorem add_comm (a b : ℕ∪∞) : a + b = b + a := by
   cases a with
   | top => simp
   | ofN a => cases b with
@@ -90,13 +90,13 @@ theorem add_comm (a b : ℕ∪∞) : a + b = b + a := by
       exact Nat.add_comm a b
 
 instance : AddCommMonoid ℕ∪∞ :=
-{ add_assoc   := add_assoc,
+{ add_assoc   := Enat.add_assoc,
   zero        := ofN Nat.zero,
-  add_zero    := add_zero,
-  zero_add    := zero_add,
-  nsmul_zero' := nsmul_zero',
-  nsmul_succ' := nsmul_succ',
-  add_comm    := add_comm }
+  add_zero    := Enat.add_zero,
+  zero_add    := Enat.zero_add,
+  -- nsmul_zero' := nsmul_zero',
+  -- nsmul_succ' := nsmul_succ',
+  add_comm    := Enat.add_comm }
 
 theorem succ_add (a b : ℕ∪∞) : succ a + b = succ (a + b) := by
   cases a with
@@ -104,7 +104,7 @@ theorem succ_add (a b : ℕ∪∞) : succ a + b = succ (a + b) := by
   | ofN a => cases b with
     | top => simp [succ]
     | ofN b =>
-      simp [add]
+      simp [Enat.add]
       exact Nat.succ_add a b
 
 theorem add_succ (a b : ℕ∪∞) : a + succ b = succ (a + b) := by
@@ -313,11 +313,11 @@ match n, m with
   | ofN a, ∞     => isFalse (fun h => by cases h)
 
 instance : Preorder ℕ∪∞ :=
-{ le               := le,
+{ le               := Enat.le,
   le_refl          := le_refl,
   le_trans         := @le_trans,
   lt_iff_le_not_le := @lt_iff_le_not_le,
-  lt               := lt}
+  lt               := Enat.lt}
 
 theorem eq_zero_or_pos : ∀ (n : ℕ∪∞), n = ofN 0 ∨ n > ofN 0
   | ofN 0   => Or.inl rfl
@@ -334,12 +334,12 @@ lemma lt_add_right (a b c : ℕ∪∞) : a < b -> a < b + c :=
   fun h => lt_of_lt_of_le h (le_add_right _ _)
 
 instance : LinearOrder ℕ∪∞ :=
-{ le               := le,
+{ le               := Enat.le,
   le_refl          := le_refl,
   le_trans         := @le_trans,
   le_antisymm      := @le_antisymm,
   le_total         := @le_total,
-  lt               := lt,
+  lt               := Enat.lt,
   lt_iff_le_not_le := @lt_iff_le_not_le,
   decidable_lt     := inferInstance,
   decidable_le     := inferInstance,
