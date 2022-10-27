@@ -80,7 +80,7 @@ def tate_big_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) :
   let c6 := e.c6
   let Δ := e.discr
   let n := val_discr_to_nat navp e
-  let ⟨vpj, k, integralInv⟩ : ℤ × ℕ × Bool := --'metavariables' kernel error if type not provided is now fixed TODO
+  let ⟨vpj, k, integralInv⟩ :=
     match (primeEVR hp).valtn.v (c4 ^ 3) with
     | ∞ => (0, n, true)
     | ofN v_c4_3 => if v_c4_3 < n then ((v_c4_3 : ℤ) - (n : ℤ), v_c4_3, false) else (v_c4_3 - n, n, true)
@@ -116,7 +116,7 @@ def tate_big_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) :
                 else (Δ / (p ^ (ν + 6) : ℕ))) p),
               .Additive,
               (u, r, s, t))
-      | _ => (I 0, 0, 0, .Good, (0, 0, 0, 0)) -- TODO this should be unreachable
+      | _ => unreachable!
   else
     match k with
       | 0  => (I 0,  0, 1, .Good, (u, r, s, t)) -- TODO check red type
@@ -136,7 +136,7 @@ def tate_big_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) :
                (u, r, s, t))
       | 9  => (IIIs, 2, 2, .Additive, (u, r, s, t))
       | 10 => (IIs,  2, 1, .Additive, (u, r, s, t))
-      | _  => (I 0, 0, 0, .Good, (0, 0, 0, 0)) -- TODO should this be unreachable?
+      | _  => unreachable!
 
 
 def kodaira_type_Is (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0 t0 : ℤ) (m q : ℕ)
@@ -261,7 +261,8 @@ decreasing_by
 
 def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0 t0 : ℤ) :
   Kodaira × ℕ × ℕ × ReductionType × (ℤ × ℤ × ℤ × ℤ) :=
-  if smallp : (p : ℤ) ≠ 2 ∧ (p : ℤ) ≠ 3 then (I 0, 0, 0, .Good, (0, 0, 0, 0)) else
+  --this function shouldn't be called with large primes (yet)
+  if smallp : (p : ℤ) ≠ 2 ∧ (p : ℤ) ≠ 3 then unreachable! else
   have p_is_2_or_3 : (p : ℤ) = 2 ∨ (p : ℤ) = 3 := by
     rw [Decidable.not_and] at smallp
     cases smallp with
@@ -361,7 +362,8 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
     apply lt_of_succ_le
     rw [mul_one, ←neg_mul_right, sub_eq_add_neg, neg_neg, succ_ofN, pow_succ, pow_one]
     simp only [Model.b6] at hb6
-    rw [factor_p_of_le_val evrp h3, factor_p_of_le_val evrp h6, factorize5, navp.v_mul_eq_add_v, val_of_pow_uniformizer, (show 3 = 2 + 1 by rfl), ←add_ofN] at hb6
+    rw [factor_p_of_le_val evrp h3, factor_p_of_le_val evrp h6, factorize5, navp.v_mul_eq_add_v,
+      val_of_pow_uniformizer, (show 3 = 2 + 1 by rfl), ←add_ofN] at hb6
     exact Enat.le_of_add_le_add_left hb6
 
   let s1 := double_root 1 e1.a1 (-e1.a2) p
@@ -456,7 +458,8 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
       rw [r_of_a3]
       apply val_add_ge_of_ge
       . exact h3'
-      . rw [mul_assoc, factor_p_of_le_val evrp h1, mul_comm _ (_ ^ 1 * _), ←mul_assoc, ←mul_assoc, mul_comm _ (_ ^ 1), ←pow_succ', mul_assoc]
+      . rw [mul_assoc, factor_p_of_le_val evrp h1, mul_comm _ (_ ^ 1 * _), ←mul_assoc, ←mul_assoc,
+          mul_comm _ (_ ^ 1), ←pow_succ', mul_assoc]
         apply val_mul_ge_of_left_ge
         rw [val_of_pow_uniformizer navp]
         exact le_refl _
@@ -552,7 +555,8 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
   have He4 : rst_iso 0 0 (a * (p:ℤ) ^ 2) e3 = e4 := by rfl
   let t := t + k * u ^ 3
   have h3 : navp.v e4.a3 ≥ ofN 3 := by
-    rw [t_of_a3, ←mul_one 2, factor_p_of_le_val evrp h3, ←mul_assoc (2*1), mul_comm ((2*1) * _), Nat.cast_pow, ←mul_add, Int.add_comm, (show 3 = 2 + 1 by rfl), ←add_ofN, navp.v_mul_eq_add_v]
+    rw [t_of_a3, ←mul_one 2, factor_p_of_le_val evrp h3, ←mul_assoc (2*1), mul_comm ((2*1) * _),
+      Nat.cast_pow, ←mul_add, Int.add_comm, (show 3 = 2 + 1 by rfl), ←add_ofN, navp.v_mul_eq_add_v]
     apply add_le_add
     . exact le_of_eq (val_of_pow_uniformizer navp).symm
     . rw [←succ_ofN 0]
@@ -597,6 +601,13 @@ decreasing_by
 
 
 
+/--
+Tate's algorithm takes an elliptic curve over the integers and a prime and returns the
+- Kodaira type
+- Conductor exponent
+- Tamagawa number
+- Reduction type (split/nonsplit multiplicative or additive) and rst isomorphism to a minimal curve?
+-/
 def tate_algorithm (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) :
   Kodaira × ℕ × ℕ × ReductionType × (ℤ × ℤ × ℤ × ℤ) :=
   if p = 2 then
