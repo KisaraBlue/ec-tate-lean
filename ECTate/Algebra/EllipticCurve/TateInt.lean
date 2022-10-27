@@ -429,7 +429,7 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
   let (a2p, a4p2, a6p3) := model_to_cubic evrp e2
   -- 18bcd – 4b³d + b²c² – 4c³ – 27d²
 
-  if test_Δcubic : navp.v (Δcubic (model_to_cubic evrp e2)) = 0 then
+  if test_Δcubic : navp.v (Δcubic (model_to_cubic evrp e2)) = 0 then -- TODO don't recompute a2p,a4pw above
     let c := 1 + count_roots_cubic 1 a2p a4p2 a6p3 p
     (Is 0, n - 4, c, (u, r, s, t))
   else
@@ -453,7 +453,7 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
         apply val_mul_ge_of_left_ge
         exact le_of_eq navp.v_uniformizer.symm
       rw [factor_p_of_le_val evrp h2'', ←Enat.add_zero (ofN 1), navp.v_mul_eq_add_v, pow_one]
-      apply congr_arg2 HAdd.hAdd
+      apply congr_arg₂ HAdd.hAdd
       . exact navp.v_uniformizer
       . exact (move_cubic_double_root_to_origin evrp e2 e2_cubic_has_double_root).1
 
@@ -462,7 +462,7 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
       rw [r_of_a3]
       apply val_add_ge_of_ge
       . exact h3'
-      . rw [mul_assoc, factor_p_of_le_val evrp h1, mul_comm _ (_ ^ 1 * _), ←mul_assoc, ←mul_assoc, mul_comm _ (_ ^ 1), ←pow_succ, mul_assoc]
+      . rw [mul_assoc, factor_p_of_le_val evrp h1, mul_comm _ (_ ^ 1 * _), ←mul_assoc, ←mul_assoc, mul_comm _ (_ ^ 1), ←pow_succ', mul_assoc]
         apply val_mul_ge_of_left_ge
         rw [val_of_pow_uniformizer navp]
         exact le_of_eq rfl

@@ -47,23 +47,23 @@ theorem mul_sub (a b c : R) : a * (b - c) = a * b - a * c := by
 theorem sub_mul (a b c : R) : (a - b) * c = a * c - b * c := by
   rw [sub_eq_add_neg, add_mul, ←neg_mul_left, ←sub_eq_add_neg]
 
-@[simp] theorem sub_zero (a : R) : a - 0 = a := by
-  rw [sub_eq_add_neg, ←add_zero (-0), add_left_neg (0: R)]
-  simp
+-- @[simp] theorem sub_zero (a : R) : a - 0 = a := by
+--   rw [sub_eq_add_neg, ←add_zero (-0), add_left_neg (0: R)]
+--   simp
 
-theorem neg_add (a b : R) : - (a + b) = -a + -b := by
-  have h₁ : - (a + b) = -(a + b) + (a + b) + -a + -b := by
-    rw [add_assoc, add_comm (-a), add_assoc, add_assoc, ← add_assoc b]
-    rw [add_right_neg b, zero_add, add_right_neg a, add_zero]
-  rwa [add_left_neg (a + b), zero_add] at h₁
+-- theorem neg_add (a b : R) : - (a + b) = -a + -b := by
+--   have h₁ : - (a + b) = -(a + b) + (a + b) + -a + -b := by
+--     rw [add_assoc, add_comm (-a), add_assoc, add_assoc, ← add_assoc b]
+--     rw [add_right_neg b, zero_add, add_right_neg a, add_zero]
+--   rwa [add_left_neg (a + b), zero_add] at h₁
 
-theorem sub_add (a b c : R) : a - (b + c) = a - b - c := by
-  rw [sub_eq_add_neg, neg_add, ←add_assoc, ←sub_eq_add_neg, ←sub_eq_add_neg]
+-- theorem sub_add (a b c : R) : a - (b + c) = a - b - c := by
+--   rw [sub_eq_add_neg, neg_add, ←add_assoc, ←sub_eq_add_neg, ←sub_eq_add_neg]
 
 -- theorem sub_add_comm (n m k : R) : n + m - k = n - k + m := by
 --   rw [sub_eq_add_neg, add_assoc, add_comm m, ←add_assoc, ←sub_eq_add_neg]
 
-@[simp] lemma square_neg_one : -1 ^ 2 = (1 : R) := by
+@[simp] lemma square_neg_one : (-1 : R) ^ 2 = (1 : R) := by
   rw [pow_succ, pow_one, ←neg_mul_left, one_mul, neg_neg (1 : R)]
 
 end Ring
@@ -80,7 +80,7 @@ theorem evenpow_neg {n m : ℕ} (a : R) (h : n = 2 * m) : -a ^ n = a ^ n := by
   rw [h, pow_mul, pow_mul, square_neg]
 
 theorem oddpow_neg {n m : ℕ} (a : R) (h : n = 2 * m + 1) : -a ^ n = -(a ^ n) := by
-  rw [h, pow_succ, evenpow_neg a (show 2 * m = 2 * m by rfl), ←neg_mul_right, ←pow_succ,
+  rw [h, pow_succ, evenpow_neg a (show 2 * m = 2 * m by rfl), ←neg_mul_left, ←pow_succ,
     Nat.add_one]
 
 lemma square_add (a b : R) : (a + b) ^ 2 = a ^ 2 + 2 * (a * b) + b ^ 2 := by
@@ -132,7 +132,7 @@ theorem pow_nonzero (a : R) (n : ℕ) : a ≠ 0 → a ^ n ≠ 0 := by
     rw [←one_mul a, hh, zero_mul]
   | succ n ih =>
     rw [pow_succ]
-    exact factors_nzero_mul_nzero ih h
+    exact factors_nzero_mul_nzero h ih
 
 end IntegralDomain
 
