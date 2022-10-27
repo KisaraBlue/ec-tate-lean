@@ -2,6 +2,7 @@ import Mathlib.Algebra.Group.Defs
 import Mathlib.Init.Algebra.Order
 import Mathlib.Algebra.Ring.Basic
 import Mathlib.Init.Data.Nat.Lemmas
+import Mathlib.Util.WhatsNew -- TODO remove
 
 inductive Enat where
   | ofN : ℕ → Enat
@@ -125,12 +126,12 @@ theorem zero_le (n : ℕ∪∞) : LE.le (ofN 0) n := by
   | ofN n => exact le.in_nat (Nat.zero_le n)
   | top => exact le.below_top
 
-theorem le_refl (n : ℕ∪∞) : LE.le n n := by
+protected theorem le_refl (n : ℕ∪∞) : LE.le n n := by
   cases n with
   | ofN n => exact le.in_nat (Nat.le_refl n)
   | top     => exact le.below_top
 
-theorem le_trans {n m k : ℕ∪∞} : LE.le n m → LE.le m k → LE.le n k
+protected theorem le_trans {n m k : ℕ∪∞} : LE.le n m → LE.le m k → LE.le n k
   | le.in_nat h, le.in_nat h' => le.in_nat (Nat.le_trans h h')
   | _, le.below_top                 => le.below_top
 
@@ -140,66 +141,7 @@ theorem le_succ (n : ℕ∪∞) : LE.le n (succ n) := by
   | top     => exact le.below_top
 
 theorem le_of_succ_le {n m : ℕ∪∞} (h : succ n ≤ m) : n ≤ m :=
-  le_trans (le_succ n) h
-
-theorem le_add_right (n k : ℕ∪∞) : n ≤ n + k := by cases n with
-  | top   => rw [top_add]; exact le_refl top
-  | ofN n => cases k with
-    | top   => rw [add_top]; exact le.below_top
-    | ofN k => exact le.in_nat (Nat.le_add_right n k)
-
-theorem le_add_left (n k : ℕ∪∞) : n ≤ k + n := by
-  rw [add_comm]
-  exact le_add_right n k
-
-theorem add_le_add_left {n m : ℕ∪∞} (h : n ≤ m) (k : ℕ∪∞) : k + n ≤ k + m := by
-  cases k with
-  | top =>
-    simp
-    exact le.below_top
-  | ofN k => cases n with
-    | top => exact le_trans h (le_add_left m (ofN k))
-    | ofN n => cases m with
-      | top =>
-        simp
-        exact le.below_top
-      | ofN m =>
-        simp
-        apply le.in_nat
-        cases h with
-          | in_nat h => exact Nat.add_le_add_left h k
-
-theorem add_le_add_right {n m : ℕ∪∞} (h : n ≤ m) (k : ℕ∪∞) : n + k ≤ m + k := by
-  rw [add_comm n k, add_comm m k]
-  apply add_le_add_left
-  assumption
-
-theorem add_le_add {a b c d : ℕ∪∞} (h₁ : a ≤ b) (h₂ : c ≤ d) : a + c ≤ b + d :=
-  le_trans (add_le_add_right h₁ c) (add_le_add_left h₂ b)
-
-theorem eq_top_of_top_le (a : ℕ∪∞) (h : ∞ ≤ a) : a = ∞ := by
-  cases h with
-  | below_top => rfl
-
-theorem eq_top_of_add_eq_top (a : ℕ∪∞) (n : ℕ) (h : a + ofN n = ∞) : a = ∞ := by
-  cases a with
-  | top => rfl
-  | ofN a => exact Enat.noConfusion h
-
-protected theorem le_of_add_le_add_left {a : ℕ} {b c : ℕ∪∞} (h : ofN a + b ≤ ofN a + c) : b ≤ c := by
-  cases b with
-  | top =>
-    simp [add_comm] at h
-    rw [eq_top_of_add_eq_top c a (eq_top_of_top_le _ h)]
-    exact le.below_top
-  | ofN b => cases c with
-    | top => exact le.below_top
-    | ofN c =>
-      apply le.in_nat
-      apply @Nat.le_of_add_le_add_left a b
-      cases h with
-      | in_nat h' => exact h'
-
+  Enat.le_trans (le_succ n) h
 
 theorem le_of_lt {n m : ℕ∪∞} (h : n < m) : n ≤ m := by
   cases m with
@@ -212,7 +154,6 @@ theorem le_of_lt {n m : ℕ∪∞} (h : n < m) : n ≤ m := by
       rfl
   | top    => exact le.below_top
 
-theorem succ_le_of_lt {n m : ℕ∪∞} (h : n < m) : succ n ≤ m := h.2
 
 theorem lt_or_ge (n m : ℕ∪∞) : Or (LT.lt n m) (GE.ge n m) := by
   cases n with
@@ -254,7 +195,74 @@ theorem gt_of_not_le {n m : ℕ∪∞} (h : ¬ n ≤ m) : n > m :=
 lemma lt_iff_le_not_le {m n : ℕ∪∞} : m < n ↔ m ≤ n ∧ ¬ n ≤ m :=
 ⟨fun h => ⟨le_of_lt h, not_le_of_gt h⟩, fun h => gt_of_not_le h.2⟩
 
-theorem le_antisymm {n m : ℕ∪∞} (h1 : LE.le n m) (h2 : LE.le m n) : Eq n m := by
+instance : Preorder ℕ∪∞ :=
+{ le               := Enat.le,
+  le_refl          := Enat.le_refl,
+  le_trans         := @Enat.le_trans,
+  lt_iff_le_not_le := @lt_iff_le_not_le,
+  lt               := Enat.lt}
+
+theorem le_add_right (n k : ℕ∪∞) : n ≤ n + k := by cases n with
+  | top   => rw [top_add]; exact le_refl top
+  | ofN n => cases k with
+    | top   => rw [add_top]; exact le.below_top
+    | ofN k => exact le.in_nat (Nat.le_add_right n k)
+
+theorem le_add_left (n k : ℕ∪∞) : n ≤ k + n := by
+  rw [add_comm]
+  exact le_add_right n k
+
+theorem add_le_add_left {n m : ℕ∪∞} (h : n ≤ m) (k : ℕ∪∞) : k + n ≤ k + m := by
+  cases k with
+  | top =>
+    simp
+  | ofN k => cases n with
+    | top => exact le_trans h (le_add_left m (ofN k))
+    | ofN n => cases m with
+      | top =>
+        simp
+        exact le.below_top
+      | ofN m =>
+        simp
+        apply le.in_nat
+        cases h with
+          | in_nat h => exact Nat.add_le_add_left h k
+
+theorem add_le_add_right {n m : ℕ∪∞} (h : n ≤ m) (k : ℕ∪∞) : n + k ≤ m + k := by
+  rw [add_comm n k, add_comm m k]
+  apply add_le_add_left
+  assumption
+
+theorem add_le_add {a b c d : ℕ∪∞} (h₁ : a ≤ b) (h₂ : c ≤ d) : a + c ≤ b + d :=
+  le_trans (add_le_add_right h₁ c) (add_le_add_left h₂ b)
+
+theorem eq_top_of_top_le (a : ℕ∪∞) (h : ∞ ≤ a) : a = ∞ := by
+  cases h with
+  | below_top => rfl
+
+theorem eq_top_of_add_eq_top (a : ℕ∪∞) (n : ℕ) (h : a + ofN n = ∞) : a = ∞ := by
+  cases a with
+  | top => rfl
+  | ofN a => exact Enat.noConfusion h
+
+protected theorem le_of_add_le_add_left {a : ℕ} {b c : ℕ∪∞} (h : ofN a + b ≤ ofN a + c) : b ≤ c :=
+by
+  cases b with
+  | top =>
+    simp [add_comm] at h
+    rw [eq_top_of_add_eq_top c a (eq_top_of_top_le _ h)]
+    exact le.below_top
+  | ofN b => cases c with
+    | top => exact le.below_top
+    | ofN c =>
+      apply le.in_nat
+      apply @Nat.le_of_add_le_add_left a b
+      cases h with
+      | in_nat h' => exact h'
+
+theorem succ_le_of_lt {n m : ℕ∪∞} (h : n < m) : succ n ≤ m := h.2
+
+protected theorem le_antisymm {n m : ℕ∪∞} (h1 : LE.le n m) (h2 : LE.le m n) : Eq n m := by
   cases n with
   | top =>
     cases h1
@@ -269,7 +277,7 @@ theorem le_antisymm {n m : ℕ∪∞} (h1 : LE.le n m) (h2 : LE.le m n) : Eq n m
         | in_nat h2 =>
           exact congrArg ofN (Nat.le_antisymm h1 h2)
 
-theorem le_total (m n : ℕ∪∞) : m ≤ n ∨ n ≤ m :=
+protected theorem le_total (m n : ℕ∪∞) : m ≤ n ∨ n ≤ m :=
   match lt_or_ge m n with
   | Or.inl h => Or.inl (le_of_lt h)
   | Or.inr h => Or.inr h
@@ -312,13 +320,6 @@ match n, m with
   | ∞, ofN a     => isFalse (fun h => by cases h)
   | ofN a, ∞     => isFalse (fun h => by cases h)
 
-instance : Preorder ℕ∪∞ :=
-{ le               := Enat.le,
-  le_refl          := le_refl,
-  le_trans         := @le_trans,
-  lt_iff_le_not_le := @lt_iff_le_not_le,
-  lt               := Enat.lt}
-
 theorem eq_zero_or_pos : ∀ (n : ℕ∪∞), n = ofN 0 ∨ n > ofN 0
   | ofN 0   => Or.inl rfl
   | ofN (Nat.succ n) => by rw [←succ_ofN n]; exact Or.inr (succ_pos _)
@@ -334,14 +335,10 @@ lemma lt_add_right (a b c : ℕ∪∞) : a < b -> a < b + c :=
   fun h => lt_of_lt_of_le h (le_add_right _ _)
 
 instance : LinearOrder ℕ∪∞ :=
-{ le               := Enat.le,
-  le_refl          := le_refl,
-  le_trans         := @le_trans,
-  le_antisymm      := @le_antisymm,
-  le_total         := @le_total,
-  lt               := Enat.lt,
-  lt_iff_le_not_le := @lt_iff_le_not_le,
-  decidable_lt     := inferInstance,
+{ Enat.instPreorderEnat with
+  le_antisymm      := @Enat.le_antisymm,
+  le_total         := @Enat.le_total,
+  decidable_lt     := inferInstance, -- TODO check if these are actually better than the defaults
   decidable_le     := inferInstance,
   decidable_eq     := inferInstance }
 
