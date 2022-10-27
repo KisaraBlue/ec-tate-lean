@@ -104,15 +104,22 @@ lemma val_of_minus_one {p : R} (nav : SurjVal p) : nav.v (-1) = ofN 0 := by
     exact False.elim ((lt_irrefl (ofN 0)) contradiction)
 
 @[simp]
-lemma val_of_neg {p : R} (nav : SurjVal p) : nav.v (-x) = nav.v x := by
+lemma val_neg {p : R} (nav : SurjVal p) : nav.v (-x) = nav.v x := by
   rw [←one_mul x, neg_mul_left, nav.v_mul_eq_add_v, val_of_minus_one, one_mul, Enat.zero_add]
+
+lemma val_sub_ge_of_ge {p : R} (nav : SurjVal p) {a b : R} (ha : nav.v a ≥ n) (hb : nav.v b ≥ n) :
+nav.v (a - b) ≥ n := by
+  rw [sub_eq_add_neg]
+  apply val_add_ge_of_ge
+  assumption
+  simpa
 
 theorem v_add_eq_min_v {p : R} (nav : SurjVal p) {a b : R} (h : nav.v a < nav.v b) :
   nav.v (a + b) = nav.v a := by
   apply Enat.le_antisymm
   . apply le_of_not_lt
     intro h'
-    have hm : nav.v a < nav.v (-b) := by rwa [val_of_neg]
+    have hm : nav.v a < nav.v (-b) := by rwa [val_neg]
     apply lt_irrefl (nav.v a)
     apply lt_of_lt_of_le (lt_min h' hm)
     rw [(show nav.v a = nav.v (a + b + -b) by simp)]
@@ -165,10 +172,10 @@ lemma decr_val_zero {p : R} (evr : EnatValRing p) : evr.decr_val 0 = 0 := by
 lemma decr_val_neg {p : R} (evr : EnatValRing p) (x : R) : evr.decr_val (-x) = -evr.decr_val x := by
   cases eq_zero_or_pos (evr.valtn.v x) with
   | inl h =>
-    have hm : evr.valtn.v (-x) = ofN 0 := by simp [val_of_neg, h]
+    have hm : evr.valtn.v (-x) = ofN 0 := by simp [h]
     rw [evr.zero_valtn_decr h, evr.zero_valtn_decr hm]
   | inr h =>
-    have hm : evr.valtn.v (-x) > ofN 0 := by simp [val_of_neg, h]
+    have hm : evr.valtn.v (-x) > ofN 0 := by simp [h]
     apply nzero_mul_left_cancel p _ _ (p_non_zero evr.valtn)
     rw [←neg_mul_right, ←evr.pos_valtn_decr h, ←evr.pos_valtn_decr hm]
 
@@ -302,10 +309,10 @@ lemma sub_val_neg {p : R} (evr : EnatValRing p) {x : R} {n : ℕ} : sub_val evr 
   | succ n ih =>
     cases eq_zero_or_pos (evr.valtn.v x) with
     | inl h' =>
-      have h'm : evr.valtn.v (-x) = ofN 0 := by simp [val_of_neg, h']
+      have h'm : evr.valtn.v (-x) = ofN 0 := by simp [h']
       rw [sub_val_val_zero evr _ _ h', sub_val_val_zero evr _ _ h'm]
     | inr h' =>
-      have h'm : evr.valtn.v (-x) > ofN 0 := by simp [val_of_neg, h']
+      have h'm : evr.valtn.v (-x) > ofN 0 := by simp [h']
       rw [sub_val_val_pos_succ evr _ _ (ne_of_gt h'), sub_val_val_pos_succ evr _ _ (ne_of_gt h'm), sub_val_decr_val_comm, ih, decr_val_neg, sub_val_decr_val_comm]
 
 lemma sub_val_add {p : R} (evr : EnatValRing p) {x y : R} {n : ℕ} (hx : evr.valtn.v x ≥ ofN n)
