@@ -114,7 +114,8 @@ def c4 (e : Model R) : R := e.b2 ^ 2 - 24*e.b4
 def c6 (e : Model R) : R := -e.b2 ^ 3 + 36*e.b2*e.b4 - 216*e.b6
 
 def discr (e : Model R) : R :=
-  -e.b2 * e.b2 * e.b8 - 8 * (e.b4 ^ 3) - 27 * e.b6 * e.b6 + 9 * e.b2 * e.b4 * e.b6
+  -e.b2 * e.b2 * e.b8 - 8 * e.b4 ^ 3 - 27 * e.b6 * e.b6 + 9 * e.b2 * e.b4 * e.b6
+
 open ring_neg in
 lemma discr_identity (e : Model R) : 1728 * e.discr = e.c4 ^ 3 - e.c6 ^ 2 :=
 by

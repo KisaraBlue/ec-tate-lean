@@ -41,6 +41,7 @@ instance : LT ℕ∪∞ where
 @[simp] theorem succ_ofN (a : Nat) : succ (ofN a) = ofN a.succ := rfl
 
 @[simp] theorem add_ofN (a b : Nat) : ofN a + ofN b = ofN (a + b) := rfl
+
 @[simp] theorem add_top (a : ℕ∪∞) : a + ∞ = ∞ := match a with
   | top => rfl
   | ofN _ => rfl
@@ -66,8 +67,6 @@ protected theorem zero_add (a : ℕ∪∞) : ofN 0 + a = a := by
   match a with
   | top => exact add_top (ofN 0)
   | ofN a => simp
-
-instance : Zero ℕ∪∞ := { zero := ofN 0 }
 
 -- theorem nsmul_zero' (x : ℕ∪∞) : nsmul_rec 0 x = ofN 0 := by
 --   simp [nsmul_rec]
@@ -99,6 +98,8 @@ instance : AddCommMonoid ℕ∪∞ :=
   -- nsmul_succ' := nsmul_succ',
   add_comm    := Enat.add_comm }
 
+lemma ofN_zero : ofN 0 = 0 := rfl
+
 theorem succ_add (a b : ℕ∪∞) : succ a + b = succ (a + b) := by
   cases a with
   | top => simp [succ]
@@ -111,6 +112,10 @@ theorem succ_add (a b : ℕ∪∞) : succ a + b = succ (a + b) := by
 theorem add_succ (a b : ℕ∪∞) : a + succ b = succ (a + b) := by
   rw [add_comm, succ_add b a, add_comm]
 
+theorem ofN_mul_eq_smul (a b : ℕ) : ofN (a * b) = a • ofN b := by
+induction a with
+| zero => simp [zero_nsmul, ofN_zero]
+| succ k ih => simp [Nat.succ_mul, succ_nsmul, ← ih, add_comm]
 
 theorem lt_top (n : ℕ) : LT.lt (ofN n) ∞ := by
   exact And.intro (Enat.noConfusion) (le.below_top)
@@ -334,8 +339,11 @@ Iff.intro pos_of_ne_zero ne_of_gt
 lemma lt_add_right (a b c : ℕ∪∞) : a < b -> a < b + c :=
   fun h => lt_of_lt_of_le h (le_add_right _ _)
 
+-- TODO if these are left as underscores this becomes noncomputable, another code generator bug?
 instance : LinearOrder ℕ∪∞ :=
 { Enat.instPreorderEnat with
+  min := fun a b => if a ≤ b then a else b,
+  max := fun a b => if a ≤ b then b else a,
   le_antisymm      := @Enat.le_antisymm,
   le_total         := @Enat.le_total,
   decidable_lt     := inferInstance, -- TODO check if these are actually better than the defaults

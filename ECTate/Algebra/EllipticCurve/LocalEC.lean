@@ -42,7 +42,8 @@ def pi_scaling (evr : EnatValRing p) (e : Model R) : Model R := {
   a6 := evr.sub_val e.a6 6
 }
 
-lemma pi_scaling_of_b2 (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ ofN 1) (h2 : evr.valtn.v e.a2 ≥ ofN 2) : evr.sub_val e.b2 2 = evr.sub_val e.a1 1 * evr.sub_val e.a1 1 + 4 * evr.sub_val e.a2 2 := by
+lemma pi_scaling_of_b2 (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ ofN 1) (h2 : evr.valtn.v e.a2 ≥ ofN 2) :
+  evr.sub_val e.b2 2 = evr.sub_val e.a1 1 * evr.sub_val e.a1 1 + 4 * evr.sub_val e.a2 2 := by
   rw [←evr.sub_val_mul_right h1, ←evr.sub_val_mul_left h1, evr.sub_val_sub_val, ←evr.sub_val_mul_right h2, ←evr.sub_val_add _ _]
   . rfl
   . exact val_mul_ge_of_both_ge evr.valtn h1 h1
@@ -91,51 +92,83 @@ by
   . exact val_add_ge_of_ge evr.valtn (val_add_ge_of_ge evr.valtn h116 h134) h26
   . exact val_add_ge_of_ge evr.valtn h116 h134
 
+open EnatValRing in
 lemma pi_scaling_of_discr (evr : EnatValRing p) (e : Model R)
-  (hb2 : evr.valtn.v e.b2 ≥ ofN 2) (hb4 : evr.valtn.v e.b4 ≥ ofN 4) (hb6 : evr.valtn.v e.b6 ≥ ofN 6)
-  (hb8 : evr.valtn.v e.b8 ≥ ofN 8) :
+  (hb2 : evr.valtn.v e.b2 ≥ ofN 2) (hb4 : evr.valtn.v e.b4 ≥ ofN 4)
+  (hb6 : evr.valtn.v e.b6 ≥ ofN 6) (hb8 : evr.valtn.v e.b8 ≥ ofN 8) :
   evr.sub_val e.discr 12 = -evr.sub_val e.b2 2 * evr.sub_val e.b2 2 * evr.sub_val e.b8 8
     - 8 * ((evr.sub_val e.b4 4) ^ 3) - 27 * evr.sub_val e.b6 6 * evr.sub_val e.b6 6
     + 9 * evr.sub_val e.b2 2 * evr.sub_val e.b4 4 * evr.sub_val e.b6 6 :=
 by
-  sorry
+  rw [discr,
+      sub_val_add,
+      sub_val_sub,
+      sub_val_sub,
+      sub_val_mul _ 4 8 _ _ hb8,
+      sub_val_mul _ 2 2 _ _ hb2,
+      sub_val_mul _ 6 6 _ _ hb6,
+      sub_val_mul_right _ hb6,
+      sub_val_mul _ 6 6 _ _ hb6,
+      sub_val_mul _ 2 4 _ _ hb4,
+      sub_val_mul_right _ hb2,
+      sub_val_mul_right,
+      sub_val_pow _ _ _ _ hb4,
+      sub_val_neg]
+  . rfl
+  . sorry
+  . norm_num
+  . sorry
+  . norm_num
+  . sorry
+  . norm_num
+  . sorry
+  . norm_num
+  . sorry
+  . norm_num
+  . sorry
+  . sorry
+  . sorry
+  . sorry
+  . sorry
+  . sorry
+  . sorry
 
 lemma b2_of_pi_scaling (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ ofN 1) (h2 : evr.valtn.v e.a2 ≥ ofN 2) : (pi_scaling evr e).b2 = evr.sub_val e.b2 2 := by
-  simp [b2, pi_scaling]
+  simp only [b2, pi_scaling]
   exact (pi_scaling_of_b2 evr e h1 h2).symm
 
 lemma b4_of_pi_scaling (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ ofN 1) (h3 : evr.valtn.v e.a3 ≥ ofN 3) (h4 : evr.valtn.v e.a4 ≥ ofN 4) : (pi_scaling evr e).b4 = evr.sub_val e.b4 4 := by
-  simp [b4, pi_scaling]
+  simp only [b4, pi_scaling]
   exact (pi_scaling_of_b4 evr e h1 h3 h4).symm
 
 lemma b6_of_pi_scaling (evr : EnatValRing p) (e : Model R) (h3 : evr.valtn.v e.a3 ≥ ofN 3) (h6 : evr.valtn.v e.a6 ≥ ofN 6) : (pi_scaling evr e).b6 = evr.sub_val e.b6 6 := by
-  simp [b6, pi_scaling]
+  simp only [b6, pi_scaling]
   exact (pi_scaling_of_b6 evr e h3 h6).symm
 
 lemma b8_of_pi_scaling (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ ofN 1) (h2 : evr.valtn.v e.a2 ≥ ofN 2) (h3 : evr.valtn.v e.a3 ≥ ofN 3) (h4 : evr.valtn.v e.a4 ≥ ofN 4) (h6 : evr.valtn.v e.a6 ≥ ofN 6) : (pi_scaling evr e).b8 = evr.sub_val e.b8 8 := by
-  simp [b8, pi_scaling]
+  simp only [b8, pi_scaling]
   exact (pi_scaling_of_b8 evr e h1 h2 h3 h4 h6).symm
 
 lemma val_b2_of_val_a12 (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ ofN 1) (h2 : evr.valtn.v e.a2 ≥ ofN 2) : evr.valtn.v e.b2 ≥ ofN 2 := by
-  simp [b2]
+  simp only [b2]
   apply val_add_ge_of_ge
   . apply val_mul_ge_of_both_ge evr.valtn h1 h1
   . apply val_mul_ge_of_right_ge evr.valtn h2
 
 lemma val_b4_of_val_a134 (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ ofN 1) (h3 : evr.valtn.v e.a3 ≥ ofN 3) (h4 : evr.valtn.v e.a4 ≥ ofN 4) : evr.valtn.v e.b4 ≥ ofN 4 := by
-  simp [b4]
+  simp only [b4]
   apply val_add_ge_of_ge
   . apply val_mul_ge_of_both_ge evr.valtn h1 h3
   . apply val_mul_ge_of_right_ge evr.valtn h4
 
 lemma val_b6_of_val_a36 (evr : EnatValRing p) (e : Model R) (h3 : evr.valtn.v e.a3 ≥ ofN 3) (h6 : evr.valtn.v e.a6 ≥ ofN 6) : evr.valtn.v e.b6 ≥ ofN 6 := by
-  simp [b6]
+  simp only [b6]
   apply val_add_ge_of_ge
   . apply val_mul_ge_of_both_ge evr.valtn h3 h3
   . apply val_mul_ge_of_right_ge evr.valtn h6
 
 lemma val_b8_of_val_ai (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ ofN 1) (h2 : evr.valtn.v e.a2 ≥ ofN 2) (h3 : evr.valtn.v e.a3 ≥ ofN 3) (h4 : evr.valtn.v e.a4 ≥ ofN 4) (h6 : evr.valtn.v e.a6 ≥ ofN 6) : evr.valtn.v e.b8 ≥ ofN 8 := by
-  simp [b8, sub_eq_add_neg]
+  simp only [b8, sub_eq_add_neg]
   apply val_add_ge_of_ge
   . apply val_add_ge_of_ge
     . apply val_add_ge_of_ge
@@ -150,7 +183,7 @@ lemma val_b8_of_val_ai (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a
     apply val_mul_ge_of_both_ge _ h4 h4
 
 lemma discr_of_pi_scaling (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ ofN 1) (h2 : evr.valtn.v e.a2 ≥ ofN 2) (h3 : evr.valtn.v e.a3 ≥ ofN 3) (h4 : evr.valtn.v e.a4 ≥ ofN 4) (h6 : evr.valtn.v e.a6 ≥ ofN 6) : (pi_scaling evr e).discr = evr.sub_val e.discr 12 := by
-  simp [discr, b2_of_pi_scaling evr e h1 h2, b4_of_pi_scaling evr e h1 h3 h4, b6_of_pi_scaling evr e h3 h6, b8_of_pi_scaling evr e h1 h2 h3 h4 h6]
+  simp only [discr, b2_of_pi_scaling evr e h1 h2, b4_of_pi_scaling evr e h1 h3 h4, b6_of_pi_scaling evr e h3 h6, b8_of_pi_scaling evr e h1 h2 h3 h4 h6]
   exact (pi_scaling_of_discr evr e (val_b2_of_val_a12 evr e h1 h2) (val_b4_of_val_a134 evr e h1 h3 h4) (val_b6_of_val_a36 evr e h3 h6) (val_b8_of_val_ai evr e h1 h2 h3 h4 h6)).symm
 
 lemma val_discr_of_val_ai (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ ofN 1) (h2 : evr.valtn.v e.a2 ≥ ofN 2) (h3 : evr.valtn.v e.a3 ≥ ofN 3) (h4 : evr.valtn.v e.a4 ≥ ofN 4) (h6 : evr.valtn.v e.a6 ≥ ofN 6) : evr.valtn.v e.discr ≥ ofN 12 := by
@@ -158,7 +191,7 @@ lemma val_discr_of_val_ai (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v 
   have hb4 := val_b4_of_val_a134 evr e h1 h3 h4
   have hb6 := val_b6_of_val_a36 evr e h3 h6
   have hb8 := val_b8_of_val_ai evr e h1 h2 h3 h4 h6
-  simp [discr, sub_eq_add_neg]
+  simp only [discr, sub_eq_add_neg]
   apply val_add_ge_of_ge
   . apply val_add_ge_of_ge
     . apply val_add_ge_of_ge
@@ -182,7 +215,7 @@ def pi_scaling (evr : EnatValRing p) (e : ValidModel R) (h1 : evr.valtn.v e.a1 �
     rw [Model.discr_of_pi_scaling evr e.toModel h1 h2 h3 h4 h6]
     intro H
     have H' := let_value_eq (fun (x:R) => p ^ 12 * x) H
-    simp at H'
+    simp only [mul_zero] at H'
     rw [←evr.factor_p_of_le_val (Model.val_discr_of_val_ai evr e.toModel h1 h2 h3 h4 h6)] at H'
     apply e.discr_not_zero H'
 }
@@ -194,7 +227,11 @@ lemma iso_rst_val_discr_to_nat {p : R} (valp : SurjVal p) (r s t : R) (e : Valid
   val_discr_to_nat valp (rst_iso r s t e) = val_discr_to_nat valp e :=
 by simp [val_discr_to_nat, nat_of_val, ValidModel.rst_iso, Model.rst_discr]
 
-lemma pi_scaling_val_discr_to_nat {p : R} (evr : EnatValRing p) (e : ValidModel R) (h1 : evr.valtn.v e.a1 ≥ ofN 1) (h2 : evr.valtn.v e.a2 ≥ ofN 2) (h3 : evr.valtn.v e.a3 ≥ ofN 3) (h4 : evr.valtn.v e.a4 ≥ ofN 4) (h6 : evr.valtn.v e.a6 ≥ ofN 6) : val_discr_to_nat evr.valtn (pi_scaling evr e h1 h2 h3 h4 h6) = val_discr_to_nat evr.valtn e - 12 := by sorry
+lemma pi_scaling_val_discr_to_nat {p : R} (evr : EnatValRing p) (e : ValidModel R)
+  (h1 : evr.valtn.v e.a1 ≥ ofN 1) (h2 : evr.valtn.v e.a2 ≥ ofN 2)
+  (h3 : evr.valtn.v e.a3 ≥ ofN 3) (h4 : evr.valtn.v e.a4 ≥ ofN 4) (h6 : evr.valtn.v e.a6 ≥ ofN 6) :
+  val_discr_to_nat evr.valtn (pi_scaling evr e h1 h2 h3 h4 h6) = val_discr_to_nat evr.valtn e - 12 :=
+by sorry
 
 lemma ofN_val_discr_to_nat {p : R} (valp : SurjVal p) (e : ValidModel R) : ofN (val_discr_to_nat valp e) = valp.v e.discr := by
   cases h : valp.v e.discr with
@@ -223,7 +260,7 @@ lemma v_b6_of_v_a3_a6 {p : R} (valp : SurjVal p) (e : ValidModel R) (h3 : valp.v
   . exact (val_mul_ge_of_right_ge valp h6)
 
 lemma v_b8_of_v_ai {p : R} (valp : SurjVal p) (e : ValidModel R) (h1 : valp.v e.a1 ≥ ofN 1) (h2 : valp.v e.a2 = ofN 1) (h3 : valp.v e.a3 ≥ ofN q) (h4 : valp.v e.a4 ≥ ofN (q + 1)) (h6 : valp.v e.a6 ≥ ofN (2 * q)) : valp.v e.b8 ≥ ofN (2 * q + 1) := by
-  simp [Model.b8]
+  simp only [Model.b8]
   rw [sub_eq_add_neg, sub_eq_add_neg]
   repeat apply val_add_ge_of_ge valp
   . rw [mul_assoc, Nat.add_comm, ←add_ofN]
@@ -243,7 +280,7 @@ lemma v_discr_of_v_ai {p : R} (valp : SurjVal p) (e : ValidModel R) (hq : q > 1)
   have h4' := v_b4_of_v_a1_a3_a4 valp e h1 h3 h4
   have h6' := v_b6_of_v_a3_a6 valp e h3 h6
   have h8' := v_b8_of_v_ai valp e h1 h2 h3 h4 h6
-  simp [Model.discr]
+  simp only [Model.discr]
   rw [sub_eq_add_neg, sub_eq_add_neg]
   apply val_add_ge_of_ge valp
   . apply val_add_ge_of_ge valp
@@ -274,7 +311,7 @@ lemma small_char_div_12 {p : R} (hp : p = 2 ∨ p = 3) (valp : SurjVal p) : valp
 
 
 lemma v_rst_b2_of_small_char {p : R} (valp : SurjVal p) (e : ValidModel R) (r s t : R) (h_b2 : valp.v e.b2 ≥ ofN 1) (h_p : valp.v 12 ≥ ofN 1) : valp.v (rst_iso r s t e).b2 ≥ ofN 1 := by
-  simp [rst_iso]
+  simp only [rst_iso]
   rw [Model.rst_b2]
   apply val_add_ge_of_ge valp h_b2
   exact val_mul_ge_of_left_ge valp h_p

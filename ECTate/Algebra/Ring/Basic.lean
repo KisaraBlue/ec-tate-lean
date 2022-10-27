@@ -44,8 +44,8 @@ theorem neg_mul_right (a b : R) : -(a * b) = a * -b := by
 theorem mul_sub (a b c : R) : a * (b - c) = a * b - a * c := by
   rw [sub_eq_add_neg, mul_add, ←neg_mul_right, ←sub_eq_add_neg]
 
-theorem sub_mul (a b c : R) : (a - b) * c = a * c - b * c := by
-  rw [sub_eq_add_neg, add_mul, ←neg_mul_left, ←sub_eq_add_neg]
+-- theorem sub_mul (a b c : R) : (a - b) * c = a * c - b * c := by
+  -- rw [sub_eq_add_neg, add_mul, ←neg_mul_left, ←sub_eq_add_neg]
 
 -- @[simp] theorem sub_zero (a : R) : a - 0 = a := by
 --   rw [sub_eq_add_neg, ←add_zero (-0), add_left_neg (0: R)]

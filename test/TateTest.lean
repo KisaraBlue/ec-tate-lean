@@ -48,6 +48,3 @@ def test (N : ℕ) : IO Unit := do
   println (toString N ++ " lines tested")
 
 #eval test 30000
-
-
-#eval (Int.tate_algorithm 2 sorry ⟨⟨1,0,1,-2731,-55146⟩, sorry⟩).fst.reduction.to_lmfdb--&2&1&9&9&13&1&-1

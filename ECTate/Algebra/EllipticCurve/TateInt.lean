@@ -25,6 +25,7 @@ Mathlib TODOs:
 - deriving
 - multiple lets
 - does show_term use dot notation enough?
+- Don't lint sorried stuff
 -/
 
 
