@@ -37,7 +37,7 @@ def parsefunc (s : String) : Model ℤ × ℕ × Kodaira × ℕ × ℕ :=
 
 def test (N : ℕ) : IO Unit := do
   -- lines of the csv (which is ampersand separated) are
-  -- model, p, conductor exponent f, disc exp, denom j exponent, kodaira type k, tamagawa c, root number]
+  -- model, p, conductor exponent f, disc exp, denom j exponent, kodaira type k, tamagawa c, reduction type]
   let l ← lines $ mkFilePath ["test/lmfdb.csv"]
   for str in l.zip (Array.range N) do
     let d : Model ℤ × ℕ × Kodaira × ℕ × ℕ := parsefunc str.1
