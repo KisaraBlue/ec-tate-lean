@@ -50,7 +50,5 @@ def test (N : ℕ) : IO Unit := do
     else
       print ""
   println (toString N ++ " lines tested")
-  -- l.foldl (λ t h => do t; println h) (return ())
-  -- parseFile <| FilePath.mk "board1.txt"
 
 #eval test 3000
