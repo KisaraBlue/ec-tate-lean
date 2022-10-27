@@ -178,11 +178,11 @@ def kodaira_type_Is (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0 
     rw [t_of_a4]
     apply Enat.le_trans _ (surjvalp.v_add_ge_min_v _ _)
     apply le_min h4
-    rw [mul_assoc, val_of_neg, surjvalp.v_mul_eq_add_v, Enat.add_comm, surjvalp.v_mul_eq_add_v, nat_cast_pow, val_of_pow_uniformizer, ←add_ofN]
+    rw [mul_assoc, val_neg, surjvalp.v_mul_eq_add_v, Enat.add_comm, surjvalp.v_mul_eq_add_v, nat_cast_pow, val_of_pow_uniformizer, ←add_ofN]
     apply Enat.le_trans _ (le_add_right (ofN q + surjvalp.v e.a1) _)
     exact add_le_add (le_of_eq rfl) h1
   have h6' : (primeEVR hp).valtn.v e1.a6 ≥ ofN (2 * q + 1) := by
-    rw [t_of_a6, factor_p_of_le_val evrp h6, factor_p_of_le_val evrp h3, rw_a6, ←val_of_neg, sub_eq_add_neg, sub_eq_add_neg, neg_add, neg_add, neg_neg, neg_neg, neg_mul_right, nat_cast_pow, pow_two, Int.add_assoc, factorize1 a a3q (↑p) q, ←pow_add, add_self_eq_mul_two, ←mul_add, surjvalp.v_mul_eq_add_v, val_of_pow_uniformizer, ←add_ofN, add_mul, ←pow_two, ←one_mul (a ^ 2), Int.add_comm]
+    rw [t_of_a6, factor_p_of_le_val evrp h6, factor_p_of_le_val evrp h3, rw_a6, ←val_neg, sub_eq_add_neg, sub_eq_add_neg, neg_add, neg_add, neg_neg, neg_neg, neg_mul_right, nat_cast_pow, pow_two, Int.add_assoc, factorize1 a a3q (↑p) q, ←pow_add, add_self_eq_mul_two, ←mul_add, surjvalp.v_mul_eq_add_v, val_of_pow_uniformizer, ←add_ofN, add_mul, ←pow_two, ←one_mul (a ^ 2), Int.add_comm]
     exact add_le_add (le_of_eq rfl) (succ_le_of_lt (val_poly_of_double_root hp 1 a3q (-a6q2) hdr).1)
   let t := t + u0 ^ 3 * a * (p ^ q : ℕ)
   let a2p := sub_val evrp e1.a2 1
@@ -320,14 +320,14 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
   have h4 : navp.v e1.a4 ≥ ofN 1 := by
     delta Model.is_local_singular_point at sing_origin
     have singular_dx := And.left (And.right sing_origin)
-    simp [Model.dweierstrass_dx, pow_succ, sub_eq_add_neg, val_of_neg navp] at singular_dx
+    simp [Model.dweierstrass_dx, pow_succ, sub_eq_add_neg, val_neg navp] at singular_dx
     rw [<-succ_ofN]
     apply succ_le_of_lt singular_dx
 
   have h6 : navp.v e1.a6 ≥ ofN 1 := by
     delta Model.is_local_singular_point at sing_origin
     have singular := And.left sing_origin
-    simp [Model.weierstrass, pow_succ, sub_eq_add_neg, val_of_neg navp] at singular
+    simp [Model.weierstrass, pow_succ, sub_eq_add_neg, val_neg navp] at singular
     rw [<-succ_ofN]
     apply succ_le_of_lt singular
   -/
@@ -379,7 +379,7 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
     exact succ_le_of_lt (val_poly_of_double_root hp 1 e1.a1 (-e1.a2) hdr_b2).2
 
   have h2 : navp.v e2.a2 ≥ ofN 1 := by
-    rw [←val_of_neg, st_of_a2, sub_eq_add_neg, sub_eq_add_neg, neg_add, neg_add, neg_neg,
+    rw [←val_neg, st_of_a2, sub_eq_add_neg, sub_eq_add_neg, neg_add, neg_add, neg_neg,
       neg_neg, Int.add_comm _ (s1 ^ 2), Int.add_comm (-e1.a2), ←Int.add_assoc,
       ←succ_ofN, ←one_mul (s1 ^ 2), mul_comm s1]
     exact succ_le_of_lt (val_poly_of_double_root hp 1 e1.a1 (-e1.a2) hdr_b2).1
@@ -397,7 +397,7 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
     exact hb8
 
   have h6 : navp.v e2.a6 ≥ ofN 3 := by
-    rw [←val_of_neg, st_of_a6, sub_eq_add_neg, sub_eq_add_neg, neg_add, neg_add, neg_neg, neg_neg,
+    rw [←val_neg, st_of_a6, sub_eq_add_neg, sub_eq_add_neg, neg_add, neg_add, neg_neg, neg_neg,
       Int.add_comm _ (_ ^ 2), Int.add_comm (-e1.a6), ←Int.add_assoc, mul_pow,
       factor_p_of_le_val evrp h3, factor_p_of_le_val evrp h6, neg_mul_right, factorize6,
       navp.v_mul_eq_add_v, (show 3 = 2 + 1 by rfl), ←add_ofN]

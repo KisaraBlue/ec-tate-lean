@@ -75,14 +75,14 @@ def tate_algorithm {R : Type u} [IntegralDomain R] {pi : R} (evr : EnatValRing p
   have h4 : evr.valtn.v e'.a4 ≥ ofN 1 := by
     delta Model.is_local_singular_point at sing_origin
     have singular_dx := And.left (And.right sing_origin)
-    simp [Model.dweierstrass_dx, pow_succ, sub_eq_add_neg, val_of_neg evr.valtn] at singular_dx
+    simp [Model.dweierstrass_dx, pow_succ, sub_eq_add_neg] at singular_dx
     rw [<-succ_ofN]
     apply succ_le_of_lt singular_dx
 
   have h6 : evr.valtn.v e'.a6 ≥ ofN 1 := by
     delta Model.is_local_singular_point at sing_origin
     have singular := And.left sing_origin
-    simp [Model.weierstrass, pow_succ, sub_eq_add_neg, val_of_neg evr.valtn] at singular
+    simp [Model.weierstrass, pow_succ, sub_eq_add_neg] at singular
     rw [<-succ_ofN]
     apply succ_le_of_lt singular
 
@@ -136,7 +136,7 @@ def tate_algorithm {R : Type u} [IntegralDomain R] {pi : R} (evr : EnatValRing p
     exact succ_le_of_lt (val_poly_of_double_root hp 1 e'.a1 (-e'.a2) hdr_b2).2
 
   have h2 : evr.valtn.v e''.a2 ≥ ofN 1 := by
-    rw [←val_of_neg, st_of_a2, sub_eq_add_neg, sub_eq_add_neg, neg_add, neg_add, neg_neg, neg_neg, Int.add_comm _ (s1 ^ 2), Int.add_comm (-e'.a2), ←Int.add_assoc, ←succ_ofN, ←one_mul (s1 ^ 2), mul_comm s1]
+    rw [←val_neg, st_of_a2, sub_eq_add_neg, sub_eq_add_neg, neg_add, neg_add, neg_neg, neg_neg, Int.add_comm _ (s1 ^ 2), Int.add_comm (-e'.a2), ←Int.add_assoc, ←succ_ofN, ←one_mul (s1 ^ 2), mul_comm s1]
     exact succ_le_of_lt (val_poly_of_double_root hp 1 e'.a1 (-e'.a2) hdr_b2).1
 
   have h3 : evr.valtn.v e''.a3 ≥ ofN 2 := by
