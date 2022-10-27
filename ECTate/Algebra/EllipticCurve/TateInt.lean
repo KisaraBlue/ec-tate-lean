@@ -13,6 +13,19 @@ lemma nat_cast_pow (p q : Nat) : ((p ^ q : ℕ) : ℤ) = (p : ℤ) ^ q := by sim
 lemma nat_cast_pow_one (p : Nat) : (↑p) ^ 1 = ↑p := by simp
 
 
+/- TODO list:
+- show invariance under change of model
+- show that Tate small prime agrees with big prime
+- profile
+- cleanup
+
+
+Mathlib TODOs:
+- attribute for ring
+- deriving
+- multiple lets
+- does show_term use dot notation enough?
+-/
 
 
 open Enat
@@ -59,14 +72,15 @@ def count_roots_cubic (a b c d : ℤ) (p : ℕ) : ℕ :=
   count_roots_cubic_aux (modulo a p) (modulo b p) (modulo c p) (modulo d p) p (p - 1)
 
 
-def tate_big_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) : Kodaira × ℕ × ℕ × (ℤ × ℤ × ℤ × ℤ) :=
+def tate_big_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) :
+  Kodaira × ℕ × ℕ × ReductionType × (ℤ × ℤ × ℤ × ℤ) :=
   let evrp := primeEVR hp
   let navp := evrp.valtn
   let c4 := e.c4
   let c6 := e.c6
   let Δ := e.discr
   let n := val_discr_to_nat navp e
-  let ⟨vpj, k, integralInv⟩ : ℤ × ℕ × Bool := --'metavariables' kernel error if type not provided
+  let ⟨vpj, k, integralInv⟩ : ℤ × ℕ × Bool := --'metavariables' kernel error if type not provided is now fixed TODO
     match (primeEVR hp).valtn.v (c4 ^ 3) with
     | ∞ => (0, n, true)
     | ofN v_c4_3 => if v_c4_3 < n then ((v_c4_3 : ℤ) - (n : ℤ), v_c4_3, false) else (v_c4_3 - n, n, true)
@@ -94,44 +108,48 @@ def tate_big_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) : Kodaira �
   if not integralInv then
     let ν := natAbs vpj
     match k with
-      | 0 => (I ν, 1,
-        if kronecker (-c6) p = 1 then ν else gcd 2 ν,
-        (u, r, s, t))
+      | 0 => let (c, R) := if kronecker (-c6) p = 1 then (ν, .SplitMultiplicative) else (gcd 2 ν, .NonSplitMultiplicative)
+             (I ν, 1, c, R, (u, r, s, t))
       | 6 => (Is ν, 2,
-        natAbs (3 + kronecker (if ν % 2 = 1 then (Δ * c6 / (p ^ (ν + 9) : ℕ)) else (Δ / (p ^ (ν + 6) : ℕ))) p),
-        (u, r, s, t))
-      | _ => (I 0, 0, 0, (0, 0, 0, 0))
+              natAbs (3 + kronecker (if ν % 2 = 1 then
+                     (Δ * c6 / (p ^ (ν + 9) : ℕ))
+                else (Δ / (p ^ (ν + 6) : ℕ))) p),
+              .Additive,
+              (u, r, s, t))
+      | _ => (I 0, 0, 0, .Good, (0, 0, 0, 0)) -- TODO this should be unreachable
   else
     match k with
-      | 0  => (I 0,  0, 1, (u, r, s, t))
-      | 2  => (II,   2, 1, (u, r, s, t))
-      | 3  => (III,  2, 2, (u, r, s, t))
+      | 0  => (I 0,  0, 1, .Good, (u, r, s, t)) -- TODO check red type
+      | 2  => (II,   2, 1, .Additive, (u, r, s, t))
+      | 3  => (III,  2, 2, .Additive, (u, r, s, t))
       | 4  => (IV,   2,
-        natAbs (2 + kronecker (-6 * c6 / (p * p)) p),
-        (u, r, s, t))
+               natAbs (2 + kronecker (-6 * c6 / (p * p)) p),
+               .Additive,
+               (u, r, s, t))
       | 6  => (Is 0, 2,
-        1 + count_roots_cubic 4 0 (-3*c4 / (p*p)) (-c6 / (p*p*p)) p,
-      (u, r, s, t))
+               1 + count_roots_cubic 4 0 (-3*c4 / (p*p)) (-c6 / (p*p*p)) p,
+               .Additive,
+               (u, r, s, t))
       | 8  => (IVs,  2,
-        natAbs (2 + kronecker (-6 * c6 / (p ^ 4 : ℕ)) p),
-        (u, r, s, t))
-      | 9  => (IIIs, 2, 2, (u, r, s, t))
-      | 10 => (IIs,  2, 1, (u, r, s, t))
-      | _  => (I 0, 0, 0, (0, 0, 0, 0))
-
-
-
---syntax (name := simpRST) "simp_rst" : tactic := simp only [rst_iso, Model.rst_iso, Model.iso]
+               natAbs (2 + kronecker (-6 * c6 / (p ^ 4 : ℕ)) p),
+               .Additive,
+               (u, r, s, t))
+      | 9  => (IIIs, 2, 2, .Additive, (u, r, s, t))
+      | 10 => (IIs,  2, 1, .Additive, (u, r, s, t))
+      | _  => (I 0, 0, 0, .Good, (0, 0, 0, 0)) -- TODO should this be unreachable?
 
 
 def kodaira_type_Is (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0 t0 : ℤ) (m q : ℕ)
-  (hq : 1 < q) (h1 : (primeEVR hp).valtn.v e.a1 ≥ ofN 1) (h2 : (primeEVR hp).valtn.v e.a2 = ofN 1) (h3 : (primeEVR hp).valtn.v e.a3 ≥ ofN q) (h4 : (primeEVR hp).valtn.v e.a4 ≥ ofN (q + 1)) (h6 : (primeEVR hp).valtn.v e.a6 ≥ ofN (2 * q)) : ℕ × ℕ × ℤ × ℤ :=
+  (hq : 1 < q) (h1 : (primeEVR hp).valtn.v e.a1 ≥ ofN 1) (h2 : (primeEVR hp).valtn.v e.a2 = ofN 1)
+  (h3 : (primeEVR hp).valtn.v e.a3 ≥ ofN q) (h4 : (primeEVR hp).valtn.v e.a4 ≥ ofN (q + 1))
+  (h6 : (primeEVR hp).valtn.v e.a6 ≥ ofN (2 * q)) :
+  ℕ × ℕ × ℤ × ℤ :=
   let evrp := primeEVR hp
   let surjvalp := evrp.valtn
   let (r, t) := (r0, t0)
   let a3q := sub_val evrp e.a3 q
   let a6q2 := sub_val evrp e.a6 (2 * q)
-  --obvious rewriting lemmas that Lean should generate implicitely
+  --obvious rewriting lemmas that Lean should generate implicitly
   have rw_a6 : sub_val evrp e.a6 (2 * q) = a6q2 := rfl
 
   if discr_1 : surjvalp.v (a3q ^ 2 + 4 * a6q2) = 0 then
@@ -147,11 +165,9 @@ def kodaira_type_Is (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0 
 
   let e1 := rst_iso 0 0 (a * (p ^ q : ℕ)) e
   have h1' : surjvalp.v e1.a1 ≥ ofN 1 := by
-    rw [rt_of_a1]
-    assumption
+    rwa [rt_of_a1]
   have h2' : surjvalp.v e1.a2 = ofN 1 := by
-    rw [t_of_a2]
-    assumption
+    rwa [t_of_a2]
   have h3' : surjvalp.v e1.a3 ≥ ofN (q+1) := by
     rw [t_of_a3, factor_p_of_le_val evrp h3, ←mul_assoc, mul_comm (2*a), nat_cast_pow, ←mul_add, surjvalp.v_mul_eq_add_v, val_of_pow_uniformizer, ←add_ofN]
     apply add_le_add (le_of_eq rfl)
@@ -171,7 +187,7 @@ def kodaira_type_Is (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0 
   let a2p := sub_val evrp e1.a2 1
   let a4pq := sub_val evrp e1.a4 (q + 1)
   let a6pq2 := sub_val evrp e1.a6 (2 * q + 1)
-  --obvious rewriting lemmas that Lean should generate implicitely
+  --obvious rewriting lemmas that Lean should generate implicitly
   have rw_a2' : sub_val evrp e1.a2 1 = a2p := rfl
   have rw_a4' : sub_val evrp e1.a4 (q + 1) = a4pq := rfl
   have rw_a6' : sub_val evrp e1.a6 (2 * q + 1) = a6pq2 := rfl
@@ -194,18 +210,16 @@ def kodaira_type_Is (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0 
   --if p = 2 then modulo a6pq2 2 else modulo (2 * a2p * -a4pq) 3
   let e2 := rst_iso (a' * (p ^ q : ℕ)) 0 0 e1
   have h1'' : surjvalp.v e2.a1 ≥ ofN 1 := by
-    rw [rt_of_a1]
-    assumption
+    rwa [rt_of_a1]
   have h2'' : surjvalp.v e2.a2 = ofN 1 := by
-    rw [r_of_a2, v_add_eq_min_v surjvalp]
-    . assumption
-    . rw [h2']
-      apply lt_of_succ_le
-      apply val_mul_ge_of_right_ge surjvalp
-      apply val_mul_ge_of_right_ge surjvalp
-      rw [nat_cast_pow, val_of_pow_uniformizer surjvalp]
-      rw [lt_ofN 1 q] at hq
-      exact succ_le_of_lt hq
+    rwa [r_of_a2, v_add_eq_min_v surjvalp]
+    rw [h2']
+    apply lt_of_succ_le
+    apply val_mul_ge_of_right_ge surjvalp
+    apply val_mul_ge_of_right_ge surjvalp
+    rw [nat_cast_pow, val_of_pow_uniformizer surjvalp]
+    rw [lt_ofN 1 q] at hq
+    exact succ_le_of_lt hq
   have h3'' : surjvalp.v e2.a3 ≥ ofN (q + 1) := by
     rw [r_of_a3]
     apply Enat.le_trans _ (surjvalp.v_add_ge_min_v _ _)
@@ -242,31 +256,12 @@ decreasing_by
     have val_d := v_discr_of_v_ai surjvalp e hq h1 h2 h3 h4 h6
     rw [←succ_ofN] at val_d
     exact lt_of_succ_le val_d
-  . apply Nat.add_lt_add_right
-    apply Nat.mul_lt_mul_of_pos_left _ (Nat.zero_lt_succ 1)
-    exact Nat.lt_succ_self q
+  . exact Nat.add_lt_add_right (Nat.mul_lt_mul_of_pos_left q.lt_succ_self (Nat.zero_lt_succ 1)) 2
 
 
---lemma x : (0 < n ↔ 1 ≤ n) := by library_search
---lemma x (a b c d : ℤ) : a = b → c = d → a + c = b + d := by library_search
---lemma x (a b c d e : Int) : e + (a - b + c + d - e) = a - b + c + d := by ring
-
---set_option maxHeartbeats 400000
-
-/-
-example : 1 + 3 = 1 := by
-  conv =>
-    congr
-    congr
-    skip
-    skip
-    rw [(sorry : 1 = 2)]
-  sorry
--/
-
-
-def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0 t0 : ℤ) : Kodaira × ℕ × ℕ × (ℤ × ℤ × ℤ × ℤ) :=
-  if smallp : (p : ℤ) ≠ 2 ∧ (p : ℤ) ≠ 3 then (I 0, 0, 0, (0, 0, 0, 0)) else
+def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0 t0 : ℤ) :
+  Kodaira × ℕ × ℕ × ReductionType × (ℤ × ℤ × ℤ × ℤ) :=
+  if smallp : (p : ℤ) ≠ 2 ∧ (p : ℤ) ≠ 3 then (I 0, 0, 0, .Good, (0, 0, 0, 0)) else
   have p_is_2_or_3 : (p : ℤ) = 2 ∨ (p : ℤ) = 3 := by
     rw [Decidable.not_and] at smallp
     cases smallp with
@@ -280,7 +275,7 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
   let evrp := primeEVR hp
   let navp := evrp.valtn
   let n := val_discr_to_nat navp e
-  if testΔ : n = 0 then (I 0, 0, 1, (u, r, s, t)) else
+  if testΔ : n = 0 then (I 0, 0, 1, .Good, (u, r, s, t)) else -- TODO check
   have hΔ : navp.v e.discr ≥ ofN 1 := by
     rw [(show ¬n = 0 ↔ 0 < n by simp [Nat.pos_iff_ne_zero]), lt_ofN, ofN_val_discr_to_nat] at testΔ
     exact succ_le_of_lt testΔ
@@ -294,8 +289,9 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
     let e1 := rst_iso r1 0 t1 e
     let r := r + r1 * u ^ 2
     let t := t + t1 * u ^ 3 + s * r1 * u ^ 2
-    let c := if quad_root_in_ZpZ 1 e1.a1 (-e1.a2) p then n else gcd 2 n
-    (I n, 1, c, (u, r, s, t))
+    let (c, R) := if quad_root_in_ZpZ 1 e1.a1 (-e1.a2) p then
+      (n, .SplitMultiplicative) else (gcd 2 n, .NonSplitMultiplicative)
+    (I n, 1, c, R, (u, r, s, t))
   else
   have hb2 : navp.v e.b2 ≥ ofN 1 := le_of_not_lt test_b2
 
@@ -334,16 +330,16 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
     apply succ_le_of_lt singular
   -/
 
-  if test_a6 : navp.v e1.a6 < ofN 2 then (II, n, 1, (u, r, s, t)) else
+  if test_a6 : navp.v e1.a6 < ofN 2 then (II, n, 1, .Additive, (u, r, s, t)) else
   have h6 : navp.v e1.a6 ≥ ofN 2 := le_of_not_lt test_a6
 
-  if test_b8 : navp.v e1.b8 < ofN 3 then (III, n-1, 2, (u, r, s, t)) else
+  if test_b8 : navp.v e1.b8 < ofN 3 then (III, n - 1, 2, .Additive, (u, r, s, t)) else
   have hb8 : navp.v e1.b8 ≥ ofN 3 := le_of_not_lt test_b8
 
   if test_b6 : navp.v e1.b6 < ofN 3 then
     let (a3p, a6p2) := (sub_val evrp e1.a3 1, sub_val evrp e1.a6 2)
     let c := if quad_root_in_ZpZ 1 a3p (-a6p2) p then 3 else 1
-    (IV, n - 2, c, (u, r, s, t))
+    (IV, n - 2, c, .Additive, (u, r, s, t))
   else
   have hb6 : navp.v e1.b6 ≥ ofN 3 := le_of_not_lt test_b6
 
@@ -355,8 +351,7 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
   have hdr_b2 : has_double_root 1 e1.a1 (-e1.a2) hp := by
     apply And.intro (val_of_one navp) _
     apply lt_of_succ_le
-    rw [mul_one, ←neg_mul_right, sub_eq_add_neg, neg_neg, succ_ofN, pow_succ, pow_one]
-    assumption
+    rwa [mul_one, ←neg_mul_right, sub_eq_add_neg, neg_neg, succ_ofN, pow_succ, pow_one]
 
   let a3p := sub_val evrp e1.a3 1
   let a6p2 := sub_val evrp e1.a6 2
@@ -431,7 +426,7 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
 
   if test_Δcubic : navp.v (Δcubic (model_to_cubic evrp e2)) = 0 then -- TODO don't recompute a2p,a4pw above
     let c := 1 + count_roots_cubic 1 a2p a4p2 a6p3 p
-    (Is 0, n - 4, c, (u, r, s, t))
+    (Is 0, n - 4, c, .Additive, (u, r, s, t))
   else
   if test_δcubic : navp.v (δmultiplicity (model_to_cubic evrp e2)) = 0 then
     have e2_cubic_has_double_root : cubic_has_double_root evrp e2 := by
@@ -443,8 +438,7 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
     --let t := t + u ^ 2 * s * r1
     have h1' : navp.v e3.a1 ≥ ofN 1 := by
       simp only [move_cubic_double_root_to_origin_iso]
-      rw [rt_of_a1]
-      exact h1
+      rwa [rt_of_a1]
 
     have h2' : navp.v e3.a2 = ofN 1 := by
       have h2'' : navp.v e3.a2 ≥ ofN 1 := by
@@ -465,7 +459,7 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
       . rw [mul_assoc, factor_p_of_le_val evrp h1, mul_comm _ (_ ^ 1 * _), ←mul_assoc, ←mul_assoc, mul_comm _ (_ ^ 1), ←pow_succ', mul_assoc]
         apply val_mul_ge_of_left_ge
         rw [val_of_pow_uniformizer navp]
-        exact le_of_eq rfl
+        exact le_refl _
 
     have h4' : navp.v e3.a4 ≥ ofN 3 := by
       have h4'' : navp.v e3.a4 ≥ ofN 2 := by
@@ -492,7 +486,7 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
         exact succ_le_of_lt (move_cubic_double_root_to_origin evrp e2 e2_cubic_has_double_root).2.2
 
     let (m, c, (r, t)) := kodaira_type_Is p hp e3 u r s t 1 2 (Nat.lt_succ_self 1) h1' h2' h3 h4' h6
-    (Is m, n - m - 4, c, (u, r, s, t))
+    (Is m, n - m - 4, c, .Additive, (u, r, s, t))
   else
 
   have e2_cubic_has_triple_root : cubic_has_triple_root evrp e2 := by
@@ -541,7 +535,7 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
 
   if discr_b6p4 : navp.v (a3p2 ^ 2 + 4 * a6p4) = 0 then
     let c := if quad_root_in_ZpZ 1 a3p2 (-a6p4) p then 3 else 1
-    (IVs, n - 6, c, (u, r, s, t))
+    (IVs, n - 6, c, .Additive, (u, r, s, t))
   else
 
   have h_b6p4 : has_double_root 1 a3p2 (-a6p4) hp := by
@@ -564,10 +558,10 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
     . rw [←succ_ofN 0]
       exact succ_le_of_lt (val_poly_of_double_root hp 1 a3p2 (-a6p4) h_b6p4).2
 
-  if test_a4 : navp.v e4.a4 < ofN 4 then (IIIs, n - 7, 2, (u, r, s, t)) else
+  if test_a4 : navp.v e4.a4 < ofN 4 then (IIIs, n - 7, 2, .Additive, (u, r, s, t)) else
   have h4 : navp.v e4.a4 ≥ ofN 4 := le_of_not_lt test_a4
 
-  if test_a6 : navp.v e4.a6 < ofN 6 then (IIs, n - 8, 1, (u, r, s, t)) else
+  if test_a6 : navp.v e4.a6 < ofN 6 then (IIs, n - 8, 1, .Additive, (u, r, s, t)) else
   have h6 : navp.v e4.a6 ≥ ofN 6 := le_of_not_lt test_a6
 
   have h1 : navp.v e4.a1 ≥ ofN 1 := by
@@ -603,7 +597,8 @@ decreasing_by
 
 
 
-def tate_algorithm (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) : Kodaira × ℕ × ℕ × (ℤ × ℤ × ℤ × ℤ) :=
+def tate_algorithm (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) :
+  Kodaira × ℕ × ℕ × ReductionType × (ℤ × ℤ × ℤ × ℤ) :=
   if p = 2 then
     tate_small_prime 2 (Int.prime_2) e 1 0 0 0
   else if p = 3 then
@@ -612,6 +607,8 @@ def tate_algorithm (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) : Kodaira �
     tate_big_prime p hp e
 
 
-def test_model : ValidModel ℤ := ⟨ ⟨1, -1, 1, -23130, -1322503⟩ , by simp⟩
+def test_model : ValidModel ℤ := ⟨⟨1, -1, 1, -23130, -1322503⟩, by simp⟩
+
+#eval tate_algorithm 2 sorry test_model
 
 end Int

@@ -1,11 +1,13 @@
 import Mathlib.Tactic.Basic
 
+-- TODO do we need more types as implied by https://mathoverflow.net/questions/127908/reduction-types-of-elliptic-curves
+
 inductive Kodaira where
   | I     : Nat → Kodaira --for both I0 and In with n > 0
   | II    : Kodaira
   | III   : Kodaira
   | IV    : Kodaira
-  | Is    : Nat → Kodaira
+  | Is    : Nat → Kodaira -- TODO really Is 0 shouldn't occur?
   | IIs   : Kodaira
   | IIIs  : Kodaira
   | IVs   : Kodaira
@@ -39,3 +41,16 @@ lemma eq_Is_Nat (m n : Nat) : m = n ↔ Is m = Is n := by
   intro h
   cases h
   rfl
+
+inductive ReductionType
+  | Good
+  | SplitMultiplicative
+  | NonSplitMultiplicative
+  | Additive
+deriving DecidableEq, Repr, Inhabited
+
+def ReductionType.to_lmfdb : ReductionType → Int
+  | Good                   => unreachable! -- LMFDB has no code for good reduction
+  | SplitMultiplicative    => 1
+  | NonSplitMultiplicative => -1
+  | Additive               => 0

@@ -22,14 +22,14 @@ def kodaira_decode : ℤ → Kodaira
   | n => if n > 0 then I (Int.natAbs (n - 4))
     else Is (Int.natAbs (-n - 4))
 
-def parsefunc (s : String) : Model ℤ × ℕ × Kodaira × ℕ × ℕ :=
+def parsefunc (s : String) : Model ℤ × ℕ × Kodaira × ℕ × ℕ × ℤ :=
   match String.split s (λ c => c = '{' || c = '}') with
   | "" :: mdl :: lcldata :: [] =>
     match String.split mdl (λ c => c = ',') with
     | [a1, a2, a3, a4, a6] =>
       match String.split lcldata (λ c => c = '&') with
-      | ["", p, f, _, _, k, c, _] =>
-        (⟨a1.toInt!, a2.toInt!, a3.toInt!, a4.toInt!, a6.toInt!⟩, p.toNat!, kodaira_decode k.toInt!, f.toNat!, c.toNat!)
+      | ["", p, f, _, _, k, c, r] =>
+        (⟨a1.toInt!, a2.toInt!, a3.toInt!, a4.toInt!, a6.toInt!⟩, p.toNat!, kodaira_decode k.toInt!, f.toNat!, c.toNat!, r.toInt!)
       | _ => unreachable!
     | _ => unreachable!
   | _ => unreachable!
@@ -40,15 +40,14 @@ def test (N : ℕ) : IO Unit := do
   -- model, p, conductor exponent f, disc exp, denom j exponent, kodaira type k, tamagawa c, reduction type]
   let l ← lines $ mkFilePath ["test/lmfdb.csv"]
   for str in l.zip (Array.range N) do
-    let d : Model ℤ × ℕ × Kodaira × ℕ × ℕ := parsefunc str.1
-    let m : Model ℤ := d.fst
+    let ⟨m, p, ok, of, oc, or⟩ : Model ℤ × ℕ × Kodaira × ℕ × ℕ × ℤ := parsefunc str.1
     if Δnz : m.discr ≠ 0 then
-      let p : ℕ := d.snd.fst; let res : Kodaira × ℕ × ℕ := d.snd.snd
       match Int.tate_algorithm p sorry ⟨m, Δnz⟩ with
-      | (k, f, c, _, _, _, _) =>
-        if (k, f, c) ≠ res then println str else print ""
-    else
-      print ""
+      | (k, f, c, r, _, _, _, _) =>
+        if (k, f, c) ≠ (ok, of, oc) ∨ or ≠ r.to_lmfdb then println str
   println (toString N ++ " lines tested")
 
-#eval test 3000
+#eval test 30000
+
+
+#eval (Int.tate_algorithm 2 sorry ⟨⟨1,0,1,-2731,-55146⟩, sorry⟩).fst.reduction.to_lmfdb--&2&1&9&9&13&1&-1

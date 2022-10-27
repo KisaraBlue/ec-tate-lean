@@ -2,7 +2,10 @@ import ECTate.Algebra.Ring.Basic
 import Mathlib.Tactic.NormNum
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.SimpTrace
+import Mathlib.Tactic.PrintPrefix
 import Mathlib.Tactic.LibrarySearch
+import Mathlib.Util.WhatsNew
+
 
 
 #print CommGroup.toDivisionCommMonoid
@@ -70,13 +73,14 @@ lemma mul4 : 2 * 2 = (4 : R) := by norm_num
 
 end Obvious
 
+
 structure Model (R : Type u) [IntegralDomain R] where
   a1 : R
   a2 : R
   a3 : R
   a4 : R
   a6 : R
-deriving Inhabited
+deriving Inhabited, DecidableEq
 
 namespace Model
 
@@ -388,7 +392,6 @@ end ValidModel
 namespace Characteristic
 open Classical
 variable (R)
-variable [DecidableEq R]
 noncomputable
 def characteristic := if h : _ then Nat.find (fun n => n ≠ 0 ∧ (n : R) = 0) h else 0
 end Characteristic
