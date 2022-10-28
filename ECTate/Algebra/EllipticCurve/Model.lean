@@ -1,4 +1,5 @@
 import ECTate.Algebra.Ring.Basic
+import ECTate.Algebra.CharP.Basic
 import Mathlib.Tactic.NormNum
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.SimpTrace
@@ -390,12 +391,6 @@ rfl
 
 end ValidModel
 
-namespace Characteristic
-open Classical
-variable (R)
-noncomputable
-def characteristic := if h : _ then Nat.find (fun n => n ≠ 0 ∧ (n : R) = 0) h else 0
-end Characteristic
 
 namespace Model
 
