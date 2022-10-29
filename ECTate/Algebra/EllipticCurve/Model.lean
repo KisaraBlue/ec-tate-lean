@@ -408,7 +408,7 @@ by
   sorry
 
 
-open Characteristic Classical
+open Classical
 
 /--
 Proposition 1.5.4 of Elliptic Curve Handbook, Ian Connell February, 1999,
@@ -417,7 +417,7 @@ https://www.math.rug.nl/~top/ian.pdf
 noncomputable
 def singular_point (e : Model R) : R × R :=
   if e.c4 = 0 then
-    match characteristic R with
+    match ring_char R with
     | 2 => (0, 0)
     | 3 => ((-e.b6), (e.a3 - e.b6 * e.a1))
     | _ => (0, 0) --need to fill here
