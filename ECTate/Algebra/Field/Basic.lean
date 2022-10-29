@@ -1,4 +1,5 @@
 import Mathlib.Algebra.Ring.Basic
+import ECTate.Algebra.Ring.Basic
 
 
 
@@ -8,3 +9,5 @@ class DivisionRing (K : Type u) extends Ring K, DivInvMonoid K :=
 (inv_zero : (0 : K)⁻¹ = 0)
 
 class Field (K : Type u) extends CommRing K, DivisionRing K
+
+instance (K : Type u) [Field K] : IntegralDomain K := sorry

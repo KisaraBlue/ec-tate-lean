@@ -137,12 +137,12 @@ def rst_iso (r s t : R) (e : Model R) : Model R := {
   a2 := e.a2 - s*e.a1 + 3*r - s*s,
   a3 := e.a3 + r*e.a1 + 2*t,
   a4 := e.a4 - s*e.a3 + 2*r*e.a2 - (t+r*s)*e.a1 + 3*r*r - 2*s*t,
-  a6 := e.a6 + r*e.a4 + r*r*e.a2 + r*r*r - t*(e.a3 + t + r*e.a1)
-  }
+  a6 := e.a6 + r*e.a4 + r*r*e.a2 + r*r*r - t*(e.a3 + t + r*e.a1) }
 
 lemma rst_b2 (r s t : R) (e : Model R) : (rst_iso r s t e).b2 = e.b2 + 12*r := by
   simp [rst_iso, b2, one_mul, one_pow, sub_eq_add_neg, mul_add, add_mul]
-  rw [mul_comm _ (2*s), mul_assoc 2, add_assoc (e.a1*e.a1), ←add_assoc (2*(s*e.a1)), ←add_mul, add4, ←neg_mul_right]
+  rw [mul_comm _ (2*s), mul_assoc 2, add_assoc (e.a1*e.a1), ←add_assoc (2*(s*e.a1)),
+    ←add_mul, add4, ←neg_mul_right]
   rw [←mul_assoc (2*s), mul_comm _ 2, ←mul_assoc 2, mul4, ←neg_mul_right, mul_assoc 4 s s]
   rw [add_comm (4*(s*e.a1)), add_comm (4*e.a2), add_assoc, add_assoc, add_comm (4*(s*s)), ←add_assoc]
   simp [←add_assoc (4*(s*e.a1))]
@@ -170,7 +170,7 @@ by
   -- the negatives to the other side, to get a purely additive expression
   simp only [← sub_add_comm, neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
     ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, sub_add]
-  simp [eq_sub_iff_add_eq, sub_eq_iff_eq_add, sub_add_comm, neg_add_eq_sub, add_sub]
+  simp only [eq_sub_iff_add_eq, sub_eq_iff_eq_add, sub_add_comm, neg_add_eq_sub, add_sub]
   ring
 
 open ring_neg in
@@ -180,9 +180,9 @@ by
   simp only [rst_iso, b2, b4, b6, b8, one_mul, one_pow]
   -- this is a hacky way to get a version of ring with negs, we expand everything and move
   -- the negatives to the other side, to get a purely additive expression
-  simp [sub_add_comm', neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
+  simp only [sub_add_comm', neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
     ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul]
-  simp [eq_sub_iff_add_eq, sub_eq_iff_eq_add, sub_add_comm', neg_add_eq_sub, add_sub, sub_add]
+  simp only [eq_sub_iff_add_eq, sub_eq_iff_eq_add, sub_add_comm', neg_add_eq_sub, add_sub, sub_add]
   ring
 
 open ring_neg in
@@ -257,7 +257,7 @@ by
 
 
 open ring_neg in
-set_option maxHeartbeats 2000000 in
+set_option maxHeartbeats 600000 in
 lemma discr_in_jacobian_ideal (e : Model R) (P : R × R) : e.discr =
   -((48*P.1*P.2*e.a2^2 +24*e.a1*e.a2*e.a6 +216*P.2*e.a6 +P.2*e.a1^6 +11*P.2*e.a1^4*e.a2 +P.1*e.a1^4*e.a3 +38*P.1*e.a1^2*e.a2*e.a3 +8*e.a1^2*e.a2^2*e.a3
   +e.a1^4*e.a2*e.a3 +40*P.2*e.a1^2*e.a2^2 +32*P.2*e.a2^3 +24*P.1*P.2*e.a1*e.a3 +30*P.1^2*e.a2*e.a3 +3*P.1*e.a1^3*e.a4 +60*P.1^2*e.a1*e.a4 +30*P.1^2*e.a1^2*e.a3
@@ -275,13 +275,12 @@ lemma discr_in_jacobian_ideal (e : Model R) (P : R × R) : e.discr =
   -(432*e.a6 +e.a1^6 +288*P.2*e.a3 +252*e.a3^2 +12*e.a1^4*e.a2 +48*e.a1^2*e.a2^2 +96*P.1*e.a2^2 +64*e.a2^3))*(weierstrass e P))
  :=
 by
-  rw [discr_eq_neg_singular]
-  rw [neg_eq_neg_iff]
+  rw [discr_eq_neg_singular, neg_eq_neg_iff]
   simp only [weierstrass, dweierstrass_dx, dweierstrass_dy]
   -- this is a hacky way to get a version of ring with negs, we expand everything and move
   -- the negatives to the other side, to get a purely additive expression
-  simp [sub_add_comm', neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
-    ← neg_mul_right, mul_sub, sub_mul]
+  simp only [sub_add_comm', neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
+    ← neg_mul_right, mul_sub, sub_mul, pow_zero, mul_one]
   simp only [eq_sub_iff_add_eq, sub_eq_iff_eq_add, sub_add_comm', neg_add_eq_sub,
     add_sub, sub_add, ← sub_eq_add_neg]
   simp only [sub_add_comm', neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
@@ -317,68 +316,81 @@ structure ValidModel (R : Type u) [IntegralDomain R] extends Model R where
 
 namespace ValidModel
 instance [Repr R] : Repr (ValidModel R) := ⟨ λ (e : ValidModel R) _ => repr e.toModel⟩
--- #eval repr ({a1 := 0,a2 := 0, a3:=0,a4:=0,a6:=1, discr_not_zero := by norm_num : ValidModel ℤ})
-
 
 def rst_iso (r s t : R) (e : ValidModel R) : ValidModel R := {
   toModel := Model.rst_iso r s t e.toModel,
   discr_not_zero := by
     rw [Model.rst_discr]
-    exact e.discr_not_zero
-}
+    exact e.discr_not_zero }
 
+@[simp]
 lemma rst_discr_valid (r s t : R) (e : ValidModel R) : (rst_iso r s t e).discr = e.discr :=
   Model.rst_discr r s t e.toModel
 
 --more [simp] lemmas
+@[simp]
 lemma rt_of_a1 (e : ValidModel R) (r t : R) : (rst_iso r 0 t e).a1 = e.a1 :=
 by simp only [rst_iso, Model.rst_iso, mul_zero, add_zero, one_mul]
 
+@[simp]
 lemma t_of_a2 (e : ValidModel R) (t : R) : (rst_iso 0 0 t e).a2 = e.a2 :=
 by simp only [rst_iso, Model.rst_iso, one_pow, zero_mul, sub_zero, mul_zero, add_zero, one_mul]
 
+@[simp]
 lemma r_of_a2 (e : ValidModel R) (r : R) : (rst_iso r 0 0 e).a2 = e.a2 + 3 * r :=
 by simp only [rst_iso, Model.rst_iso, one_pow, zero_mul, sub_zero, mul_zero, add_zero, one_mul]
 
+@[simp]
 lemma t_of_a3 (e : ValidModel R) (t : R) : (rst_iso 0 0 t e).a3 = e.a3 + 2 * t :=
 by simp only [rst_iso, Model.rst_iso, one_pow, zero_mul, sub_zero, mul_zero, add_zero, one_mul]
 
+@[simp]
 lemma r_of_a3 (e : ValidModel R) (r : R) : (rst_iso r 0 0 e).a3 = e.a3 + r * e.a1 :=
 by simp only [rst_iso, Model.rst_iso, one_pow, zero_mul, sub_zero, mul_zero, add_zero, one_mul]
 
+@[simp]
 lemma t_of_a4 (e : ValidModel R) (t : R) : (rst_iso 0 0 t e).a4 = e.a4 - t * e.a1 :=
 by simp only [rst_iso, Model.rst_iso, one_pow, zero_mul, sub_zero, mul_zero, add_zero, one_mul]
 
+@[simp]
 lemma r_of_a4 (e : ValidModel R) (r : R) : (rst_iso r 0 0 e).a4 = e.a4 + 2 * r * e.a2 + 3 * r ^ 2 :=
 by simp only [rst_iso, Model.rst_iso, one_pow, zero_mul,
   sub_zero, mul_zero, one_mul, add_zero, mul_assoc, ←pow_two r]
 
+@[simp]
 lemma t_of_a6 (e : ValidModel R) (t : R) : (rst_iso 0 0 t e).a6 = e.a6 - t * e.a3 - t ^ 2 :=
 by simp only [rst_iso, Model.rst_iso, one_pow, zero_mul, sub_zero, mul_zero,
   one_mul, add_zero, mul_add, ←pow_two t, sub_eq_add_neg, neg_add, ←add_assoc]
 
+@[simp]
 lemma r_of_a6 (e : ValidModel R) (r : R) :
   (rst_iso r 0 0 e).a6 = e.a6 + r * e.a4 + r ^ 2 * e.a2 + r ^ 3 :=
 by simp only [rst_iso, Model.rst_iso, one_pow, zero_mul, sub_zero,
   mul_zero, one_mul, add_zero, mul_assoc, pow_two r, pow_succ r, pow_zero, mul_one]
 
+@[simp]
 lemma st_of_a1 (e : ValidModel R) (s t : R) : (rst_iso 0 s t e).a1 = e.a1 + 2 * s :=
 by simp only [rst_iso, Model.rst_iso, one_pow, mul_zero, one_mul]
 
+@[simp]
 lemma st_of_a2 (e : ValidModel R) (s t : R) : (rst_iso 0 s t e).a2 = e.a2 - s * e.a1 - s ^ 2 :=
 by simp only [rst_iso, Model.rst_iso, one_pow, mul_zero, one_mul, add_zero, mul_assoc, ←pow_two s]
 
+@[simp]
 lemma st_of_a3 (e : ValidModel R) (s t : R) : (rst_iso 0 s t e).a3 = e.a3 + 2 * t :=
 by simp only [rst_iso, Model.rst_iso, one_pow, mul_zero, one_mul, add_zero, mul_assoc, zero_mul]
 
+@[simp]
 lemma st_of_a4 (e : ValidModel R) (s t : R) :
   (rst_iso 0 s t e).a4 = e.a4 - s * e.a3 - t * e.a1 - 2 * s * t :=
 by simp only [rst_iso, Model.rst_iso, one_pow, mul_zero, one_mul, add_zero, mul_assoc, zero_mul]
 
+@[simp]
 lemma st_of_a6 (e : ValidModel R) (s t : R) : (rst_iso 0 s t e).a6 = e.a6 - t * e.a3 - t ^ 2 :=
 by simp only [rst_iso, Model.rst_iso, one_pow, mul_zero, one_mul,
   add_zero, mul_assoc, ←pow_two t, zero_mul, mul_add, sub_sub]
 
+@[simp]
 lemma st_of_b8 (e : ValidModel R) (s t : R) : (rst_iso 0 s t e).b8 = e.b8 := by
   rw [rst_iso, Model.rst_b8]
   simp only [mul_zero, add_zero, zero_mul]
@@ -395,18 +407,25 @@ end ValidModel
 namespace Model
 
 namespace Field
-variable {p : R}
+variable {K : Type u} [Field K]
 
-def is_singular_point (e : Model R) (P : R × R) : Prop :=
+def is_singular_point (e : Model K) (P : K × K) : Prop :=
 weierstrass e P = 0 ∧ dweierstrass_dx e P = 0 ∧ dweierstrass_dy e P = 0
-lemma discr_eq_zero_of_singular (e : Model R) {P} (h : is_singular_point e P) :
-  e.discr = 0 := sorry
 
-lemma singular_of_val_discr (e : Model R) (h : e.discr = 0) :
-  ∃ P, is_singular_point e P :=
+attribute [instance] Semiring.toMonoidWithZero
+attribute [instance] DivisionCommMonoid.toDivisionMonoid
+attribute [instance] SubtractionCommMonoid.toSubtractionMonoid
+attribute [instance] Ring.toSemiring
+attribute [instance] CommRing.toRing
+attribute [instance] Field.toDivisionRing
+attribute [instance] Field.toCommRing
+lemma discr_eq_zero_of_singular (e : Model K) {P} (h : is_singular_point e P) :
+  e.discr = 0 :=
 by
+  rcases h with ⟨h₁, h₂, h₃⟩
+  rw [discr_in_jacobian_ideal, h₁, h₂, h₃]
+  simp [neg_eq_zero]
   sorry
-
 
 open Classical
 
@@ -415,22 +434,63 @@ Proposition 1.5.4 of Elliptic Curve Handbook, Ian Connell February, 1999,
 https://www.math.rug.nl/~top/ian.pdf
 -/
 noncomputable
-def singular_point (e : Model R) : R × R :=
+def singular_point (e : Model K) : K × K :=
   if e.c4 = 0 then
-    match ring_char R with
+    match ring_char K with
     | 2 => (0, 0)
     | 3 => ((-e.b6), (e.a3 - e.b6 * e.a1))
-    | _ => (0, 0) --need to fill here
+    | _ => (e.b2 / 12, -(e.a1 * e.b2 / 12 + e.a3) / 2)
   else
-    ((18 * e.b6 - e.b2 * e.b4), (e.b2 * e.b5 + 3 * e.b7))
-    -- ((18 * e.b6 - e.b2 * e.b4) / e.c4, (e.b2 * e.b5 + 3 * e.b7) / e.c4)
+    ((18 * e.b6 - e.b2 * e.b4) / e.c4, (e.b2 * e.b5 + 3 * e.b7) / e.c4)
+
+lemma is_singular_point_singular_point (e : Model K) (h : e.discr = 0) :
+  is_singular_point e (singular_point e) :=
+by
+  rw [singular_point]
+  split
+  . split
+    . rw [is_singular_point]
+      refine ⟨?_, ?_, ?_⟩
+      . rw [weierstrass]
+        simp
+        ring
+      . rw [dweierstrass_dx]
+        sorry
+      . rw [dweierstrass_dy]
+        sorry
+    . rw [is_singular_point]
+      refine ⟨?_, ?_, ?_⟩
+      . rw [weierstrass]
+        sorry
+      . rw [dweierstrass_dx]
+        sorry
+      . rw [dweierstrass_dy]
+        sorry
+    . rw [is_singular_point]
+      refine ⟨?_, ?_, ?_⟩
+      . rw [weierstrass]
+        sorry
+      . rw [dweierstrass_dx]
+        sorry
+      . rw [dweierstrass_dy]
+        sorry
+  . rw [is_singular_point]
+    refine ⟨?_, ?_, ?_⟩
+    . rw [weierstrass]
+      sorry
+    . rw [dweierstrass_dx]
+      sorry
+    . rw [dweierstrass_dy]
+      sorry
+
+
 /--
 Proposition 1.5.4 of Elliptic Curve Handbook, Ian Connell February, 1999,
 https://www.math.rug.nl/~top/ian.pdf
 -/
 noncomputable
 def move_singular_point_to_origin_triple (e : Model R) : R × R × R :=
-  sorry
+⟨(singular_point e).1, 0, (singular_point e).2⟩
 
 noncomputable
 def move_singular_point_to_origin_iso (e : Model R) : Model R :=
