@@ -14,8 +14,7 @@ require mathlib from git
 
 @[default_target]
 lean_lib ECTate {
-  roots := #[`ECTate],
-  globs := #[.one `ECTate, .andSubmodules `ECTate]
+  globs := #[.andSubmodules `ECTate]
 
   -- add any library configuration options here
 }
