@@ -1,6 +1,6 @@
 import ECTate.Algebra.EllipticCurve.Kronecker
 import ECTate.Algebra.EllipticCurve.Model
-import ECTate.Algebra.EllipticCurve.ValuedRing
+import ECTate.Algebra.ValuedRing
 import ECTate.Data.Nat.Enat
 import Mathlib.Init.Data.Int.Basic
 import Mathlib.Tactic.LibrarySearch

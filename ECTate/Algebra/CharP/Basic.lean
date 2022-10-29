@@ -1,6 +1,6 @@
 import ECTate.Algebra.Field.Basic
 import ECTate.Algebra.Ring.Basic
-import ECTate.Algebra.EllipticCurve.ValuedRing
+import ECTate.Algebra.ValuedRing
 import ECTate.Data.Nat.Enat
 
 open Classical
