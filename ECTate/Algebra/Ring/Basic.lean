@@ -93,13 +93,13 @@ lemma square_sub (a b : R) : (a - b) ^ 2 = a ^ 2 - 2 * (a * b) + b ^ 2 := by
 end CommRing
 
 class IntegralDomain (R : Type u) extends CommRing R where
-  non_trivial : ¬1 = 0
+  non_trivial : ¬(1 : R) = 0
   factors_nzero_mul_nzero {a b : R} : a ≠ 0 → b ≠ 0 → a * b ≠ 0
 
 section IntegralDomain
 variable [IntegralDomain R]
 
-theorem non_trivial : ¬1 = 0 := IntegralDomain.non_trivial R
+theorem non_trivial : ¬(1 : R) = 0 := IntegralDomain.non_trivial
 
 theorem factors_nzero_mul_nzero {a b : R} : a ≠ 0 → b ≠ 0 → a * b ≠ 0 := IntegralDomain.factors_nzero_mul_nzero
 
