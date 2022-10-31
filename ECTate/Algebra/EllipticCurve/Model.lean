@@ -566,22 +566,35 @@ by
       have hchar'' : (3 : K) = 0 := by simp [← hchar', ring_char_eq_zero]
       have hb2 : e.b2 = 0 := by simpa [c4_zero_iff_b2_zero_of_char_three e hchar] using hc4
       have hb4 : e.b4 = 0 := b4_zero_of_b2_zero_of_disc_zero_of_char_three e hchar h hb2
+      rw [b2] at hb2 -- TODO get versions that elim one b
+      rw [b4] at hb4
       refine ⟨?_, ?_, ?_⟩
       . rw [weierstrass]
-        simp
         rw [← hchar, pth_root_pow_char hcharne]
-        simp
-        simp [sub_add_comm', neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
+        simp [sub_add_comm', neg_pow_three, neg_add_eq_sub, sub_sub, ← neg_mul_left,
           ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
         simp [eq_sub_iff_add_eq, sub_eq_iff_eq_add, neg_add_eq_sub, add_sub, sub_add]
-        sorry
+        rw [show (e.a1 * pth_root (-e.a3 ^ 2 - e.a6) + e.a3) ^ 2 +
+          (e.a1 * pth_root (-e.a3 ^ 2 - e.a6) * (e.a1 * pth_root (-e.a3 ^ 2 - e.a6)) +
+            e.a1 * pth_root (-e.a3 ^ 2 - e.a6) * e.a3) +
+          (e.a3 * (e.a1 * pth_root (-e.a3 ^ 2 - e.a6)) + e.a3 * e.a3) =
+          2 * e.a3 ^ 2 +
+          (2 * e.a1 ^ 2 * pth_root (-e.a3 ^ 2 - e.a6) ^ 2) +
+          (4 * e.a1 * e.a3 * pth_root (-e.a3 ^ 2 - e.a6))
+          by ring]
+        congr
+        . sorry
+        . sorry
+        . sorry
       . rw [dweierstrass_dx]
-        simp
         rw [hchar'', zero_mul, zero_add]
         simp [sub_add_comm', neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
           ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
         simp [eq_sub_iff_add_eq, sub_eq_iff_eq_add, neg_add_eq_sub, add_sub, sub_add]
-        sorry
+        rw [← mul_assoc]
+        congr 2
+        . sorry
+        . sorry
       . rw [dweierstrass_dy]
         simp [sub_add_comm', neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
           ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
@@ -590,22 +603,46 @@ by
             + e.a1 * pth_root (e.a3 * e.a3 - e.a6) + e.a3 = 3 * ((e.a1 * pth_root (e.a3 * e.a3 - e.a6)) + e.a3) by ring]
         rw [hchar'', zero_mul]
     . rw [is_singular_point]
+      have hb4 : e.b2 ^ 2 = 24 * e.b2 := sorry
       refine ⟨?_, ?_, ?_⟩
       . rw [weierstrass]
-        simp
+        simp [hb4]
+        simp [sub_add_comm', neg_pow_three, div_eq_mul_inv, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
+          ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
+        simp [eq_sub_iff_add_eq, sub_eq_iff_eq_add, neg_add_eq_sub, add_sub, sub_add]
+        apply nzero_mul_left_cancel (12 ^ 3) _ _ sorry
+        norm_num
         sorry
+
       . rw [dweierstrass_dx]
+        apply nzero_mul_left_cancel (12 ^ 2) _ _ sorry
+        simp [b2]
+        simp [sub_add_comm', neg_pow_three, div_eq_mul_inv, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
+          ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
+        simp [eq_sub_iff_add_eq, sub_eq_iff_eq_add, neg_add_eq_sub, add_sub, sub_add]
+        norm_num
         sorry
       . rw [dweierstrass_dy]
+        simp
         sorry
   . rw [is_singular_point]
     refine ⟨?_, ?_, ?_⟩
     . rw [weierstrass]
-      simp
+      -- simp [b2, b5, b7]
+      apply nzero_mul_left_cancel (e.c4 ^ 2) _ _ sorry
+      rw [mul_zero]
+      simp [sub_add_comm', neg_pow_three, div_eq_mul_inv, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
+        ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
+      -- assoc_rw
       sorry
     . rw [dweierstrass_dx]
+      apply nzero_mul_left_cancel e.c4 _ _ hc4
+      rw [mul_zero]
+      simp [sub_add_comm', neg_pow_three, div_eq_mul_inv, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
+        ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
       sorry
     . rw [dweierstrass_dy]
+      simp
       sorry
 
 
