@@ -553,11 +553,11 @@ Proposition 1.5.4 of Elliptic Curve Handbook, Ian Connell February, 1999,
 https://www.math.rug.nl/~top/ian.pdf
 -/
 noncomputable
-def move_singular_point_to_origin_triple (e : Model K) : K × K × K :=
+def move_singular_point_to_origin_triple [PerfectRing K] (e : Model K) : K × K × K :=
 ⟨(singular_point e).1, 0, (singular_point e).2⟩
 
 noncomputable
-def move_singular_point_to_origin_iso (e : Model K) : Model K :=
+def move_singular_point_to_origin_iso [PerfectRing K] (e : Model K) : Model K :=
 rst_triple e (move_singular_point_to_origin_triple e)
 
 lemma move_singular_point (e : Model K) (r t : K) {P : K × K} (h : is_singular_point e P) :
@@ -567,7 +567,7 @@ by
     dweierstrass_dx_iso_eq_var_change, dweierstrass_dy_iso_eq_var_change, var_change_comp]
   simpa
 
-lemma move_singular_point_to_origin (e : Model K) (h : e.discr = 0) :
+lemma move_singular_point_to_origin [PerfectRing K] (e : Model K) (h : e.discr = 0) :
   is_singular_point (move_singular_point_to_origin_iso e) (0, 0) :=
 by
   rw [move_singular_point_to_origin_iso, rst_triple, move_singular_point_to_origin_triple]
@@ -576,7 +576,7 @@ by
   . simp [var_change]
   . simp [var_change]
 
-lemma move_singular_point_to_origin' (e : Model K) :
+lemma move_singular_point_to_origin' [PerfectRing K] (e : Model K) :
   (∃ P, is_singular_point e P) →
     is_singular_point (move_singular_point_to_origin_iso e) (0, 0) := by sorry
 
