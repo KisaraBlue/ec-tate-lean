@@ -1,5 +1,7 @@
 import ECTate.Algebra.Ring.Basic
 import ECTate.Algebra.CharP.Basic
+import ECTate.FieldTheory.PerfectClosure
+import ECTate.Tactic.SplitIfs
 import Mathlib.Tactic.NormNum
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.SimpTrace
@@ -439,13 +441,6 @@ variable {K : Type u} [Field K]
 def is_singular_point (e : Model K) (P : K × K) : Prop :=
 weierstrass e P = 0 ∧ dweierstrass_dx e P = 0 ∧ dweierstrass_dy e P = 0
 
-attribute [instance] Semiring.toMonoidWithZero
-attribute [instance] DivisionCommMonoid.toDivisionMonoid
-attribute [instance] SubtractionCommMonoid.toSubtractionMonoid
-attribute [instance] Ring.toSemiring
-attribute [instance] CommRing.toRing
-attribute [instance] Field.toDivisionRing
-attribute [instance] Field.toCommRing
 lemma discr_eq_zero_of_singular (e : Model K) {P} (h : is_singular_point e P) :
   e.discr = 0 :=
 by
@@ -453,54 +448,90 @@ by
   rw [discr_in_jacobian_ideal, h₁, h₂, h₃, mul_zero,
     mul_zero, mul_zero, add_zero, add_zero, neg_eq_zero]
 
-open Classical
+open Classical PerfectRing
 
 /--
 Proposition 1.5.4 of Elliptic Curve Handbook, Ian Connell February, 1999,
 https://www.math.rug.nl/~top/ian.pdf
 -/
 noncomputable
-def singular_point (e : Model K) : K × K :=
+def singular_point [PerfectRing K] (e : Model K) : K × K :=
   if e.c4 = 0 then
     match ring_char K with
-    | 2 => (0, 0)
-    | 3 => (-e.b6, (e.a3 - e.b6 * e.a1))
+    | 2 => (pth_root e.a4, pth_root (e.a2 * e.a4 + e.a6))
+    | 3 => (pth_root (-e.a3 ^ 2 - e.a6), e.a1 * pth_root (-e.a3 ^ 2 - e.a6) + e.a3)
     | _ => (e.b2 / 12, -(e.a1 * e.b2 / 12 + e.a3) / 2)
   else
     ((18 * e.b6 - e.b2 * e.b4) / e.c4, (e.b2 * e.b5 + 3 * e.b7) / e.c4)
 
-lemma is_singular_point_singular_point (e : Model K) (h : e.discr = 0) :
+-- TODO maybe rewrite to take an explicit point
+open ring_neg in
+lemma is_singular_point_singular_point [PerfectRing K] (e : Model K) (h : e.discr = 0) :
   is_singular_point e (singular_point e) :=
 by
   rw [singular_point]
-  split
+  split_ifs with hc4 hc4
   . split
     . rw [is_singular_point]
+      have hchar : ring_char K = 2 := by assumption
+      have hchar' : (ring_char K : K) = 2 := by simp [hchar]
+      have hchar'' : (2 : K) = 0 := by simp [← hchar', ring_char_eq_zero]
+      have hcharne : ring_char K ≠ 0 := by simp [hchar]
+      have ha1 : e.a1 = 0 := by sorry
+      have ha3 : e.a3 = 0 := by sorry
       refine ⟨?_, ?_, ?_⟩
       . rw [weierstrass]
-        rw [pow_succ]
-        rw [pow_succ]
-        rw [pow_succ]
-        rw [pow_succ]
-        rw [pow_succ]
+        simp only [ha1, ha3, mul_zero, zero_add, zero_mul, add_zero]
+        rw [show 3 = 2 + 1 by norm_num]
+        rw [pow_succ _ 2]
+        rw [← hchar, pth_root_pow_char hcharne]
+        rw [pth_root_pow_char hcharne]
+        simp only [add_sub_add_right_eq_sub, sub_eq_iff_eq_add, zero_add]
+        rw [show pth_root e.a4 * e.a4 + e.a2 * e.a4 + e.a4 * pth_root e.a4 =
+                2 * (pth_root e.a4 * e.a4) + e.a2 * e.a4 by ring]
+        rw [hchar'', zero_mul, zero_add]
+      . rw [dweierstrass_dx]
+        simp [ha1, ha3, mul_zero, zero_add, zero_mul, add_zero, hchar'']
+        rw [← hchar, pth_root_pow_char hcharne, ← sub_eq_add_neg]
+        simp only [add_sub_add_right_eq_sub, sub_eq_iff_eq_add, zero_add]
+        rw [show (3 : K) = 2 + 1 by norm_num]
+        rw [hchar'']
+        sorry
+      . simp [dweierstrass_dy, ha1, ha3, hchar'']
+    . rw [is_singular_point]
+      have hchar : ring_char K = 3 := by assumption
+      have hcharne : ring_char K ≠ 0 := by simp [hchar]
+      have hchar' : (ring_char K : K) = 3 := by simp [hchar]
+      have hchar'' : (3 : K) = 0 := by simp [← hchar', ring_char_eq_zero]
+      have hb2 : e.b2 = 0 := by sorry
+      have hb4 : e.b4 = 0 := by sorry
+      refine ⟨?_, ?_, ?_⟩
+      . rw [weierstrass]
         simp
-        rw [c4, b2] at *
+        rw [← hchar, pth_root_pow_char hcharne]
+        simp
+        simp [sub_add_comm', neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
+          ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
+        simp [eq_sub_iff_add_eq, sub_eq_iff_eq_add, neg_add_eq_sub, add_sub, sub_add]
         sorry
       . rw [dweierstrass_dx]
+        simp
+        rw [hchar'', zero_mul, zero_add]
+        simp [sub_add_comm', neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
+          ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
+        simp [eq_sub_iff_add_eq, sub_eq_iff_eq_add, neg_add_eq_sub, add_sub, sub_add]
         sorry
       . rw [dweierstrass_dy]
-        sorry
+        simp [sub_add_comm', neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
+          ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
+        simp [eq_sub_iff_add_eq, sub_eq_iff_eq_add, neg_add_eq_sub, add_sub, sub_add]
+        rw [show 2 * (e.a1 * pth_root (e.a3 * e.a3 - e.a6)) + 2 * e.a3
+            + e.a1 * pth_root (e.a3 * e.a3 - e.a6) + e.a3 = 3 * ((e.a1 * pth_root (e.a3 * e.a3 - e.a6)) + e.a3) by ring]
+        rw [hchar'', zero_mul]
     . rw [is_singular_point]
       refine ⟨?_, ?_, ?_⟩
       . rw [weierstrass]
-        simp [b6]
-      . rw [dweierstrass_dx]
-        sorry
-      . rw [dweierstrass_dy]
-        sorry
-    . rw [is_singular_point]
-      refine ⟨?_, ?_, ?_⟩
-      . rw [weierstrass]
+        simp
         sorry
       . rw [dweierstrass_dx]
         sorry
@@ -509,6 +540,7 @@ by
   . rw [is_singular_point]
     refine ⟨?_, ?_, ?_⟩
     . rw [weierstrass]
+      simp
       sorry
     . rw [dweierstrass_dx]
       sorry

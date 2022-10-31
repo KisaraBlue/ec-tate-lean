@@ -3,18 +3,11 @@ import ECTate.Algebra.Ring.Basic
 import Mathlib.Logic.Nontrivial
 
 
-
 class DivisionRing (K : Type u) extends Ring K, DivInvMonoid K, Nontrivial K :=
 (mul_inv_cancel : ∀ {a : K}, a ≠ 0 → a * a⁻¹ = 1)
 (inv_zero : (0 : K)⁻¹ = 0)
 
 class Field (K : Type u) extends CommRing K, DivisionRing K
-
-lemma aa : ∀ F (h : Field F), (h).toCommRing.toRing = @DivisionRing.toRing _ (h).toDivisionRing :=
-by
-  intro F h
-  rfl
-
 
 instance (K : Type u) [h : Field K] : IntegralDomain K :=
 { h with
