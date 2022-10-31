@@ -1,5 +1,7 @@
 import Mathlib.Algebra.Ring.Basic
 import Mathlib.Tactic.Ring
+import Mathlib.Tactic.LibrarySearch
+import Mathlib.Tactic.Contrapose
 
 
 theorem pow_two {M} [Monoid M] (a : M) : a ^ (2:ℕ) = a * a :=
@@ -121,7 +123,7 @@ theorem nzero_mul_left_cancel (a b c : R) : a ≠ 0 → a * b = a * c → b = c 
     rw [←add_left_inj (-c), add_neg_self c]
     exact h
 
--- set_option pp.all true
+
 theorem pow_nonzero (a : R) (n : ℕ) : a ≠ 0 → a ^ n ≠ 0 := by
   intro h
   induction n with
@@ -133,6 +135,16 @@ theorem pow_nonzero (a : R) (n : ℕ) : a ≠ 0 → a ^ n ≠ 0 := by
   | succ n ih =>
     rw [pow_succ]
     exact factors_nzero_mul_nzero h ih
+
+theorem pow_eq_zero_iff (a : R) (n : ℕ) (hg : 1 ≤ n) : a ^ n = 0 ↔ a = 0 :=
+by
+  apply Iff.intro
+  . intro h
+    contrapose h
+    exact pow_nonzero _ _ h
+  . intro h
+    rw [h, ← @Nat.succ_pred n, pow_succ, zero_mul]
+    exact ne_of_gt hg
 
 end IntegralDomain
 

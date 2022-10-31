@@ -76,7 +76,12 @@ lemma mul4 : 2 * 2 = (4 : R) := by norm_num
 
 end Obvious
 
-
+/-- A model of a (possibly singular) elliptic curve is given
+by `a` invariants $$a₁, a₂, a₃, a₄, a₆$$ which represent the curve
+$$
+y^2 + a₁ xy + a₃ y =  x^ 3 + a₂ x ^ 2 + a₄ x + a₆
+$$
+-/
 structure Model (R : Type u) [IntegralDomain R] where
   a1 : R
   a2 : R
@@ -88,7 +93,7 @@ deriving Inhabited, DecidableEq
 namespace Model
 variable {R : Type u} [IntegralDomain R]
 
-instance [Repr R] : Repr (Model R) := ⟨ λ (e : Model R) _ => repr (e.a1, e.a2, e.a3, e.a4, e.a6)⟩
+instance [Repr R] : Repr (Model R) := ⟨λ (e : Model R) _ => repr (e.a1, e.a2, e.a3, e.a4, e.a6)⟩
 
 def b2 (e : Model R) : R := e.a1 * e.a1 + 4 * e.a2
 
@@ -464,6 +469,62 @@ def singular_point [PerfectRing K] (e : Model K) : K × K :=
   else
     ((18 * e.b6 - e.b2 * e.b4) / e.c4, (e.b2 * e.b5 + 3 * e.b7) / e.c4)
 
+section invariant_lemmas
+
+lemma c4_zero_iff_a1_zero_of_char_two (e : Model K) (h : ring_char K = 2) :
+  e.c4 = 0 ↔ e.a1 = 0 :=
+by
+  have hchar' : (ring_char K : K) = 2 := by simp [h]
+  have hchar'' : (2 : K) = 0 := by simp [← hchar', ring_char_eq_zero]
+  rw [c4, b2, show 24 = 2 * 12 by norm_num, show 4 = 2 * 2 by norm_num, hchar'', ← pow_two]
+  simp only [mul_zero, zero_mul, add_zero, ← pow_mul, sub_zero] -- TODO simp? doesn't do back arrows
+  rw [pow_eq_zero_iff]
+  norm_num
+
+lemma c4_zero_iff_b2_zero_of_char_three (e : Model K) (h : ring_char K = 3) :
+  e.c4 = 0 ↔ e.b2 = 0 :=
+by
+  have hchar' : (ring_char K : K) = 3 := by simp [h]
+  have hchar'' : (3 : K) = 0 := by simp [← hchar', ring_char_eq_zero]
+  rw [c4, show 24 = 3 * 8 by norm_num, hchar'']
+  simp only [mul_zero, zero_mul, add_zero, sub_zero] -- TODO simp? doesn't do back arrows
+  rw [pow_eq_zero_iff]
+  norm_num
+
+-- TODO is this actually an iff
+lemma a3_zero_of_a1_zero_of_disc_zero_of_char_two
+  (e : Model K) (h : ring_char K = 2) (hdisc : e.discr = 0) (ha1 : e.a1 = 0) :
+  e.a3 = 0 :=
+by
+  have hchar' : (ring_char K : K) = 2 := by simp [h]
+  have hchar'' : (2 : K) = 0 := by simp [← hchar', ring_char_eq_zero]
+  rw [discr, b2, b4, b6, b8, ha1,
+    show 8 = 2 * 4 by norm_num, show 4 = 2 * 2 by norm_num, show 27 = 2 * 13 + 1 by norm_num, hchar''] at hdisc
+  -- TODO simp identifier "at" can't be on next line
+  simp only [mul_zero, zero_mul, add_zero, neg_zero, sub_self, zero_add, one_mul, zero_sub, neg_eq_zero] at hdisc
+  rw [← pow_two, ← pow_two, ← pow_mul] at hdisc
+  rwa [pow_eq_zero_iff] at hdisc
+  norm_num
+
+-- TODO is this actually an iff discr
+lemma b4_zero_of_b2_zero_of_disc_zero_of_char_three
+  (e : Model K) (h : ring_char K = 3) (hdisc : e.discr = 0) (hb2 : e.b2 = 0) :
+  e.b4 = 0 :=
+by
+  have hchar' : (ring_char K : K) = 3 := by simp [h]
+  have hchar'' : (3 : K) = 0 := by simp [← hchar', ring_char_eq_zero]
+  rw [discr, hb2,
+    show 27 = 3 * 9 by norm_num,
+    show 8 = 3 * 3 - 1 by norm_num,
+    hchar''] at hdisc
+  -- TODO simp identifier "at" can't be on next line
+  simp at hdisc
+  rw [← neg_mul_left, one_mul, neg_eq_zero] at hdisc
+  rwa [pow_eq_zero_iff] at hdisc
+  norm_num
+
+end invariant_lemmas
+
 -- TODO maybe rewrite to take an explicit point
 open ring_neg in
 lemma is_singular_point_singular_point [PerfectRing K] (e : Model K) (h : e.discr = 0) :
@@ -477,8 +538,8 @@ by
       have hchar' : (ring_char K : K) = 2 := by simp [hchar]
       have hchar'' : (2 : K) = 0 := by simp [← hchar', ring_char_eq_zero]
       have hcharne : ring_char K ≠ 0 := by simp [hchar]
-      have ha1 : e.a1 = 0 := by sorry
-      have ha3 : e.a3 = 0 := by sorry
+      have ha1 : e.a1 = 0 := by simpa [c4_zero_iff_a1_zero_of_char_two e hchar] using hc4
+      have ha3 : e.a3 = 0 := a3_zero_of_a1_zero_of_disc_zero_of_char_two e hchar h ha1
       refine ⟨?_, ?_, ?_⟩
       . rw [weierstrass]
         simp only [ha1, ha3, mul_zero, zero_add, zero_mul, add_zero]
@@ -491,20 +552,20 @@ by
                 2 * (pth_root e.a4 * e.a4) + e.a2 * e.a4 by ring]
         rw [hchar'', zero_mul, zero_add]
       . rw [dweierstrass_dx]
-        simp [ha1, ha3, mul_zero, zero_add, zero_mul, add_zero, hchar'']
+        simp only [ha1, zero_mul, hchar'', add_zero, zero_sub, neg_add_rev]
         rw [← hchar, pth_root_pow_char hcharne, ← sub_eq_add_neg]
         simp only [add_sub_add_right_eq_sub, sub_eq_iff_eq_add, zero_add]
-        rw [show (3 : K) = 2 + 1 by norm_num]
+        rw [show (3 : K) = 2 * 2 - 1 by norm_num]
         rw [hchar'']
-        sorry
+        simp [← neg_mul_left]
       . simp [dweierstrass_dy, ha1, ha3, hchar'']
     . rw [is_singular_point]
       have hchar : ring_char K = 3 := by assumption
       have hcharne : ring_char K ≠ 0 := by simp [hchar]
       have hchar' : (ring_char K : K) = 3 := by simp [hchar]
       have hchar'' : (3 : K) = 0 := by simp [← hchar', ring_char_eq_zero]
-      have hb2 : e.b2 = 0 := by sorry
-      have hb4 : e.b4 = 0 := by sorry
+      have hb2 : e.b2 = 0 := by simpa [c4_zero_iff_b2_zero_of_char_three e hchar] using hc4
+      have hb4 : e.b4 = 0 := b4_zero_of_b2_zero_of_disc_zero_of_char_three e hchar h hb2
       refine ⟨?_, ?_, ?_⟩
       . rw [weierstrass]
         simp
