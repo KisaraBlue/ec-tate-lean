@@ -8,6 +8,7 @@ import Mathlib.Tactic.SimpTrace
 import Mathlib.Tactic.PrintPrefix
 import Mathlib.Tactic.LibrarySearch
 import Mathlib.Util.WhatsNew
+import Aesop
 
 
 
@@ -304,9 +305,8 @@ lemma var_change_comp (r s t : R) (r' s' t' : R) (P : R × R) :
   var_change r s t (var_change r' s' t' P) = var_change (r + r') (s + s') (t + t' + s * r') P :=
 by
   simp only [var_change, Prod.mk.injEq]
-  apply And.intro -- TODO look up syntax for apply to both subgoals
-  . ring
-  . ring
+  apply And.intro <;>
+  ring
 
 @[simp]
 lemma var_change_zero (P : R × R) : var_change (0 : R) 0 0 P = P :=
@@ -326,12 +326,12 @@ by
   simp only [eq_sub_iff_add_eq, sub_eq_iff_eq_add, neg_add_eq_sub, add_sub, sub_add]
   ring
 
--- TODO generalize to include s ne 0
 open ring_neg in
 theorem dweierstrass_dx_iso_eq_var_change (e : Model R) (P : R × R) :
-  dweierstrass_dx (rst_iso r 0 t e) P = dweierstrass_dx e (var_change r 0 t P) :=
+  dweierstrass_dx (rst_iso r s t e) P =
+  dweierstrass_dx e (var_change r s t P) + s * dweierstrass_dy e (var_change r s t P) :=
 by
-  simp only [dweierstrass_dx, rst_iso, var_change]
+  simp only [dweierstrass_dx, dweierstrass_dy, rst_iso, var_change]
   -- this is a hacky way to get a version of ring with negs, we expand everything and move
   -- the negatives to the other side, to get a purely additive expression
   simp only [sub_add_comm', neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
@@ -525,8 +525,26 @@ by
 
 end invariant_lemmas
 
+
+instance [h : IsAssociative R op] : Lean.IsAssociative op := {h with}
+instance [h : IsCommutative R op] : Lean.IsCommutative op := {h with}
+instance [h : IsIdempotent R op] : Lean.IsIdempotent op := {h with}
+@[to_additive]
+instance [Semigroup R] : IsAssociative R (. * .) := {assoc := mul_assoc}
+@[to_additive]
+instance [CommSemigroup R] : IsCommutative R (. * .) := {comm := mul_comm}
+lemma test (e : Model K) :
+  c4 e ^ 3 * ((b2 e * b5 e + 3 * b7 e) ^ 2 * (c4 e)⁻¹ ^ 2) + 0 =
+            c4 e^ 3 * (c4 e)⁻¹ ^ 2 * ((b2 e * b5 e + 3 * b7 e) ^ 2) :=
+by
+  rw [show c4 e ^ 3 * ((b2 e * b5 e+ 3 * b7 e) ^ 2 * (c4 e)⁻¹ ^ 2) =
+            c4 e^ 3 * (c4 e)⁻¹ ^ 2 * ((b2 e * b5 e + 3 * b7 e) ^ 2) by ac_rfl]
+  sorry
+-- TODO a field should be a division comm monoid
+
 -- TODO maybe rewrite to take an explicit point
 open ring_neg in
+set_option maxHeartbeats 600000 in
 lemma is_singular_point_singular_point [PerfectRing K] (e : Model K) (h : e.discr = 0) :
   is_singular_point e (singular_point e) :=
 by
@@ -629,21 +647,104 @@ by
     refine ⟨?_, ?_, ?_⟩
     . rw [weierstrass]
       -- simp [b2, b5, b7]
-      apply nzero_mul_left_cancel (e.c4 ^ 2) _ _ sorry
+      apply nzero_mul_left_cancel (e.c4 ^ 3) _ _ (pow_nonzero _ _ hc4)
       rw [mul_zero]
-      simp [sub_add_comm', neg_pow_three, div_eq_mul_inv, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
-        ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
-      -- assoc_rw
+      simp only [mul_add, mul_sub, div_eq_mul_inv, mul_pow]
+    --   c4 e ^ 3 * ((b2 e * b5 e + 3 * b7 e) ^ 2 * (c4 e)⁻¹ ^ 2) +
+    --     c4 e ^ 3 * (e.a1 * ((18 * b6 e - b2 e * b4 e) * (c4 e)⁻¹) * ((b2 e * b5 e + 3 * b7 e) * (c4 e)⁻¹)) +
+    --   c4 e ^ 3 * (e.a3 * ((b2 e * b5 e + 3 * b7 e) * (c4 e)⁻¹)) -
+    -- (c4 e ^ 3 * ((18 * b6 e - b2 e * b4 e) ^ 3 * (c4 e)⁻¹ ^ 3) +
+    --       c4 e ^ 3 * (e.a2 * ((18 * b6 e - b2 e * b4 e) ^ 2 * (c4 e)⁻¹ ^ 2)) +
+    --     c4 e ^ 3 * (e.a4 * ((18 * b6 e - b2 e * b4 e) * (c4 e)⁻¹)) +
+      have : c4 e ^ 3 * ((b2 e * b5 e + 3 * b7 e) ^ 2 * (c4 e)⁻¹ ^ 2) =
+          c4 e ^ 3 * (c4 e)⁻¹ ^ 2 * ((b2 e * b5 e + 3 * b7 e) ^ 2 ) :=
+            by ac_rfl -- TODO ac_rfl bug or show bug?
+      rw [this]
+      -- rw [show c4 e * c4 e * (e.a1 * (3 * b7 e * (c4 e)⁻¹)) =
+      --   c4 e * (c4 e)⁻¹ * c4 e * (e.a1 * (3 * b7 e)) by ac_rfl, Field.mul_inv_cancel hc4, one_mul]
+      -- rw [show c4 e * c4 e * (3 * (18 * b6 e * (c4 e)⁻¹ * (18 * b6 e * (c4 e)⁻¹))) =
+      --    c4 e * (c4 e)⁻¹ * c4 e * (c4 e)⁻¹ * (3 * (18 * b6 e * (18 * b6 e))) by ac_rfl,
+      --    Field.mul_inv_cancel hc4, one_mul, Field.mul_inv_cancel hc4, one_mul]
+      -- rw [show c4 e * c4 e * (2 * e.a2 * (18 * b6 e * (c4 e)⁻¹)) =
+      --   c4 e * (c4 e)⁻¹ * (c4 e * (2 * e.a2 * (18 * b6 e))) by ac_rfl, Field.mul_inv_cancel hc4, one_mul]
+      -- rw [show c4 e * c4 e * (2 * e.a2 * (b2 e * b4 e * (c4 e)⁻¹)) =
+      --   c4 e * (c4 e)⁻¹ * c4 e * (2 * e.a2 * (b2 e * b4 e)) by ac_rfl, Field.mul_inv_cancel hc4, one_mul]
+      -- rw [show c4 e * c4 e * (3 * (b2 e * b4 e * (c4 e)⁻¹ * (18 * b6 e * (c4 e)⁻¹))) =
+      --   c4 e * (c4 e)⁻¹ * c4 e * (c4 e)⁻¹ * (3 * (b2 e * b4 e * (18 * b6 e))) by ac_rfl,
+      --    Field.mul_inv_cancel hc4, one_mul, Field.mul_inv_cancel hc4, one_mul]
+      -- rw [show c4 e * c4 e * (3 * (18 * b6 e * (c4 e)⁻¹ * (b2 e * b4 e * (c4 e)⁻¹))) =
+      --   c4 e * (c4 e)⁻¹ * c4 e * (c4 e)⁻¹ * (3 * (18 * b6 e * (b2 e * b4 e))) by ac_rfl,
+      --    Field.mul_inv_cancel hc4, one_mul, Field.mul_inv_cancel hc4, one_mul]
+      -- rw [show c4 e * c4 e * (3 * (b2 e * b4 e * (c4 e)⁻¹ * (b2 e * b4 e * (c4 e)⁻¹))) =
+      --   c4 e * (c4 e)⁻¹ * c4 e  * (c4 e)⁻¹ * (3 * (b2 e * b4 e * (b2 e * b4 e))) by ac_rfl,
+      --   Field.mul_inv_cancel hc4, one_mul, Field.mul_inv_cancel hc4, one_mul]
+      -- simp [sub_add_comm', neg_pow_three, div_eq_mul_inv, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
+      --   ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
       sorry
     . rw [dweierstrass_dx]
-      apply nzero_mul_left_cancel e.c4 _ _ hc4
-      rw [mul_zero]
+      apply nzero_mul_left_cancel (e.c4 ^ 2) _ _ (pow_nonzero _ _ hc4)
+      rw [mul_zero, pow_two]
       simp [sub_add_comm', neg_pow_three, div_eq_mul_inv, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
         ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
+-- ⊢ e.a1 * (b2 e * b5 e) +
+-- c4 e * (e.a1 * (3 * b7 e * (c4 e)⁻¹)) -
+--     (c4 e * (3 * (18 * b6 e * (c4 e)⁻¹ * (18 * b6 e * (c4 e)⁻¹))) +
+--           (c4 e * (2 * e.a2 * (18 * b6 e * (c4 e)⁻¹))
+-- - c4 e * (2 * e.a2 * (b2 e * b4 e * (c4 e)⁻¹))) +
+--         c4 e * e.a4 -
+--       (c4 e * (3 * (b2 e * b4 e * (c4 e)⁻¹ * (18 * b6 e * (c4 e)⁻¹))) +
+--         (c4 e * (3 * (18 * b6 e * (c4 e)⁻¹ * (b2 e * b4 e * (c4 e)⁻¹))) -
+--           c4 e * (3 * (b2 e * b4 e * (c4 e)⁻¹ * (b2 e * b4 e * (c4 e)⁻¹)))))) =
+      rw [show c4 e * c4 e * (e.a1 * (b2 e * b5 e * (c4 e)⁻¹)) =
+        c4 e * (c4 e)⁻¹ * c4 e * (e.a1 * (b2 e * b5 e)) by ac_rfl, Field.mul_inv_cancel hc4, one_mul]
+      rw [show c4 e * c4 e * (e.a1 * (3 * b7 e * (c4 e)⁻¹)) =
+        c4 e * (c4 e)⁻¹ * c4 e * (e.a1 * (3 * b7 e)) by ac_rfl, Field.mul_inv_cancel hc4, one_mul]
+      rw [show c4 e * c4 e * (3 * (18 * b6 e * (c4 e)⁻¹ * (18 * b6 e * (c4 e)⁻¹))) =
+         c4 e * (c4 e)⁻¹ * c4 e * (c4 e)⁻¹ * (3 * (18 * b6 e * (18 * b6 e))) by ac_rfl,
+         Field.mul_inv_cancel hc4, one_mul, Field.mul_inv_cancel hc4, one_mul]
+      rw [show c4 e * c4 e * (2 * e.a2 * (18 * b6 e * (c4 e)⁻¹)) =
+        c4 e * (c4 e)⁻¹ * (c4 e * (2 * e.a2 * (18 * b6 e))) by ac_rfl, Field.mul_inv_cancel hc4, one_mul]
+      rw [show c4 e * c4 e * (2 * e.a2 * (b2 e * b4 e * (c4 e)⁻¹)) =
+        c4 e * (c4 e)⁻¹ * c4 e * (2 * e.a2 * (b2 e * b4 e)) by ac_rfl, Field.mul_inv_cancel hc4, one_mul]
+      rw [show c4 e * c4 e * (3 * (b2 e * b4 e * (c4 e)⁻¹ * (18 * b6 e * (c4 e)⁻¹))) =
+        c4 e * (c4 e)⁻¹ * c4 e * (c4 e)⁻¹ * (3 * (b2 e * b4 e * (18 * b6 e))) by ac_rfl,
+         Field.mul_inv_cancel hc4, one_mul, Field.mul_inv_cancel hc4, one_mul]
+      rw [show c4 e * c4 e * (3 * (18 * b6 e * (c4 e)⁻¹ * (b2 e * b4 e * (c4 e)⁻¹))) =
+        c4 e * (c4 e)⁻¹ * c4 e * (c4 e)⁻¹ * (3 * (18 * b6 e * (b2 e * b4 e))) by ac_rfl,
+         Field.mul_inv_cancel hc4, one_mul, Field.mul_inv_cancel hc4, one_mul]
+      rw [show c4 e * c4 e * (3 * (b2 e * b4 e * (c4 e)⁻¹ * (b2 e * b4 e * (c4 e)⁻¹))) =
+        c4 e * (c4 e)⁻¹ * c4 e  * (c4 e)⁻¹ * (3 * (b2 e * b4 e * (b2 e * b4 e))) by ac_rfl,
+        Field.mul_inv_cancel hc4, one_mul, Field.mul_inv_cancel hc4, one_mul]
+      rw [b5, b7, c4, b2, b4, b6]
+      -- what remains is just 36 times the discriminant (up to sign)
+      rw [← mul_zero (36 : K), ← h, discr_eq_neg_singular]
+      simp only [sub_add_comm', neg_pow_three, div_eq_mul_inv, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
+        ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
+      simp only [eq_sub_iff_add_eq, sub_eq_iff_eq_add, neg_add_eq_sub, add_sub, sub_add]
+      -- ring -- true but too slow
       sorry
     . rw [dweierstrass_dy]
-      simp
-      sorry
+      apply nzero_mul_left_cancel e.c4 _ _ hc4
+      simp only [sub_add_comm', neg_pow_three, div_eq_mul_inv, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
+        ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
+      --     c4 e * (2 * (b2 e * b5 e * (c4 e)⁻¹))
+      -- + c4 e * (2 * (3 * b7 e * (c4 e)⁻¹)) +
+      --   (c4 e * (e.a1 * (18 * b6 e * (c4 e)⁻¹))
+      -- - c4 e * (e.a1 * (b2 e * b4 e * (c4 e)⁻¹))) +
+      -- c4 e * e.a3
+      rw [show c4 e * (2 * (b2 e * b5 e * (c4 e)⁻¹)) =
+        c4 e * (c4 e)⁻¹ * (2 * (b2 e * b5 e)) by ac_rfl, Field.mul_inv_cancel hc4, one_mul]
+      rw [show c4 e * (2 * (3 * b7 e * (c4 e)⁻¹)) =
+        c4 e * (c4 e)⁻¹ * (2 * (3 * b7 e)) by ac_rfl, Field.mul_inv_cancel hc4, one_mul]
+      rw [show c4 e * (e.a1 * (18 * b6 e * (c4 e)⁻¹)) =
+        c4 e * (c4 e)⁻¹ * (e.a1 * (18 * b6 e)) by ac_rfl, Field.mul_inv_cancel hc4, one_mul]
+      rw [show c4 e * (e.a1 * (b2 e * b4 e * (c4 e)⁻¹)) =
+        c4 e * (c4 e)⁻¹ * (e.a1 * (b2 e * b4 e)) by ac_rfl, Field.mul_inv_cancel hc4, one_mul]
+      rw [b5, b7, c4, b2, b4, b6]
+      simp only [sub_add_comm', neg_pow_three, div_eq_mul_inv, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
+        ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
+      simp only [eq_sub_iff_add_eq, sub_eq_iff_eq_add, neg_add_eq_sub, add_sub, sub_add]
+      ring
 
 
 /--
@@ -662,7 +763,8 @@ lemma move_singular_point (e : Model K) (r t : K) {P : K × K} (h : is_singular_
   is_singular_point (rst_iso r 0 t e) (var_change (-r) 0 (-t) P) :=
 by
   rw [is_singular_point, weierstrass_iso_eq_var_change,
-    dweierstrass_dx_iso_eq_var_change, dweierstrass_dy_iso_eq_var_change, var_change_comp]
+    dweierstrass_dx_iso_eq_var_change, zero_mul, add_zero,
+    dweierstrass_dy_iso_eq_var_change, var_change_comp]
   simpa
 
 lemma move_singular_point_to_origin [PerfectRing K] (e : Model K) (h : e.discr = 0) :
@@ -670,9 +772,8 @@ lemma move_singular_point_to_origin [PerfectRing K] (e : Model K) (h : e.discr =
 by
   rw [move_singular_point_to_origin_iso, rst_triple, move_singular_point_to_origin_triple]
   convert move_singular_point e (singular_point e).fst (singular_point e).snd
-    (is_singular_point_singular_point e h)
-  . simp [var_change]
-  . simp [var_change]
+    (is_singular_point_singular_point e h) <;>
+  simp [var_change]
 
 lemma move_singular_point_to_origin' [PerfectRing K] (e : Model K) :
   (∃ P, is_singular_point e P) →
