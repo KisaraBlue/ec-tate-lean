@@ -8,13 +8,15 @@ import Mathlib.Tactic.SimpTrace
 import Mathlib.Tactic.PrintPrefix
 import Mathlib.Tactic.LibrarySearch
 import Mathlib.Util.WhatsNew
-import Aesop
+-- import Aesop
 
 
 
 #print CommGroup.toDivisionCommMonoid
 #print AddCommGroup.toDivisionCommMonoid -- TODO LOL
+-- attribute [-instance] AddCommGroup.toDivisionCommMonoid
 attribute [instance] AddCommGroup.toDivisionCommMonoid
+#print AddCommGroup.toDivisionCommMonoid -- TODO a way to tell if this works
 section ring_with_neg
 namespace ring_neg
 variable {R : Type _} [Ring R]
@@ -23,7 +25,7 @@ by rw [sub_eq_add_neg, sub_eq_add_neg, add_assoc, add_assoc, add_comm z]
 lemma neg_mul_neg {y z : R} : -y * -z = y * z :=
 by simp [← neg_mul_left, ← neg_mul_right, neg_neg]
 lemma neg_pow_three {y : R} : (- y)^3 = - (y ^ 3) :=
-by simp [pow_succ, mul_assoc]; simp [neg_mul_neg]; rw [neg_mul_left]
+by simp [pow_succ, mul_assoc]
 lemma sub_sub' {x y z : R} : (x - (y - z)) = x + z - y :=
 by simp [sub_eq_add_neg, neg_add, add_assoc, add_comm z]
 -- lemma add_sub {x y z : R} : (x + (y - z)) = x + y - z :=
@@ -110,13 +112,9 @@ def b5 (e : Model R) : R := e.a1 * e.a4 - 2 * e.a2 * e.a3
 
 def b7 (e : Model R) : R := e.a1 * (e.a3 ^ 2 - 12 * e.a6) + 8 * e.a3 * e.a4
 
-open ring_neg in
 lemma b8_identity (e : Model R) : 4*e.b8 = e.b2*e.b6 - e.b4 ^ 2 :=
 by
   simp only [b2, b4, b6, b8]
-  simp only [sub_add_comm', neg_pow_three, neg_add_eq_sub, sub_sub', pow_succ, ← neg_mul_left,
-    ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, sub_add, pow_zero, mul_one]
-  simp only [eq_sub_iff_add_eq, sub_eq_iff_eq_add, sub_add_comm']
   ring
 
 def c4 (e : Model R) : R := e.b2 ^ 2 - 24*e.b4
@@ -126,19 +124,11 @@ def c6 (e : Model R) : R := -e.b2 ^ 3 + 36*e.b2*e.b4 - 216*e.b6
 def discr (e : Model R) : R :=
   -e.b2 * e.b2 * e.b8 - 8 * e.b4 ^ 3 - 27 * e.b6 * e.b6 + 9 * e.b2 * e.b4 * e.b6
 
-open ring_neg in
 lemma discr_identity (e : Model R) : 1728 * e.discr = e.c4 ^ 3 - e.c6 ^ 2 :=
 by
-  simp only [c4, c6, discr]
-  -- this is a hacky way to get a version of ring with negs, we expand everything and move
-  -- the negatives to the other side, to get a purely additive expression
-  simp only [← sub_add_comm, neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
-    ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, sub_add]
-  rw [(by ring : 1728 * (e.b2 * e.b2 * e.b8) = 432 * (e.b2 * e.b2 * (4 * e.b8)))]
+  simp only [c4, c6, discr, mul_sub, mul_add]
+  rw [(by ring : 1728 * (-e.b2 * e.b2 * e.b8) = -432 * e.b2 * e.b2 * (4 * e.b8))]
   rw [b8_identity]
-  simp [neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left, ← neg_mul_right,
-    mul_add, add_mul, mul_sub, sub_mul, sub_add, add_sub]
-  simp [eq_sub_iff_add_eq, sub_eq_iff_eq_add, sub_add_comm', neg_add_eq_sub, add_sub]
   ring
 
 def rst_iso (r s t : R) (e : Model R) : Model R := {
@@ -149,67 +139,33 @@ def rst_iso (r s t : R) (e : Model R) : Model R := {
   a6 := e.a6 + r*e.a4 + r*r*e.a2 + r*r*r - t*(e.a3 + t + r*e.a1) }
 
 lemma rst_b2 (r s t : R) (e : Model R) : (rst_iso r s t e).b2 = e.b2 + 12*r := by
-  simp [rst_iso, b2, one_mul, one_pow, sub_eq_add_neg, mul_add, add_mul]
-  rw [mul_comm _ (2*s), mul_assoc 2, add_assoc (e.a1*e.a1), ←add_assoc (2*(s*e.a1)),
-    ←add_mul, add4, ←neg_mul_right]
-  rw [←mul_assoc (2*s), mul_comm _ 2, ←mul_assoc 2, mul4, ←neg_mul_right, mul_assoc 4 s s]
-  rw [add_comm (4*(s*e.a1)), add_comm (4*e.a2), add_assoc, add_assoc, add_comm (4*(s*s)), ←add_assoc]
-  simp [←add_assoc (4*(s*e.a1))]
-  rw [add_assoc, add_assoc, neg_add_self (4*(s*s))]
+  simp [rst_iso, b2]
   ring
 
-open ring_neg in
 lemma rst_b4 (r s t : R) (e : Model R) :
   (rst_iso r s t e).b4 = e.b4 + r * (e.b2 + 6 * r) :=
 by
   simp only [rst_iso, b2, b4]
-  -- this is a hacky way to get a version of ring with negs, we expand everything and move
-  -- the negatives to the other side, to get a purely additive expression
-  simp only [← sub_add_comm, neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
-    ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, sub_add]
-  simp [eq_sub_iff_add_eq, sub_eq_iff_eq_add, sub_add_comm, neg_add_eq_sub, add_sub]
   ring
 
-open ring_neg in
 lemma rst_b6 (r s t : R) (e : Model R) :
   (rst_iso r s t e).b6 = e.b6 + 2*r*e.b4 + r*r*e.b2 + 4*r*r*r :=
 by
   simp only [rst_iso, b2, b4, b6]
-  -- this is a hacky way to get a version of ring with negs, we expand everything and move
-  -- the negatives to the other side, to get a purely additive expression
-  simp only [← sub_add_comm, neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
-    ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, sub_add]
-  simp only [eq_sub_iff_add_eq, sub_eq_iff_eq_add, sub_add_comm, neg_add_eq_sub, add_sub]
   ring
 
-open ring_neg in
 lemma rst_b8 (r s t : R) (e : Model R) :
   (rst_iso r s t e).b8 = e.b8 + 3*r*e.b6 + 3*r*r*e.b4 + r*r*r*e.b2 + 3*r*r*r*r :=
 by
-  simp only [rst_iso, b2, b4, b6, b8, one_mul, one_pow]
-  -- this is a hacky way to get a version of ring with negs, we expand everything and move
-  -- the negatives to the other side, to get a purely additive expression
-  simp only [sub_add_comm', neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
-    ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul]
-  simp only [eq_sub_iff_add_eq, sub_eq_iff_eq_add, sub_add_comm', neg_add_eq_sub, add_sub, sub_add]
+  simp only [rst_iso, b2, b4, b6, b8]
   ring
 
-open ring_neg in
 lemma rst_discr (r s t : R) (e : Model R) : (rst_iso r s t e).discr = e.discr :=
 by
   simp only [discr, rst_b2, rst_b4, rst_b6, rst_b8]
-  -- this is a hacky way to get a version of ring with negs, we expand everything and move
-  -- the negatives to the other side, to get a purely additive expression
-  simp only [sub_add_comm', neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
-    ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one, one_mul]
-  rw [(by ring : b2 e * (12 * r) * b8 e = b2 e * (3 * r) * (4 * b8 e)),
-      (by ring : 12 * r * b2 e * b8 e = 3 * r * b2 e * (4 * b8 e)),
-      (by ring : 12 * r * (12 * r) * b8 e = 3 * r * 12 * r * (4 * b8 e))]
-  simp only [b8_identity]
-  simp only [← sub_add_comm, neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
-    ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero]
-  simp only [eq_sub_iff_add_eq, sub_eq_iff_eq_add, sub_add_comm', ← sub_eq_add_neg,
-    neg_add_eq_sub, add_sub, ← sub_add]
+  simp only [mul_add]
+  rw [(by ring : (-(b2 e + 12 * r) * b2 e + -(b2 e + 12 * r) * (12 * r)) * b8 e = -(b2 e ^ 2 * b8 e) + (- (3 * r) * b2 e + -(b2 e + 12 * r) * (3 * r)) * (4 * b8 e))]
+  rw [b8_identity]
   ring
 
 def weierstrass (e : Model R) (P : R × R) : R :=
@@ -224,7 +180,6 @@ def dweierstrass_dy (e : Model R) (P : R × R) : R :=
   2 * P.2 + e.a1 * P.1 + e.a3
 
 
-open ring_neg in
 /--
 
 We can compute the discriminant in terms of these using `Singular.jl`, part of `OSCAR`
@@ -255,18 +210,9 @@ lemma discr_eq_neg_singular (e : Model R) : e.discr = -(
  :=
 by
   simp only [discr, weierstrass, dweierstrass_dx, dweierstrass_dy, b2, b4, b6, b8]
-  -- this is a hacky way to get a version of ring with negs, we expand everything and move
-  -- the negatives to the other side, to get a purely additive expression
-  simp only [sub_add_comm', neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
-    ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul]
-  simp only [eq_sub_iff_add_eq, sub_eq_iff_eq_add, sub_add_comm', neg_add_eq_sub,
-    add_sub, sub_add, ← sub_eq_add_neg]
-  simp only [eq_sub_iff_add_eq, sub_eq_iff_eq_add]
   ring
 
 
-open ring_neg in
-set_option maxHeartbeats 600000 in
 lemma discr_in_jacobian_ideal (e : Model R) (P : R × R) : e.discr =
   -((48*P.1*P.2*e.a2^2 +24*e.a1*e.a2*e.a6 +216*P.2*e.a6 +P.2*e.a1^6 +11*P.2*e.a1^4*e.a2 +P.1*e.a1^4*e.a3 +38*P.1*e.a1^2*e.a2*e.a3 +8*e.a1^2*e.a2^2*e.a3
   +e.a1^4*e.a2*e.a3 +40*P.2*e.a1^2*e.a2^2 +32*P.2*e.a2^3 +24*P.1*P.2*e.a1*e.a3 +30*P.1^2*e.a2*e.a3 +3*P.1*e.a1^3*e.a4 +60*P.1^2*e.a1*e.a4 +30*P.1^2*e.a1^2*e.a3
@@ -284,17 +230,8 @@ lemma discr_in_jacobian_ideal (e : Model R) (P : R × R) : e.discr =
   -(432*e.a6 +e.a1^6 +288*P.2*e.a3 +252*e.a3^2 +12*e.a1^4*e.a2 +48*e.a1^2*e.a2^2 +96*P.1*e.a2^2 +64*e.a2^3))*(weierstrass e P))
  :=
 by
-  rw [discr_eq_neg_singular, neg_eq_neg_iff]
+  rw [discr_eq_neg_singular]
   simp only [weierstrass, dweierstrass_dx, dweierstrass_dy]
-  -- this is a hacky way to get a version of ring with negs, we expand everything and move
-  -- the negatives to the other side, to get a purely additive expression
-  simp only [sub_add_comm', neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
-    ← neg_mul_right, mul_sub, sub_mul, pow_zero, mul_one]
-  simp only [eq_sub_iff_add_eq, sub_eq_iff_eq_add, sub_add_comm', neg_add_eq_sub,
-    add_sub, sub_add, ← sub_eq_add_neg]
-  simp only [sub_add_comm', neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
-    ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, sub_neg]
-  simp only [sub_add_comm', eq_sub_iff_add_eq, sub_eq_iff_eq_add]
   ring
 
 def var_change (r s t : R) (P' : R × R) : R × R :=
@@ -314,41 +251,23 @@ by simp [var_change]
 
 -- TODO probably these proofs should be more conceptual
 
-open ring_neg in
 theorem weierstrass_iso_eq_var_change (e : Model R) (P : R × R) :
   weierstrass (rst_iso r s t e) P = weierstrass e (var_change r s t P) :=
 by
   simp only [weierstrass, rst_iso, var_change]
-  -- this is a hacky way to get a version of ring with negs, we expand everything and move
-  -- the negatives to the other side, to get a purely additive expression
-  simp only [sub_add_comm', neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
-    ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul]
-  simp only [eq_sub_iff_add_eq, sub_eq_iff_eq_add, neg_add_eq_sub, add_sub, sub_add]
   ring
 
-open ring_neg in
 theorem dweierstrass_dx_iso_eq_var_change (e : Model R) (P : R × R) :
   dweierstrass_dx (rst_iso r s t e) P =
   dweierstrass_dx e (var_change r s t P) + s * dweierstrass_dy e (var_change r s t P) :=
 by
   simp only [dweierstrass_dx, dweierstrass_dy, rst_iso, var_change]
-  -- this is a hacky way to get a version of ring with negs, we expand everything and move
-  -- the negatives to the other side, to get a purely additive expression
-  simp only [sub_add_comm', neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
-    ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
-  simp only [eq_sub_iff_add_eq, sub_eq_iff_eq_add, neg_add_eq_sub, add_sub, sub_add]
   ring
 
-open ring_neg in
 theorem dweierstrass_dy_iso_eq_var_change (e : Model R) (P : R × R) :
   dweierstrass_dy (rst_iso r s t e) P = dweierstrass_dy e (var_change r s t P) :=
 by
   simp only [dweierstrass_dy, rst_iso, var_change]
-  -- this is a hacky way to get a version of ring with negs, we expand everything and move
-  -- the negatives to the other side, to get a purely additive expression
-  simp only [sub_add_comm', neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
-    ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
-  simp only [eq_sub_iff_add_eq, sub_eq_iff_eq_add, neg_add_eq_sub, add_sub, sub_add]
   ring
 
 def rst_triple (e : Model R) (rst : R × R × R) : Model R :=
@@ -464,7 +383,7 @@ def singular_point [PerfectRing K] (e : Model K) : K × K :=
   if e.c4 = 0 then
     match ring_char K with
     | 2 => (pth_root e.a4, pth_root (e.a2 * e.a4 + e.a6))
-    | 3 => (pth_root (-e.a3 ^ 2 - e.a6), e.a1 * pth_root (-e.a3 ^ 2 - e.a6) + e.a3)
+    | 3 => (pth_root (-(e.a3 ^ 2) - e.a6), e.a1 * pth_root (-(e.a3 ^ 2) - e.a6) + e.a3)
     | _ => (e.b2 / 12, -(e.a1 * e.b2 / 12 + e.a3) / 2)
   else
     ((18 * e.b6 - e.b2 * e.b4) / e.c4, (e.b2 * e.b5 + 3 * e.b7) / e.c4)
@@ -519,7 +438,6 @@ by
     hchar''] at hdisc
   -- TODO simp identifier "at" can't be on next line
   simp at hdisc
-  rw [← neg_mul_left, one_mul, neg_eq_zero] at hdisc
   rwa [pow_eq_zero_iff] at hdisc
   norm_num
 
@@ -543,7 +461,6 @@ by
 -- TODO a field should be a division comm monoid
 
 -- TODO maybe rewrite to take an explicit point
-open ring_neg in
 set_option maxHeartbeats 600000 in
 lemma is_singular_point_singular_point [PerfectRing K] (e : Model K) (h : e.discr = 0) :
   is_singular_point e (singular_point e) :=
@@ -589,45 +506,38 @@ by
       refine ⟨?_, ?_, ?_⟩
       . rw [weierstrass]
         rw [← hchar, pth_root_pow_char hcharne]
-        simp [sub_add_comm', neg_pow_three, neg_add_eq_sub, sub_sub, ← neg_mul_left,
-          ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
-        simp [eq_sub_iff_add_eq, sub_eq_iff_eq_add, neg_add_eq_sub, add_sub, sub_add]
-        rw [show (e.a1 * pth_root (-e.a3 ^ 2 - e.a6) + e.a3) ^ 2 +
-          (e.a1 * pth_root (-e.a3 ^ 2 - e.a6) * (e.a1 * pth_root (-e.a3 ^ 2 - e.a6)) +
-            e.a1 * pth_root (-e.a3 ^ 2 - e.a6) * e.a3) +
-          (e.a3 * (e.a1 * pth_root (-e.a3 ^ 2 - e.a6)) + e.a3 * e.a3) =
-          2 * e.a3 ^ 2 +
-          (2 * e.a1 ^ 2 * pth_root (-e.a3 ^ 2 - e.a6) ^ 2) +
-          (4 * e.a1 * e.a3 * pth_root (-e.a3 ^ 2 - e.a6))
+        simp only
+        rw [show
+          (e.a1 * pth_root (-(e.a3 ^ 2) - e.a6) + e.a3) ^ 2 +
+          e.a1 * pth_root (-(e.a3 ^ 2) - e.a6) * (e.a1 * pth_root (-(e.a3 ^ 2) - e.a6) + e.a3) +
+          e.a3 * (e.a1 * pth_root (-(e.a3 ^ 2) - e.a6) + e.a3) -
+          (-(e.a3 ^ 2) - e.a6 + e.a2 * pth_root (-(e.a3 ^ 2) - e.a6) ^ 2 + e.a4 * pth_root (-(e.a3 ^ 2) - e.a6) + e.a6) =
+          (2 * e.a1 ^ 2 - e.a2) * pth_root (-(e.a3 ^ 2) - e.a6) ^ 2 +
+          (4 * e.a1 * e.a3 - e.a4) * pth_root (-(e.a3 ^ 2) - e.a6) +
+          3 * e.a3 ^ 2
           by ring]
-        congr
-        . sorry
-        . sorry
-        . sorry
+        rw [show 2 * e.a1 ^ 2 - e.a2 = 0 from ?_]
+        rw [show 4 * e.a1 * e.a3 - e.a4 = 0 from ?_]
+        simp [hchar'']
+        sorry
+        sorry
       . rw [dweierstrass_dx]
         rw [hchar'', zero_mul, zero_add]
-        simp [sub_add_comm', neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
-          ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
-        simp [eq_sub_iff_add_eq, sub_eq_iff_eq_add, neg_add_eq_sub, add_sub, sub_add]
-        rw [← mul_assoc]
-        congr 2
-        . sorry
-        . sorry
+        simp only
+        rw [show e.a1 * (e.a1 * pth_root (-(e.a3 ^ 2) - e.a6) + e.a3) - (2 * e.a2 * pth_root (-(e.a3 ^ 2) - e.a6) + e.a4) =
+                 (e.a1 * e.a1 - 2 * e.a2) * pth_root (-(e.a3 ^ 2) - e.a6) + (e.a1 * e.a3 - e.a4)
+          by ring]
+        sorry
       . rw [dweierstrass_dy]
-        simp [sub_add_comm', neg_pow_three, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
-          ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
-        simp [eq_sub_iff_add_eq, sub_eq_iff_eq_add, neg_add_eq_sub, add_sub, sub_add]
-        rw [show 2 * (e.a1 * pth_root (e.a3 * e.a3 - e.a6)) + 2 * e.a3
-            + e.a1 * pth_root (e.a3 * e.a3 - e.a6) + e.a3 = 3 * ((e.a1 * pth_root (e.a3 * e.a3 - e.a6)) + e.a3) by ring]
+        simp only
+        rw [show 2 * (e.a1 * pth_root (-(e.a3 ^ 2) - e.a6) + e.a3)
+            + e.a1 * pth_root (- (e.a3 ^ 2) - e.a6) + e.a3 = 3 * ((e.a1 * pth_root (-(e.a3 ^ 2) - e.a6)) + e.a3) by ring]
         rw [hchar'', zero_mul]
     . rw [is_singular_point]
       have hb4 : e.b2 ^ 2 = 24 * e.b2 := sorry
       refine ⟨?_, ?_, ?_⟩
       . rw [weierstrass]
-        simp [hb4]
-        simp [sub_add_comm', neg_pow_three, div_eq_mul_inv, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
-          ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
-        simp [eq_sub_iff_add_eq, sub_eq_iff_eq_add, neg_add_eq_sub, add_sub, sub_add]
+        simp [hb4, div_eq_mul_inv]
         apply nzero_mul_left_cancel (12 ^ 3) _ _ sorry
         norm_num
         sorry
@@ -635,9 +545,7 @@ by
       . rw [dweierstrass_dx]
         apply nzero_mul_left_cancel (12 ^ 2) _ _ sorry
         simp [b2]
-        simp [sub_add_comm', neg_pow_three, div_eq_mul_inv, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
-          ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
-        simp [eq_sub_iff_add_eq, sub_eq_iff_eq_add, neg_add_eq_sub, add_sub, sub_add]
+        simp [div_eq_mul_inv]
         norm_num
         sorry
       . rw [dweierstrass_dy]
@@ -649,101 +557,57 @@ by
       -- simp [b2, b5, b7]
       apply nzero_mul_left_cancel (e.c4 ^ 3) _ _ (pow_nonzero _ _ hc4)
       rw [mul_zero]
-      simp only [mul_add, mul_sub, div_eq_mul_inv, mul_pow]
-    --   c4 e ^ 3 * ((b2 e * b5 e + 3 * b7 e) ^ 2 * (c4 e)⁻¹ ^ 2) +
-    --     c4 e ^ 3 * (e.a1 * ((18 * b6 e - b2 e * b4 e) * (c4 e)⁻¹) * ((b2 e * b5 e + 3 * b7 e) * (c4 e)⁻¹)) +
-    --   c4 e ^ 3 * (e.a3 * ((b2 e * b5 e + 3 * b7 e) * (c4 e)⁻¹)) -
-    -- (c4 e ^ 3 * ((18 * b6 e - b2 e * b4 e) ^ 3 * (c4 e)⁻¹ ^ 3) +
-    --       c4 e ^ 3 * (e.a2 * ((18 * b6 e - b2 e * b4 e) ^ 2 * (c4 e)⁻¹ ^ 2)) +
-    --     c4 e ^ 3 * (e.a4 * ((18 * b6 e - b2 e * b4 e) * (c4 e)⁻¹)) +
-      have : c4 e ^ 3 * ((b2 e * b5 e + 3 * b7 e) ^ 2 * (c4 e)⁻¹ ^ 2) =
-          c4 e ^ 3 * (c4 e)⁻¹ ^ 2 * ((b2 e * b5 e + 3 * b7 e) ^ 2 ) :=
-            by ac_rfl -- TODO ac_rfl bug or show bug?
-      rw [this]
-      -- rw [show c4 e * c4 e * (e.a1 * (3 * b7 e * (c4 e)⁻¹)) =
-      --   c4 e * (c4 e)⁻¹ * c4 e * (e.a1 * (3 * b7 e)) by ac_rfl, Field.mul_inv_cancel hc4, one_mul]
-      -- rw [show c4 e * c4 e * (3 * (18 * b6 e * (c4 e)⁻¹ * (18 * b6 e * (c4 e)⁻¹))) =
-      --    c4 e * (c4 e)⁻¹ * c4 e * (c4 e)⁻¹ * (3 * (18 * b6 e * (18 * b6 e))) by ac_rfl,
-      --    Field.mul_inv_cancel hc4, one_mul, Field.mul_inv_cancel hc4, one_mul]
-      -- rw [show c4 e * c4 e * (2 * e.a2 * (18 * b6 e * (c4 e)⁻¹)) =
-      --   c4 e * (c4 e)⁻¹ * (c4 e * (2 * e.a2 * (18 * b6 e))) by ac_rfl, Field.mul_inv_cancel hc4, one_mul]
-      -- rw [show c4 e * c4 e * (2 * e.a2 * (b2 e * b4 e * (c4 e)⁻¹)) =
-      --   c4 e * (c4 e)⁻¹ * c4 e * (2 * e.a2 * (b2 e * b4 e)) by ac_rfl, Field.mul_inv_cancel hc4, one_mul]
-      -- rw [show c4 e * c4 e * (3 * (b2 e * b4 e * (c4 e)⁻¹ * (18 * b6 e * (c4 e)⁻¹))) =
-      --   c4 e * (c4 e)⁻¹ * c4 e * (c4 e)⁻¹ * (3 * (b2 e * b4 e * (18 * b6 e))) by ac_rfl,
-      --    Field.mul_inv_cancel hc4, one_mul, Field.mul_inv_cancel hc4, one_mul]
-      -- rw [show c4 e * c4 e * (3 * (18 * b6 e * (c4 e)⁻¹ * (b2 e * b4 e * (c4 e)⁻¹))) =
-      --   c4 e * (c4 e)⁻¹ * c4 e * (c4 e)⁻¹ * (3 * (18 * b6 e * (b2 e * b4 e))) by ac_rfl,
-      --    Field.mul_inv_cancel hc4, one_mul, Field.mul_inv_cancel hc4, one_mul]
-      -- rw [show c4 e * c4 e * (3 * (b2 e * b4 e * (c4 e)⁻¹ * (b2 e * b4 e * (c4 e)⁻¹))) =
-      --   c4 e * (c4 e)⁻¹ * c4 e  * (c4 e)⁻¹ * (3 * (b2 e * b4 e * (b2 e * b4 e))) by ac_rfl,
-      --   Field.mul_inv_cancel hc4, one_mul, Field.mul_inv_cancel hc4, one_mul]
-      -- simp [sub_add_comm', neg_pow_three, div_eq_mul_inv, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
-      --   ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
-      sorry
+      -- simp only [mul_add, mul_sub, div_eq_mul_inv, mul_pow]
+      -- have : c4 e ^ 3 * ((b2 e * b5 e + 3 * b7 e) ^ 2 * (c4 e)⁻¹ ^ 2) =
+      --     c4 e ^ 3 * (c4 e)⁻¹ ^ 2 * ((b2 e * b5 e + 3 * b7 e) ^ 2 ) :=
+      --       by ac_rfl -- TODO ac_rfl bug or show bug?
+      -- rw [this]
+      simp only [div_eq_mul_inv]
+      rw [show c4 e ^ 3 * (((b2 e * b5 e + 3 * b7 e) * (c4 e)⁻¹) ^ 2 +
+            e.a1 * ((18 * b6 e - b2 e * b4 e) * (c4 e)⁻¹) * ((b2 e * b5 e + 3 * b7 e) * (c4 e)⁻¹) +
+          e.a3 * ((b2 e * b5 e + 3 * b7 e) * (c4 e)⁻¹) -
+          (((18 * b6 e - b2 e * b4 e) * (c4 e)⁻¹) ^ 3 + e.a2 * ((18 * b6 e - b2 e * b4 e) * (c4 e)⁻¹) ^ 2 +
+          e.a4 * ((18 * b6 e - b2 e * b4 e) * (c4 e)⁻¹) + e.a6)) =
+        (c4 e * (c4 e)⁻¹ * c4 e * (c4 e)⁻¹ * c4 e * ((b2 e * b5 e + 3 * b7 e)) ^ 2 +
+          c4 e * (c4 e)⁻¹ * c4 e * (c4 e)⁻¹ * c4 e * e.a1 * ((18 * b6 e - b2 e * b4 e)) * ((b2 e * b5 e + 3 * b7 e)) +
+        c4 e * (c4 e)⁻¹ * c4 e * c4 e * e.a3 * ((b2 e * b5 e + 3 * b7 e)) -
+        (c4 e * (c4 e)⁻¹ * c4 e * (c4 e)⁻¹ * c4 e * (c4 e)⁻¹ * ((18 * b6 e - b2 e * b4 e)) ^ 3 +
+        c4 e * (c4 e)⁻¹ * c4 e * (c4 e)⁻¹ * c4 e * e.a2 * ((18 * b6 e - b2 e * b4 e)) ^ 2 +
+          c4 e * (c4 e)⁻¹ * c4 e * c4 e * e.a4 * ((18 * b6 e - b2 e * b4 e)) +
+        c4 e * c4 e * c4 e * e.a6)) by ring]
+      simp only [Field.mul_inv_cancel hc4, one_mul]
+      rw [b5, b7, c4, b2, b4, b6]
+      -- what remains is just the discriminant (up to sign)
+      rw [← mul_zero (e.a1^6 + 12*e.a1^4*e.a2 + 48*e.a1^2*e.a2^2 - 36*e.a1^3*e.a3 + 64*e.a2^3
+        - 144*e.a1*e.a2*e.a3 - 72*e.a1^2*e.a4 + 216*e.a3^2 - 288*e.a2*e.a4 + 864*e.a6),
+        ← h, discr_eq_neg_singular]
+      ring
     . rw [dweierstrass_dx]
       apply nzero_mul_left_cancel (e.c4 ^ 2) _ _ (pow_nonzero _ _ hc4)
       rw [mul_zero, pow_two]
-      simp [sub_add_comm', neg_pow_three, div_eq_mul_inv, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
-        ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
--- ⊢ e.a1 * (b2 e * b5 e) +
--- c4 e * (e.a1 * (3 * b7 e * (c4 e)⁻¹)) -
---     (c4 e * (3 * (18 * b6 e * (c4 e)⁻¹ * (18 * b6 e * (c4 e)⁻¹))) +
---           (c4 e * (2 * e.a2 * (18 * b6 e * (c4 e)⁻¹))
--- - c4 e * (2 * e.a2 * (b2 e * b4 e * (c4 e)⁻¹))) +
---         c4 e * e.a4 -
---       (c4 e * (3 * (b2 e * b4 e * (c4 e)⁻¹ * (18 * b6 e * (c4 e)⁻¹))) +
---         (c4 e * (3 * (18 * b6 e * (c4 e)⁻¹ * (b2 e * b4 e * (c4 e)⁻¹))) -
---           c4 e * (3 * (b2 e * b4 e * (c4 e)⁻¹ * (b2 e * b4 e * (c4 e)⁻¹)))))) =
-      rw [show c4 e * c4 e * (e.a1 * (b2 e * b5 e * (c4 e)⁻¹)) =
-        c4 e * (c4 e)⁻¹ * c4 e * (e.a1 * (b2 e * b5 e)) by ac_rfl, Field.mul_inv_cancel hc4, one_mul]
-      rw [show c4 e * c4 e * (e.a1 * (3 * b7 e * (c4 e)⁻¹)) =
-        c4 e * (c4 e)⁻¹ * c4 e * (e.a1 * (3 * b7 e)) by ac_rfl, Field.mul_inv_cancel hc4, one_mul]
-      rw [show c4 e * c4 e * (3 * (18 * b6 e * (c4 e)⁻¹ * (18 * b6 e * (c4 e)⁻¹))) =
-         c4 e * (c4 e)⁻¹ * c4 e * (c4 e)⁻¹ * (3 * (18 * b6 e * (18 * b6 e))) by ac_rfl,
-         Field.mul_inv_cancel hc4, one_mul, Field.mul_inv_cancel hc4, one_mul]
-      rw [show c4 e * c4 e * (2 * e.a2 * (18 * b6 e * (c4 e)⁻¹)) =
-        c4 e * (c4 e)⁻¹ * (c4 e * (2 * e.a2 * (18 * b6 e))) by ac_rfl, Field.mul_inv_cancel hc4, one_mul]
-      rw [show c4 e * c4 e * (2 * e.a2 * (b2 e * b4 e * (c4 e)⁻¹)) =
-        c4 e * (c4 e)⁻¹ * c4 e * (2 * e.a2 * (b2 e * b4 e)) by ac_rfl, Field.mul_inv_cancel hc4, one_mul]
-      rw [show c4 e * c4 e * (3 * (b2 e * b4 e * (c4 e)⁻¹ * (18 * b6 e * (c4 e)⁻¹))) =
-        c4 e * (c4 e)⁻¹ * c4 e * (c4 e)⁻¹ * (3 * (b2 e * b4 e * (18 * b6 e))) by ac_rfl,
-         Field.mul_inv_cancel hc4, one_mul, Field.mul_inv_cancel hc4, one_mul]
-      rw [show c4 e * c4 e * (3 * (18 * b6 e * (c4 e)⁻¹ * (b2 e * b4 e * (c4 e)⁻¹))) =
-        c4 e * (c4 e)⁻¹ * c4 e * (c4 e)⁻¹ * (3 * (18 * b6 e * (b2 e * b4 e))) by ac_rfl,
-         Field.mul_inv_cancel hc4, one_mul, Field.mul_inv_cancel hc4, one_mul]
-      rw [show c4 e * c4 e * (3 * (b2 e * b4 e * (c4 e)⁻¹ * (b2 e * b4 e * (c4 e)⁻¹))) =
-        c4 e * (c4 e)⁻¹ * c4 e  * (c4 e)⁻¹ * (3 * (b2 e * b4 e * (b2 e * b4 e))) by ac_rfl,
-        Field.mul_inv_cancel hc4, one_mul, Field.mul_inv_cancel hc4, one_mul]
+      simp only [div_eq_mul_inv]
+      rw [show c4 e * c4 e *
+        (e.a1 * ((b2 e * b5 e + 3 * b7 e) * (c4 e)⁻¹) -
+          (3 * ((18 * b6 e - b2 e * b4 e) * (c4 e)⁻¹) ^ 2
+          + 2 * e.a2 * ((18 * b6 e - b2 e * b4 e) * (c4 e)⁻¹) + e.a4)) =
+        c4 e * (c4 e)⁻¹ * c4 e * (e.a1 * (b2 e * b5 e + 3 * b7 e) - 2 * e.a2 * ((18 * b6 e - b2 e * b4 e)))
+        - c4 e * (c4 e)⁻¹ * c4 e * (c4 e)⁻¹ *
+          3 * (18 * b6 e - b2 e * b4 e) ^ 2 - e.a4 * c4 e * c4 e
+        by ring]
+      simp only [Field.mul_inv_cancel hc4, one_mul]
       rw [b5, b7, c4, b2, b4, b6]
       -- what remains is just 36 times the discriminant (up to sign)
       rw [← mul_zero (36 : K), ← h, discr_eq_neg_singular]
-      simp only [sub_add_comm', neg_pow_three, div_eq_mul_inv, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
-        ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
-      simp only [eq_sub_iff_add_eq, sub_eq_iff_eq_add, neg_add_eq_sub, add_sub, sub_add]
-      -- ring -- true but too slow
-      sorry
+      ring
     . rw [dweierstrass_dy]
       apply nzero_mul_left_cancel e.c4 _ _ hc4
-      simp only [sub_add_comm', neg_pow_three, div_eq_mul_inv, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
-        ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
-      --     c4 e * (2 * (b2 e * b5 e * (c4 e)⁻¹))
-      -- + c4 e * (2 * (3 * b7 e * (c4 e)⁻¹)) +
-      --   (c4 e * (e.a1 * (18 * b6 e * (c4 e)⁻¹))
-      -- - c4 e * (e.a1 * (b2 e * b4 e * (c4 e)⁻¹))) +
-      -- c4 e * e.a3
-      rw [show c4 e * (2 * (b2 e * b5 e * (c4 e)⁻¹)) =
-        c4 e * (c4 e)⁻¹ * (2 * (b2 e * b5 e)) by ac_rfl, Field.mul_inv_cancel hc4, one_mul]
-      rw [show c4 e * (2 * (3 * b7 e * (c4 e)⁻¹)) =
-        c4 e * (c4 e)⁻¹ * (2 * (3 * b7 e)) by ac_rfl, Field.mul_inv_cancel hc4, one_mul]
-      rw [show c4 e * (e.a1 * (18 * b6 e * (c4 e)⁻¹)) =
-        c4 e * (c4 e)⁻¹ * (e.a1 * (18 * b6 e)) by ac_rfl, Field.mul_inv_cancel hc4, one_mul]
-      rw [show c4 e * (e.a1 * (b2 e * b4 e * (c4 e)⁻¹)) =
-        c4 e * (c4 e)⁻¹ * (e.a1 * (b2 e * b4 e)) by ac_rfl, Field.mul_inv_cancel hc4, one_mul]
+      simp only [div_eq_mul_inv, mul_zero]
+      rw [show c4 e * (2 * ((b2 e * b5 e + 3 * b7 e) * (c4 e)⁻¹)
+          + e.a1 * ((18 * b6 e - b2 e * b4 e) * (c4 e)⁻¹) + e.a3) =
+        c4 e * (c4 e)⁻¹ * (2 * (b2 e * b5 e + 3 * b7 e)
+        + e.a1 * ((18 * b6 e - b2 e * b4 e))) + c4 e * e.a3 by ring]
+      simp only [Field.mul_inv_cancel hc4, one_mul]
       rw [b5, b7, c4, b2, b4, b6]
-      simp only [sub_add_comm', neg_pow_three, div_eq_mul_inv, neg_add_eq_sub, sub_sub, pow_succ, ← neg_mul_left,
-        ← neg_mul_right, mul_add, add_mul, mul_sub, sub_mul, pow_zero, mul_one]
-      simp only [eq_sub_iff_add_eq, sub_eq_iff_eq_add, neg_add_eq_sub, add_sub, sub_add]
       ring
 
 
@@ -772,7 +636,7 @@ lemma move_singular_point_to_origin [PerfectRing K] (e : Model K) (h : e.discr =
 by
   rw [move_singular_point_to_origin_iso, rst_triple, move_singular_point_to_origin_triple]
   convert move_singular_point e (singular_point e).fst (singular_point e).snd
-    (is_singular_point_singular_point e h) <;>
+    (is_singular_point_singular_point e h) using 2 <;> -- TODO convert does too much here
   simp [var_change]
 
 lemma move_singular_point_to_origin' [PerfectRing K] (e : Model K) :

@@ -3,7 +3,7 @@ import ECTate.Algebra.EllipticCurve.Model
 import ECTate.Algebra.ValuedRing
 import ECTate.Algebra.EllipticCurve.KodairaTypes
 import ECTate.Data.Nat.Enat
-import Mathlib.Init.Data.Int.Basic
+import Mathlib.Data.Int.Basic
 import Mathlib.Tactic.LibrarySearch
 import ECTate.Algebra.EllipticCurve.LocalEC
 import Mathlib.Init.Algebra.Order

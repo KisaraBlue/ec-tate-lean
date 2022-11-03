@@ -1,4 +1,4 @@
-import Mathlib.Init.Data.Int.Basic
+import Mathlib.Data.Int.Basic
 import Mathlib.Data.Nat.Basic
 import Mathlib.Init.Data.Nat.Lemmas
 import Mathlib.Logic.Basic

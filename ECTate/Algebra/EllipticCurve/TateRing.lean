@@ -6,7 +6,7 @@ import ECTate.Algebra.EllipticCurve.KodairaTypes
 import ECTate.Data.Nat.Enat
 import Mathlib.Tactic.LibrarySearch
 import Mathlib.Init.Algebra.Order
-import Mathlib.Init.Data.Int.Basic
+import Mathlib.Data.Int.Basic
 
 open ValidModel
 open Enat

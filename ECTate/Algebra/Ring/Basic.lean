@@ -14,18 +14,10 @@ variable {R : Type _}
 
 --theorem add_mul (a b c : R) : (a + b) * c = a * c + b * c := Semiring.add_mul a b c
 
-@[simp] lemma one_pow [Semiring R] (n : Nat) : (1 ^ n : R) = 1 := by
-  induction n with
-  | zero =>
-    rw [pow_zero]
-  | succ n ih =>
-    rw [pow_succ, ih]
-    simp
-
 theorem add_self_eq_mul_two [Semiring R] (a : R) : a + a = 2 * a := by
   rw [←one_mul a, ←add_mul, one_mul]
-  simp
-  sorry
+  congr
+  norm_num
 
 section Ring
 --theorem sub_eq_add_neg (a b : R) : a - b = a + -b := Ring.sub_eq_add_neg a b
@@ -108,7 +100,8 @@ theorem factors_nzero_mul_nzero {a b : R} : a ≠ 0 → b ≠ 0 → a * b ≠ 0 
 theorem mul_eq_zero_iff_factor_eq_zero (a b : R) : a * b = 0 ↔ a = 0 ∨ b = 0 := by
   apply Iff.intro
   . intro mul_eq_zero
-    sorry
+    contrapose! mul_eq_zero
+    exact factors_nzero_mul_nzero mul_eq_zero.1 mul_eq_zero.2
   . intro factor_eq_zero
     cases factor_eq_zero with
     | inl a_zero => rw [a_zero, zero_mul]
@@ -154,5 +147,5 @@ end IntegralDomain
 
 instance : IntegralDomain ℤ where
   __ := inferInstanceAs (CommRing ℤ)
-  non_trivial := by sorry
+  non_trivial := by decide
   factors_nzero_mul_nzero := by sorry

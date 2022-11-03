@@ -4,7 +4,6 @@ import ECTate.Algebra.Ring.Basic
 import Mathlib.Init.Data.Nat.Lemmas
 import ECTate.Init.Data.Int.Lemmas
 import ECTate.Data.Nat.Enat
-import Mathlib.Init.Data.Int.Basic
 import ECTate.Algebra.EllipticCurve.Kronecker
 import Mathlib.Tactic.LibrarySearch
 import Mathlib.Tactic.Ring
