@@ -598,7 +598,11 @@ def double_root (a b c : ℤ) (p : ℕ) :=
   else
     modulo (-b * inv_mod (2 * a) p) p
 
-lemma val_poly_of_double_root {p : ℕ} (hp : nat_prime p) (a b c : ℤ) (H : has_double_root a b c hp) : let x := double_root a b c p; let v_p := (primeEVR hp).valtn.v; v_p (a*x^2 + b*x + c) > 0 ∧ v_p (2*a*x + b) > 0 := by sorry
+lemma val_poly_of_double_root {p : ℕ} (hp : nat_prime p) (a b c : ℤ)
+  (H : has_double_root a b c hp) :
+  let x := double_root a b c p;
+  let v_p := (primeEVR hp).valtn.v;
+  v_p (a*x^2 + b*x + c) > 0 ∧ v_p (2*a*x + b) > 0 := by sorry
 
 
 

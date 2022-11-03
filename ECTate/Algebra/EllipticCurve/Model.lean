@@ -1,7 +1,7 @@
 import ECTate.Algebra.Ring.Basic
 import ECTate.Algebra.CharP.Basic
 import ECTate.FieldTheory.PerfectClosure
-import ECTate.Tactic.SplitIfs
+import Mathlib.Tactic.SplitIfs
 import Mathlib.Tactic.NormNum
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.SimpTrace
@@ -518,9 +518,12 @@ by
           by ring]
         rw [show 2 * e.a1 ^ 2 - e.a2 = 0 from ?_]
         rw [show 4 * e.a1 * e.a3 - e.a4 = 0 from ?_]
-        simp [hchar'']
-        sorry
-        sorry
+        simp only [zero_mul, add_zero, hchar'']
+        . rw [show 2 = -1 by sorry] at hb4
+          rw [show 4 = 1 by sorry]
+          simp only [neg_mul, one_mul] at hb4
+          simp [sub_eq_add_neg, hb4]
+        . sorry
       . rw [dweierstrass_dx]
         rw [hchar'', zero_mul, zero_add]
         simp only
@@ -535,6 +538,10 @@ by
         rw [hchar'', zero_mul]
     . rw [is_singular_point]
       have hb4 : e.b2 ^ 2 = 24 * e.b2 := sorry
+      have : (12 : K) ≠ 0 := by
+        rw [show 12 = 2 * 2 * 3 by norm_num]
+        repeat { apply factors_nzero_mul_nzero }
+
       refine ⟨?_, ?_, ?_⟩
       . rw [weierstrass]
         simp [hb4, div_eq_mul_inv]
@@ -550,6 +557,7 @@ by
         sorry
       . rw [dweierstrass_dy]
         simp
+        apply nzero_mul_left_cancel (12) _ _ sorry
         sorry
   . rw [is_singular_point]
     refine ⟨?_, ?_, ?_⟩
