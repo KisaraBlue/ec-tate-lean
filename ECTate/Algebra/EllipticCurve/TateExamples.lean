@@ -24,11 +24,12 @@ lemma val_discr_mordell (p : ℕ) (hp : nat_prime p) (hn23 : p ≠ 2 ∧ p ≠ 3
 by
   rw [Enat.eq_ofN, ofN_val_discr_to_nat, discr_mordell]
   simp only [neg_mul, val_neg]
-  rw [pow_two, SurjVal.v_mul_eq_add_v, SurjVal.v_mul_eq_add_v]
+  rw [pow_two, SurjVal.v_mul_eq_add_v, SurjVal.v_mul_eq_add_v] -- TODO simp lemmas v_pow, v_uniformizer_pow
+  rw [SurjVal.v_uniformizer]
   sorry
 
-lemma KodairaTypeII (p) (hp : nat_prime p) (hn23 : p ≠ 2 ∧ p ≠ 3) :
-  (tate_big_prime p hp ⟨⟨0,0,0,0,p⟩, sorry⟩).1 = .II :=
+lemma Mordell_KodairaTypeII (p) (hp : nat_prime p) (hn23 : p ≠ 2 ∧ p ≠ 3) :
+  (tate_big_prime p hp ⟨⟨0, 0, 0, 0, p⟩, sorry⟩).1 = .II := -- TODO maybe expand this to say more about conductor exponent etc
 by
   rw [tate_big_prime]
   generalize h : (⟨⟨0,0,0,0,p⟩, _⟩ : ValidModel ℤ) = e
@@ -41,4 +42,3 @@ by
   simp only [valc4, valdisc, valdisc']
   rw [if_neg]
   exact not_false
--- -- #print KodairaTypeII
