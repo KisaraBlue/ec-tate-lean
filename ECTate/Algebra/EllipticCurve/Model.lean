@@ -468,6 +468,7 @@ by
   rw [singular_point]
   split_ifs with hc4 hc4
   . split
+    -- case _ hchar => TODO get this working, but its subtly different
     . rw [is_singular_point]
       have hchar : ring_char K = 2 := by assumption
       have hchar' : (ring_char K : K) = 2 := by simp [hchar]
@@ -538,26 +539,23 @@ by
         rw [hchar'', zero_mul]
     . rw [is_singular_point]
       have hb4 : e.b2 ^ 2 = 24 * e.b2 := sorry
-      have : (12 : K) ≠ 0 := by
+      have h12 : (12 : K) ≠ 0 := by
         rw [show 12 = 2 * 2 * 3 by norm_num]
-        repeat { apply factors_nzero_mul_nzero }
-
+        apply factors_nzero_mul_nzero
+        apply factors_nzero_mul_nzero -- TODO why repeat no work
+        sorry
+        sorry
+        sorry
       refine ⟨?_, ?_, ?_⟩
-      . rw [weierstrass]
-        simp [hb4, div_eq_mul_inv]
-        apply nzero_mul_left_cancel (12 ^ 3) _ _ sorry
-        norm_num
+      . apply nzero_mul_left_cancel (12 ^ 3) _ _ (pow_nonzero _ _ h12)
+        simp only [weierstrass, hb4, div_eq_mul_inv, mul_zero]
         sorry
 
-      . rw [dweierstrass_dx]
-        apply nzero_mul_left_cancel (12 ^ 2) _ _ sorry
-        simp [b2]
-        simp [div_eq_mul_inv]
-        norm_num
+      . apply nzero_mul_left_cancel (12 ^ 2) _ _ (pow_nonzero _ _ h12)
+        simp only [dweierstrass_dx, div_eq_mul_inv, mul_zero]
         sorry
-      . rw [dweierstrass_dy]
-        simp
-        apply nzero_mul_left_cancel (12) _ _ sorry
+      . apply nzero_mul_left_cancel 12 _ _ h12
+        simp only [dweierstrass_dy, div_eq_mul_inv, mul_zero]
         sorry
   . rw [is_singular_point]
     refine ⟨?_, ?_, ?_⟩
