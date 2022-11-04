@@ -70,14 +70,6 @@ by rw [← zero_add (-z), ← sub_eq_add_neg,
 end ring_neg
 end ring_with_neg
 
-section Obvious
-variable {R : Type u} [IntegralDomain R]
-
-
-lemma add4 : 2 + 2 = (4 : R) := by norm_num
-lemma mul4 : 2 * 2 = (4 : R) := by norm_num
-
-end Obvious
 
 /-- A model of a (possibly singular) elliptic curve is given
 by `a` invariants $$a₁, a₂, a₃, a₄, a₆$$ which represent the curve
@@ -85,16 +77,12 @@ $$
 y^2 + a₁ xy + a₃ y =  x^ 3 + a₂ x ^ 2 + a₄ x + a₆
 $$
 -/
-structure Model (R : Type u) [IntegralDomain R] where
-  a1 : R
-  a2 : R
-  a3 : R
-  a4 : R
-  a6 : R
+structure Model (R : Type u) [CommRing R] where
+  (a1 a2 a3 a4 a6 : R)
 deriving Inhabited, DecidableEq
 
 namespace Model
-variable {R : Type u} [IntegralDomain R]
+variable {R : Type u} [CommRing R]
 
 instance [Repr R] : Repr (Model R) := ⟨λ (e : Model R) _ => repr (e.a1, e.a2, e.a3, e.a4, e.a6)⟩
 

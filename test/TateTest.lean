@@ -10,7 +10,7 @@ open FS
 open Kodaira
 
 def kodaira_decode : ℤ → Kodaira
-  | 0 => I 0 -- invalid code
+  | 0 => unreachable!
   | 1 => I 0
   | 2 => II
   | 3 => III
