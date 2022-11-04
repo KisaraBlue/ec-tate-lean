@@ -541,8 +541,7 @@ by
       have hb4 : e.b2 ^ 2 = 24 * e.b2 := sorry
       have h12 : (12 : K) ≠ 0 := by
         rw [show 12 = 2 * 2 * 3 by norm_num]
-        apply factors_nzero_mul_nzero
-        apply factors_nzero_mul_nzero -- TODO why repeat no work
+        repeat' apply factors_nzero_mul_nzero
         sorry
         sorry
         sorry

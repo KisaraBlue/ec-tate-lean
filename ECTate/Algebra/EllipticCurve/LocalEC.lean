@@ -149,11 +149,10 @@ by
         (val_mul_ge_of_both_ge evr.valtn (by simpa : SurjVal.v evr.valtn (-b2 e) ≥ ofN 2) hb2) hb8
     . exact val_mul_ge_of_right_ge evr.valtn (val_pow_ge_of_ge evr.valtn 3 hb4)
   . exact val_mul_ge_of_both_ge evr.valtn (val_mul_ge_of_right_ge evr.valtn hb6) hb6
-  . apply val_sub_ge_of_ge
-    . apply val_sub_ge_of_ge
-      exact val_mul_ge_of_both_ge evr.valtn
+  . repeat' apply val_sub_ge_of_ge
+    . exact val_mul_ge_of_both_ge evr.valtn
         (val_mul_ge_of_both_ge evr.valtn (by simpa : SurjVal.v evr.valtn (-b2 e) ≥ ofN 2) hb2) hb8
-      apply val_mul_ge_of_right_ge evr.valtn
+    . apply val_mul_ge_of_right_ge evr.valtn
       exact val_pow_ge_of_ge evr.valtn 3 hb4
     . exact val_mul_ge_of_both_ge evr.valtn (val_mul_ge_of_right_ge evr.valtn hb6) hb6
   . exact val_mul_ge_of_both_ge
@@ -238,15 +237,13 @@ lemma val_discr_of_val_ai (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v 
   have hb6 := val_b6_of_val_a36 evr e h3 h6
   have hb8 := val_b8_of_val_ai evr e h1 h2 h3 h4 h6
   simp only [discr, sub_eq_add_neg]
-  apply val_add_ge_of_ge
-  . apply val_add_ge_of_ge
-    . apply val_add_ge_of_ge
-      . rw [←neg_mul_left, ←neg_mul_left, val_neg]
-          apply val_mul_ge_of_both_ge _ (val_mul_ge_of_both_ge _ hb2 hb2) hb8
-      . rw [val_neg, pow_succ', pow_succ', pow_one]
-        apply val_mul_ge_of_right_ge _ (val_mul_ge_of_both_ge _ (val_mul_ge_of_both_ge _ hb4 hb4) hb4)
-    . rw [val_neg, mul_assoc]
-      apply val_mul_ge_of_right_ge _ (val_mul_ge_of_both_ge _ hb6 hb6)
+  repeat' apply val_add_ge_of_ge
+  . rw [←neg_mul_left, ←neg_mul_left, val_neg]
+    apply val_mul_ge_of_both_ge _ (val_mul_ge_of_both_ge _ hb2 hb2) hb8
+  . rw [val_neg, pow_succ', pow_succ', pow_one]
+    apply val_mul_ge_of_right_ge _ (val_mul_ge_of_both_ge _ (val_mul_ge_of_both_ge _ hb4 hb4) hb4)
+  . rw [val_neg, mul_assoc]
+    apply val_mul_ge_of_right_ge _ (val_mul_ge_of_both_ge _ hb6 hb6)
   . rw [mul_assoc, mul_assoc]
     apply val_mul_ge_of_right_ge _ (val_mul_ge_of_both_ge _ hb2 (val_mul_ge_of_both_ge _ hb4 hb6))
 
@@ -347,20 +344,18 @@ lemma v_discr_of_v_ai {p : R} (valp : SurjVal p) (e : ValidModel R) (hq : q > 1)
   have h8' := v_b8_of_v_ai valp e h1 h2 h3 h4 h6
   simp only [Model.discr]
   rw [sub_eq_add_neg, sub_eq_add_neg]
-  apply val_add_ge_of_ge valp
-  . apply val_add_ge_of_ge valp
-    . apply val_add_ge_of_ge valp
-      . rw [←neg_mul_left, ←neg_mul_left, val_neg, (show 3 = 1 + 1 + 1 by rfl), ←Nat.add_assoc,
-          ←Nat.add_assoc, Nat.add_assoc, mul_comm, ←add_ofN]
-        exact val_mul_ge_of_both_ge valp h8' (val_mul_ge_of_both_ge valp h2' h2')
-      . rw [val_neg, pow_succ', pow_succ', pow_one, ←add_self_eq_mul_two,
-          (show q + q + 3 = q + 1 + (q + 1) + 1 by ring), ←add_ofN, ←add_ofN]
-        exact val_mul_ge_of_right_ge valp (val_mul_ge_of_both_ge valp
-          (val_mul_ge_of_both_ge valp h4' h4') (Enat.le_trans ((le_ofN _ _).1 (Nat.le_add_left 1 q)) h4'))
-    . rw [val_neg, ←add_ofN, mul_assoc, (show 3 = 2 + 1 by rfl)]
-      apply val_mul_ge_of_right_ge valp (val_mul_ge_of_both_ge valp h6' (Enat.le_trans ((le_ofN _ _).1 _) h6'))
-      rw [←add_self_eq_mul_two q]
-      exact Nat.add_le_add (Nat.succ_le_of_lt hq) (Nat.le_of_lt hq)
+  repeat' apply val_add_ge_of_ge valp
+  . rw [←neg_mul_left, ←neg_mul_left, val_neg, (show 3 = 1 + 1 + 1 by rfl), ←Nat.add_assoc,
+      ←Nat.add_assoc, Nat.add_assoc, mul_comm, ←add_ofN]
+    exact val_mul_ge_of_both_ge valp h8' (val_mul_ge_of_both_ge valp h2' h2')
+  . rw [val_neg, pow_succ', pow_succ', pow_one, ←add_self_eq_mul_two,
+      (show q + q + 3 = q + 1 + (q + 1) + 1 by ring), ←add_ofN, ←add_ofN]
+    exact val_mul_ge_of_right_ge valp (val_mul_ge_of_both_ge valp
+      (val_mul_ge_of_both_ge valp h4' h4') (Enat.le_trans ((le_ofN _ _).1 (Nat.le_add_left 1 q)) h4'))
+  . rw [val_neg, ←add_ofN, mul_assoc, (show 3 = 2 + 1 by rfl)]
+    apply val_mul_ge_of_right_ge valp (val_mul_ge_of_both_ge valp h6' (Enat.le_trans ((le_ofN _ _).1 _) h6'))
+    rw [←add_self_eq_mul_two q]
+    exact Nat.add_le_add (Nat.succ_le_of_lt hq) (Nat.le_of_lt hq)
   . rw [(show 3 = 1 + (1 + 1) by rfl), ←add_ofN, ←add_ofN, mul_comm, mul_assoc 9]
     exact val_mul_ge_of_both_ge valp h6' (val_mul_ge_of_right_ge valp
       (val_mul_ge_of_both_ge valp h2' (Enat.le_trans ((le_ofN _ _).1
@@ -389,37 +384,44 @@ lemma v_rst_b2_of_small_char {p : R} (valp : SurjVal p) (e : ValidModel R) (r s 
 
 section cubic
 
-def Δcubic (c : R × R × R) : R := 18 * c.1 * c.2.1 * c.2.2 - 4 * c.1 ^ 3 * c.2.2 + c.1 ^ 2 * c.2.1 ^ 2 - 4 * c.2.1 ^ 3 - 27 * c.2.2 ^ 2
+def Δcubic (c : R × R × R) : R :=
+18 * c.1 * c.2.1 * c.2.2 - 4 * c.1 ^ 3 * c.2.2 + c.1 ^ 2 * c.2.1 ^ 2 - 4 * c.2.1 ^ 3 - 27 * c.2.2 ^ 2
 
-def model_to_cubic {p : R} (evr : EnatValRing p) (e : ValidModel R) : R × R × R := (evr.sub_val e.a2 1, evr.sub_val e.a4 2, evr.sub_val e.a6 3)
+def model_to_cubic {p : R} (evr : EnatValRing p) (e : ValidModel R) : R × R × R :=
+(evr.sub_val e.a2 1, evr.sub_val e.a4 2, evr.sub_val e.a6 3)
 
-def cubic_has_dinstinct_roots {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop := evr.valtn.v (Δcubic (model_to_cubic evr e)) = 0
+def cubic_has_dinstinct_roots {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop :=
+evr.valtn.v (Δcubic (model_to_cubic evr e)) = 0
 
 def δmultiplicity (c : R × R × R) : R := 3 * c.2.1 - c.1 ^ 2
 
-def cubic_has_double_root {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop := evr.valtn.v (Δcubic (model_to_cubic evr e)) > 0 ∧ evr.valtn.v (δmultiplicity (model_to_cubic evr e)) = 0
+def cubic_has_double_root {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop :=
+evr.valtn.v (Δcubic (model_to_cubic evr e)) > 0 ∧ evr.valtn.v (δmultiplicity (model_to_cubic evr e)) = 0
 
-def cubic_has_triple_root {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop := evr.valtn.v (Δcubic (model_to_cubic evr e)) > 0 ∧ evr.valtn.v (δmultiplicity (model_to_cubic evr e)) > 0
+def cubic_has_triple_root {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop :=
+evr.valtn.v (Δcubic (model_to_cubic evr e)) > 0 ∧ evr.valtn.v (δmultiplicity (model_to_cubic evr e)) > 0
 
 def move_cubic_double_root_to_origin_iso {p : R} (evr : EnatValRing p) (e : ValidModel R) : ValidModel R :=
-  let (a2p, a4p2, a6p3) := model_to_cubic evr e
+  let (a2p, a4p2, _) := model_to_cubic evr e
   rst_iso (p * (evr.norm_repr (if evr.residue_char = 2 then a4p2 else a2p * a4p2))) 0 0 e
 
 def cubic_double_root_is_zero {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop :=
   let (a2p, a4p2, a6p3) := model_to_cubic evr e
   evr.valtn.v a2p = 0 ∧ evr.valtn.v a4p2 > 0 ∧ evr.valtn.v a6p3 > 0
 
-lemma move_cubic_double_root_to_origin {p : R} (evr : EnatValRing p) (e : ValidModel R) : cubic_has_double_root evr e → cubic_double_root_is_zero evr (move_cubic_double_root_to_origin_iso evr e) := sorry
+lemma move_cubic_double_root_to_origin {p : R} (evr : EnatValRing p) (e : ValidModel R) :
+  cubic_has_double_root evr e → cubic_double_root_is_zero evr (move_cubic_double_root_to_origin_iso evr e) := sorry
 
 def move_cubic_triple_root_to_origin_iso {p : R} (evr : EnatValRing p) (e : ValidModel R) : ValidModel R :=
-  let (a2p, a4p2, a6p3) := model_to_cubic evr e
+  let (a2p, _, a6p3) := model_to_cubic evr e
   rst_iso (p * (evr.norm_repr (if evr.residue_char = 2 then -a2p else -a6p3))) 0 0 e
 
 def cubic_triple_root_is_zero {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop :=
   let (a2p, a4p2, a6p3) := model_to_cubic evr e
   evr.valtn.v a2p > 0 ∧ evr.valtn.v a4p2 > 0 ∧ evr.valtn.v a6p3 > 0
 
-lemma move_cubic_triple_root_to_origin {p : R} (evr : EnatValRing p) (e : ValidModel R) : cubic_has_triple_root evr e → cubic_triple_root_is_zero evr (move_cubic_triple_root_to_origin_iso evr e) := sorry
+lemma move_cubic_triple_root_to_origin {p : R} (evr : EnatValRing p) (e : ValidModel R) :
+cubic_has_triple_root evr e → cubic_triple_root_is_zero evr (move_cubic_triple_root_to_origin_iso evr e) := sorry
 
 end cubic
 
