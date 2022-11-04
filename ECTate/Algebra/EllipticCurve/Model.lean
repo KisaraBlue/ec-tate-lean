@@ -520,8 +520,8 @@ by
         rw [show 2 * e.a1 ^ 2 - e.a2 = 0 from ?_]
         rw [show 4 * e.a1 * e.a3 - e.a4 = 0 from ?_]
         simp only [zero_mul, add_zero, hchar'']
-        . rw [show 2 = -1 by sorry] at hb4
-          rw [show 4 = 1 by sorry]
+        . rw [show 2 = -1 by rw [← add_zero (-1), ← hchar'']; norm_num] at hb4
+          rw [show 4 = 1 by rw [← add_zero 1, ← hchar'']; norm_num]
           simp only [neg_mul, one_mul] at hb4
           simp [sub_eq_add_neg, hb4]
         . sorry
@@ -538,7 +538,8 @@ by
             + e.a1 * pth_root (- (e.a3 ^ 2) - e.a6) + e.a3 = 3 * ((e.a1 * pth_root (-(e.a3 ^ 2) - e.a6)) + e.a3) by ring]
         rw [hchar'', zero_mul]
     . rw [is_singular_point]
-      have hb4 : e.b2 ^ 2 = 24 * e.b2 := sorry
+      -- have hb4 : e.b2 ^ 2 = 24 * e.b4 := sorry
+      have h2 : (2 : K) ≠ 0 := sorry
       have h12 : (12 : K) ≠ 0 := by
         rw [show 12 = 2 * 2 * 3 by norm_num]
         repeat' apply factors_nzero_mul_nzero
@@ -547,9 +548,22 @@ by
         sorry
       refine ⟨?_, ?_, ?_⟩
       . apply nzero_mul_left_cancel (12 ^ 3) _ _ (pow_nonzero _ _ h12)
-        simp only [weierstrass, hb4, div_eq_mul_inv, mul_zero]
+        simp only [weierstrass, div_eq_mul_inv, mul_zero]
+        rw [show
+          12 ^ 3 * ((-(e.a1 * b2 e * 12⁻¹ + e.a3) * 2⁻¹) ^ 2 +
+          e.a1 * (b2 e * 12⁻¹) * (-(e.a1 * b2 e * 12⁻¹ + e.a3) * 2⁻¹) +
+          e.a3 * (-(e.a1 * b2 e * 12⁻¹ + e.a3) * 2⁻¹) -
+          ((b2 e * 12⁻¹) ^ 3 + e.a2 * (b2 e * 12⁻¹) ^ 2 + e.a4 * (b2 e * 12⁻¹) + e.a6)) =
+          3*(-(e.a1 * b2 e * (12 * 12⁻¹) + 12 * e.a3) * (2 * 2⁻¹)) ^ 2 +
+          e.a1 * (b2 e * (12 * 12⁻¹)) * (-(e.a1 * b2 e * (12 * 12⁻¹) + 12 * e.a3) * (6 * (2 * 2⁻¹))) +
+          12 * e.a3 * (-(e.a1 * b2 e * (12 * 12⁻¹) + 12 * e.a3) * (6 * (2 * 2⁻¹))) -
+          ((b2 e * (12 * 12⁻¹)) ^ 3 + 12 * e.a2 * (b2 e * (12 * 12⁻¹)) ^ 2 + 12 ^ 2 * e.a4 * (b2 e * (12 * 12⁻¹)) + 12 ^ 3 * e.a6) by ring]
+        simp only [Field.mul_inv_cancel h2, Field.mul_inv_cancel h12, one_mul, mul_one]
+        simp [b2]
+        rw [← mul_zero (4 : K), ← h, discr_eq_neg_singular]
+        -- This is 2*c6 - 2 * b2 * (c4 + 98*b4)
+        -- ring
         sorry
-
       . apply nzero_mul_left_cancel (12 ^ 2) _ _ (pow_nonzero _ _ h12)
         simp only [dweierstrass_dx, div_eq_mul_inv, mul_zero]
         sorry
@@ -582,7 +596,7 @@ by
         c4 e * c4 e * c4 e * e.a6)) by ring]
       simp only [Field.mul_inv_cancel hc4, one_mul]
       rw [b5, b7, c4, b2, b4, b6]
-      -- what remains is just the discriminant (up to sign)
+      -- what remains factors the discriminant (up to sign)
       rw [← mul_zero (e.a1^6 + 12*e.a1^4*e.a2 + 48*e.a1^2*e.a2^2 - 36*e.a1^3*e.a3 + 64*e.a2^3
         - 144*e.a1*e.a2*e.a3 - 72*e.a1^2*e.a4 + 216*e.a3^2 - 288*e.a2*e.a4 + 864*e.a6),
         ← h, discr_eq_neg_singular]
