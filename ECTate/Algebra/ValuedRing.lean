@@ -186,7 +186,7 @@ lemma decr_val_p_mul {p : R} (evr : EnatValRing p) (x : R) : evr.decr_val (p * x
   have h : (p * x) = p * decr_val evr (p * x) := by
     apply evr.pos_valtn_decr
     rw [evr.valtn.v_mul_eq_add_v, evr.valtn.v_uniformizer]
-    apply lt_of_lt_of_le ((Enat.lt_ofN 0 1).1 (Nat.lt_succ_self 0)) (Enat.le_add_right 1 _)
+    apply lt_of_lt_of_le ((Enat.lt_ofN 0 1).1 (Nat.lt_succ_self 0)) (le_add_right 1 _)
   apply nzero_mul_left_cancel p _ _ (p_non_zero evr.valtn)
   exact h.symm
 
@@ -324,7 +324,7 @@ lemma sub_val_add {p : R} (evr : EnatValRing p) {x y : R} {n : ℕ} (hx : evr.va
   apply nzero_mul_left_cancel (p ^ n)
   . exact pow_nonzero p n (p_non_zero evr.valtn)
   . rw [←factor_p_of_le_val evr (_ : evr.valtn.v (x + y) ≥ n), mul_add, ←factor_p_of_le_val evr hx, ←factor_p_of_le_val evr hy]
-    exact Enat.le_trans (le_min hx hy) (evr.valtn.v_add_ge_min_v x y)
+    exact le_trans (le_min hx hy) (evr.valtn.v_add_ge_min_v x y)
 
 lemma sub_val_sub {p : R} (evr : EnatValRing p) {x y : R} {n : ℕ} (hx : evr.valtn.v x ≥ n)
   (hy : evr.valtn.v y ≥ n) : sub_val evr (x - y) n = sub_val evr x n - sub_val evr y n :=
@@ -337,7 +337,7 @@ lemma sub_val_mul_left {p : R} (evr : EnatValRing p) {x y : R} {n : ℕ} (hx : e
   apply nzero_mul_left_cancel (p ^ n)
   . exact pow_nonzero p n (p_non_zero evr.valtn)
   . rw [←factor_p_of_le_val evr (_ : evr.valtn.v (x * y) ≥ n), ←mul_assoc, ←factor_p_of_le_val evr hx]
-    exact Enat.le_trans hx (val_mul_ge_left evr.valtn x y)
+    exact le_trans hx (val_mul_ge_left evr.valtn x y)
 
 lemma sub_val_mul_right {p : R} (evr : EnatValRing p) {x y : R} {n : ℕ} (hy : evr.valtn.v y ≥ n) :
   sub_val evr (x * y) n = x * sub_val evr y n :=
