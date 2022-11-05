@@ -463,15 +463,13 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
         (move_cubic_double_root_to_origin evrp e2 e2_cubic_has_double_root).1, add_zero]
 
     have h3 : navp.v e3.a3 ≥ 2 := by
-      simp only [move_cubic_double_root_to_origin_iso]
-      rw [r_of_a3]
-      apply val_add_ge_of_ge
-      . exact h3'
-      . rw [mul_assoc, factor_p_of_le_val evrp h1, mul_comm _ (_ ^ 1 * _), ←mul_assoc, ←mul_assoc,
-          mul_comm _ (_ ^ 1), ←pow_succ', mul_assoc]
-        apply val_mul_ge_of_left_ge
-        rw [val_of_pow_uniformizer navp]
-        exact le_refl _
+      simp only [move_cubic_double_root_to_origin_iso, r_of_a3]
+      apply val_add_ge_of_ge _ h3'
+      rw [mul_assoc, factor_p_of_le_val evrp h1, mul_comm _ (_ ^ 1 * _), ←mul_assoc, ←mul_assoc,
+        mul_comm _ (_ ^ 1), ←pow_succ', mul_assoc]
+      apply val_mul_ge_of_left_ge
+      rw [val_of_pow_uniformizer navp]
+      exact le_refl _
 
     have h4' : navp.v e3.a4 ≥ 3 := by
       have h4'' : navp.v e3.a4 ≥ 2 := by
@@ -493,7 +491,7 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
       rw [factor_p_of_le_val evrp h6', navp.v_mul_eq_add_v, show 4 = 3 + 1 by rfl]
       apply add_le_add
       . exact le_of_eq (val_of_pow_uniformizer navp).symm
-      .  exact succ_le_of_lt (move_cubic_double_root_to_origin evrp e2 e2_cubic_has_double_root).2.2
+      . exact succ_le_of_lt (move_cubic_double_root_to_origin evrp e2 e2_cubic_has_double_root).2.2
 
     let (m, c, (r, t)) := kodaira_type_Is p hp e3 u r s t 1 2 (Nat.lt_succ_self 1) h1' h2' h3 h4' h6
     (Is m, n - m - 4, c, .Additive, (u, r, s, t))

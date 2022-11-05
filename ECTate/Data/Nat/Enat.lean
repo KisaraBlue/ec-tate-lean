@@ -1,4 +1,5 @@
 import Mathlib.Algebra.Group.Defs
+import Mathlib.Algebra.Order.Monoid
 import Mathlib.Init.Algebra.Order
 import Mathlib.Algebra.Ring.Basic
 import Mathlib.Init.Data.Nat.Lemmas
@@ -418,5 +419,9 @@ lemma ofN_to_nat_eq_self {a : ℕ∪∞} (h : a ≠ ∞) : to_nat h = a := by
   cases a with
   | top => exact False.elim (h (Eq.refl ∞))
   | ofN n => rfl
+
+instance : OrderedAddCommMonoid ℕ∪∞ :=
+{ Enat.instLinearOrderEnat with
+  add_le_add_left := fun _ _ h c => Enat.add_le_add_left h c }
 
 end Enat
