@@ -26,6 +26,8 @@ by
   simp only [neg_mul, val_neg]
   rw [pow_two, SurjVal.v_mul_eq_add_v, SurjVal.v_mul_eq_add_v] -- TODO simp lemmas v_pow, v_uniformizer_pow
   rw [SurjVal.v_uniformizer]
+  simp
+  norm_num
   sorry
 
 lemma Mordell_KodairaTypeII (p) (hp : nat_prime p) (hn23 : p ≠ 2 ∧ p ≠ 3) :

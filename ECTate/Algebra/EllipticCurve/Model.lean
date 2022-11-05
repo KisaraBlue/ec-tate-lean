@@ -597,8 +597,9 @@ by
         (e.a1 * ((b2 e * b5 e + 3 * b7 e) * (c4 e)⁻¹) -
           (3 * ((18 * b6 e - b2 e * b4 e) * (c4 e)⁻¹) ^ 2
           + 2 * e.a2 * ((18 * b6 e - b2 e * b4 e) * (c4 e)⁻¹) + e.a4)) =
-        c4 e * (c4 e)⁻¹ * c4 e * (e.a1 * (b2 e * b5 e + 3 * b7 e) - 2 * e.a2 * ((18 * b6 e - b2 e * b4 e)))
-        - c4 e * (c4 e)⁻¹ * c4 e * (c4 e)⁻¹ *
+          c4 e * (c4 e)⁻¹ * c4 e * (e.a1 * (b2 e * b5 e + 3 * b7 e)
+          - 2 * e.a2 * ((18 * b6 e - b2 e * b4 e)))
+          - c4 e * (c4 e)⁻¹ * c4 e * (c4 e)⁻¹ *
           3 * (18 * b6 e - b2 e * b4 e) ^ 2 - e.a4 * c4 e * c4 e
         by ring]
       simp only [Field.mul_inv_cancel hc4, one_mul]
