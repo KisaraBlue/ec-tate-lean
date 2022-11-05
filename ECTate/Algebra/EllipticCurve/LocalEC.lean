@@ -330,7 +330,7 @@ lemma v_b8_of_v_ai {p : R} {q : ℕ} (valp : SurjVal p) (e : ValidModel R) (h1 :
   . rw [mul_assoc, ←add_self_eq_mul_two q, Nat.add_comm]
     exact val_mul_ge_of_both_ge valp (le_of_eq h2.symm) (val_mul_ge_of_both_ge valp h3 h3)
   . rw [val_neg, ←add_self_eq_mul_two q, Nat.add_assoc]
-    exact val_mul_ge_of_both_ge valp (Enat.le_trans (le_succ (ofN q)) h4) h4
+    exact val_mul_ge_of_both_ge valp (le_trans (le_succ (ofN q)) h4) h4
 
 
 lemma v_discr_of_v_ai {p : R} {q : ℕ} (valp : SurjVal p) (e : ValidModel R) (hq : q > 1)
@@ -350,14 +350,14 @@ lemma v_discr_of_v_ai {p : R} {q : ℕ} (valp : SurjVal p) (e : ValidModel R) (h
   . rw [val_neg, pow_succ', pow_succ', pow_one, ←add_self_eq_mul_two,
       (show q + q + 3 = q + 1 + (q + 1) + 1 by ring)]
     exact val_mul_ge_of_right_ge valp (val_mul_ge_of_both_ge valp
-      (val_mul_ge_of_both_ge valp h4' h4') (Enat.le_trans ((le_ofN _ _).1 (Nat.le_add_left 1 q)) h4'))
+      (val_mul_ge_of_both_ge valp h4' h4') (le_trans ((le_ofN _ _).1 (Nat.le_add_left 1 q)) h4'))
   . rw [val_neg, mul_assoc, (show 3 = 2 + 1 by rfl)]
-    apply val_mul_ge_of_right_ge valp (val_mul_ge_of_both_ge valp h6' (Enat.le_trans ((le_ofN _ _).1 _) h6'))
+    apply val_mul_ge_of_right_ge valp (val_mul_ge_of_both_ge valp h6' (le_trans ((le_ofN _ _).1 _) h6'))
     rw [←add_self_eq_mul_two q]
     exact Nat.add_le_add (Nat.succ_le_of_lt hq) (Nat.le_of_lt hq)
   . rw [(show 3 = 1 + (1 + 1) by rfl), mul_comm, mul_assoc 9]
     exact val_mul_ge_of_both_ge valp h6' (val_mul_ge_of_right_ge valp
-      (val_mul_ge_of_both_ge valp h2' (Enat.le_trans ((le_ofN _ _).1
+      (val_mul_ge_of_both_ge valp h2' (le_trans ((le_ofN _ _).1
       (Nat.add_le_add (Nat.le_of_lt hq) (le_of_eq rfl))) h4')))
 
 lemma small_char_div_12 {p : R} (hp : p = 2 ∨ p = 3) (valp : SurjVal p) : valp.v 12 ≥ 1 := by

@@ -228,7 +228,7 @@ def kodaira_type_Is (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0 
     exact succ_le_of_lt hq
   have h3'' : surjvalp.v e2.a3 ≥ (q + 1) := by
     rw [r_of_a3]
-    apply le_trans _ (surjvalp.v_add_ge_min_v _ _) -- TODO delete ENat.le_trans
+    apply le_trans _ (surjvalp.v_add_ge_min_v _ _)
     apply le_min h3'
     rw [mul_comm a', mul_assoc, surjvalp.v_mul_eq_add_v, Nat.cast_pow, val_of_pow_uniformizer]
     exact add_le_add (le_of_eq rfl) (val_mul_ge_of_right_ge surjvalp h1')
@@ -374,7 +374,7 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0
     simp only [Model.b6] at hb6
     rw [factor_p_of_le_val evrp h3, factor_p_of_le_val evrp h6, factorize5, navp.v_mul_eq_add_v,
       val_of_pow_uniformizer, show 3 = 2 + 1 by rfl] at hb6
-    exact Enat.le_of_add_le_add_left hb6 -- OrderedCancelAddCommMonoid
+    exact Enat.le_of_add_le_add_left hb6
 
   let s1 := double_root 1 e1.a1 (-e1.a2) p
   let t1 := double_root 1 a3p (-a6p2) p

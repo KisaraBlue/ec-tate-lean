@@ -183,7 +183,7 @@ theorem le_succ (n : ℕ∪∞) : n ≤ (succ n) := by
 theorem le_of_succ_le {n m : ℕ∪∞} (h : succ n ≤ m) : n ≤ m :=
   Enat.le_trans (le_succ n) h
 
-theorem le_of_lt {n m : ℕ∪∞} (h : n < m) : n ≤ m := by
+protected theorem le_of_lt {n m : ℕ∪∞} (h : n < m) : n ≤ m := by
   cases m with
   | ofN m =>
     cases n with
@@ -194,8 +194,7 @@ theorem le_of_lt {n m : ℕ∪∞} (h : n < m) : n ≤ m := by
       rfl
   | top    => exact le.below_top
 
-
-theorem lt_or_ge (n m : ℕ∪∞) : Or (n < m) (n ≥ m) := by
+protected theorem lt_or_ge (n m : ℕ∪∞) : n < m ∨ n ≥ m := by
   cases n with
   | top     => exact Or.inr (le.below_top)
   | ofN n =>
@@ -208,7 +207,7 @@ theorem lt_or_ge (n m : ℕ∪∞) : Or (n < m) (n ≥ m) := by
       | inr h =>
         exact Or.inr (le.in_nat h)
 
-theorem not_le_of_gt {n m : ℕ∪∞} (h : n > m) : ¬ n ≤ m := by
+protected theorem not_le_of_gt {n m : ℕ∪∞} (h : n > m) : ¬ n ≤ m := by
   cases m with
   | top     =>
     intro _
@@ -228,18 +227,18 @@ theorem not_le_of_gt {n m : ℕ∪∞} (h : n > m) : ¬ n ≤ m := by
         assumption
 
 theorem gt_of_not_le {n m : ℕ∪∞} (h : ¬ n ≤ m) : n > m :=
-  match lt_or_ge m n with
+  match Enat.lt_or_ge m n with
   | Or.inl h₁ => h₁
   | Or.inr h₁ => absurd h₁ h
 
-lemma lt_iff_le_not_le {m n : ℕ∪∞} : m < n ↔ m ≤ n ∧ ¬ n ≤ m :=
-⟨fun h => ⟨le_of_lt h, not_le_of_gt h⟩, fun h => gt_of_not_le h.2⟩
+protected lemma lt_iff_le_not_le {m n : ℕ∪∞} : m < n ↔ m ≤ n ∧ ¬ n ≤ m :=
+⟨fun h => ⟨Enat.le_of_lt h, Enat.not_le_of_gt h⟩, fun h => gt_of_not_le h.2⟩
 
 instance : Preorder ℕ∪∞ :=
 { le               := Enat.le,
   le_refl          := Enat.le_refl,
   le_trans         := @Enat.le_trans,
-  lt_iff_le_not_le := @lt_iff_le_not_le,
+  lt_iff_le_not_le := @Enat.lt_iff_le_not_le,
   lt               := Enat.lt}
 
 theorem le_add_right (n k : ℕ∪∞) : n ≤ n + k := by cases n with
@@ -272,6 +271,7 @@ theorem add_le_add_right {n m : ℕ∪∞} (h : n ≤ m) (k : ℕ∪∞) : n + k
   rw [add_comm n k, add_comm m k]
   apply add_le_add_left
   assumption
+-- #check add_le_add
 
 theorem add_le_add {a b c d : ℕ∪∞} (h₁ : a ≤ b) (h₂ : c ≤ d) : a + c ≤ b + d :=
   le_trans (add_le_add_right h₁ c) (add_le_add_left h₂ b)
@@ -318,7 +318,7 @@ protected theorem le_antisymm {n m : ℕ∪∞} (h1 : n ≤ m) (h2 : m ≤ n) : 
           exact congrArg ofN (Nat.le_antisymm h1 h2)
 
 protected theorem le_total (m n : ℕ∪∞) : m ≤ n ∨ n ≤ m :=
-  match lt_or_ge m n with
+  match Enat.lt_or_ge m n with
   | Or.inl h => Or.inl (le_of_lt h)
   | Or.inr h => Or.inr h
 

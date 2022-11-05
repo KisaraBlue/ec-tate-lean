@@ -45,7 +45,7 @@ lemma p_non_zero {p : R} (nav : SurjVal p) : ¬p = 0 := by
 lemma val_zero {p : R} (nav : SurjVal p) : nav.v 0 = ∞ := (nav.v_eq_top_iff_zero 0).2 rfl
 
 lemma val_mul_ge_left {p : R} (nav : SurjVal p) (a b : R) : nav.v (a * b) ≥ nav.v a :=
-Enat.le_trans (le_add_right (nav.v a) (nav.v b)) (le_of_eq (nav.v_mul_eq_add_v a b).symm)
+le_trans (le_add_right (nav.v a) (nav.v b)) (le_of_eq (nav.v_mul_eq_add_v a b).symm)
 
 lemma val_mul_ge_right {p : R} (nav : SurjVal p) (a b : R) : nav.v (a * b) ≥ nav.v b := by
   rw [mul_comm]
@@ -53,11 +53,11 @@ lemma val_mul_ge_right {p : R} (nav : SurjVal p) (a b : R) : nav.v (a * b) ≥ n
 
 lemma val_mul_ge_of_left_ge {p : R} (nav : SurjVal p) {a b : R} (ha : nav.v a ≥ n) :
 nav.v (a * b) ≥ n :=
-Enat.le_trans ha (val_mul_ge_left nav a b)
+le_trans ha (val_mul_ge_left nav a b)
 
 lemma val_mul_ge_of_right_ge {p : R} (nav : SurjVal p) {a b : R} (hb : nav.v b ≥ n) :
 nav.v (a * b) ≥ n :=
-Enat.le_trans hb (val_mul_ge_right nav a b)
+le_trans hb (val_mul_ge_right nav a b)
 
 lemma val_mul_ge_of_both_ge {p : R} (nav : SurjVal p) {a b : R} (ha : nav.v a ≥ m) (hb : nav.v b ≥ n) :
 nav.v (a * b) ≥ m + n := by
@@ -79,19 +79,19 @@ nav.v (a ^ k) ≥ k • m := by
     apply val_mul_ge_of_both_ge _ ha ih
 
 lemma val_add_ge_of_ge {p : R} (nav : SurjVal p) {a b : R} (ha : nav.v a ≥ n) (hb : nav.v b ≥ n) :
-nav.v (a + b) ≥ n := Enat.le_trans (le_min ha hb) (nav.v_add_ge_min_v a b)
+nav.v (a + b) ≥ n := le_trans (le_min ha hb) (nav.v_add_ge_min_v a b)
 
 def nat_of_val {p : R} (nav : SurjVal p) {a : R} (h : a ≠ 0) : ℕ :=
   to_nat ((not_iff_not.2 (nav.v_eq_top_iff_zero a)).2 h)
 
 /-
 lemma val_of_add_one {p : R} (nav : SurjVal p) (h : nav.v x ≥ 1): nav.v (x + 1) = 0 := by
-  apply Enat.le_antisymm
+  apply le_antisymm
   . apply le_of_not_lt
     intro h'
     sorry
-  . apply Enat.le_trans _ (nav.v_add_ge_min_v x 1)
-    apply le_min (Enat.le_trans (Enat.le_succ 0) h) (le_of_eq (val_of_one nav).symm)
+  . apply le_trans _ (nav.v_add_ge_min_v x 1)
+    apply le_min (le_trans (le_succ 0) h) (le_of_eq (val_of_one nav).symm)
 -/
 
 @[simp]
@@ -118,7 +118,7 @@ nav.v (a - b) ≥ n := by
 
 theorem v_add_eq_min_v {p : R} (nav : SurjVal p) {a b : R} (h : nav.v a < nav.v b) :
   nav.v (a + b) = nav.v a := by
-  apply Enat.le_antisymm
+  apply le_antisymm
   . apply le_of_not_lt
     intro h'
     have hm : nav.v a < nav.v (-b) := by rwa [val_neg]
@@ -126,7 +126,7 @@ theorem v_add_eq_min_v {p : R} (nav : SurjVal p) {a b : R} (h : nav.v a < nav.v 
     apply lt_of_lt_of_le (lt_min h' hm)
     rw [(show nav.v a = nav.v (a + b + -b) by simp)]
     exact nav.v_add_ge_min_v (a + b) (-b)
-  . exact Enat.le_trans (le_min (le_of_eq rfl) (Enat.le_of_lt h)) (SurjVal.v_add_ge_min_v nav a b)
+  . exact le_trans (le_min (le_of_eq rfl) (le_of_lt h)) (SurjVal.v_add_ge_min_v nav a b)
 
 theorem val_of_pow_uniformizer {p : R} (nav : SurjVal p) {n : ℕ} : nav.v (p ^ n) = n := by
   induction n with
