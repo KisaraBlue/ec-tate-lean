@@ -372,7 +372,7 @@ def singular_point [PerfectRing K] (e : Model K) : K × K :=
     match ring_char K with
     | 2 => (pth_root e.a4, pth_root (e.a2 * e.a4 + e.a6))
     | 3 => (pth_root (-(e.a3 ^ 2) - e.a6), e.a1 * pth_root (-(e.a3 ^ 2) - e.a6) + e.a3)
-    | _ => (e.b2 / 12, -(e.a1 * e.b2 / 12 + e.a3) / 2)
+    | _ => (-e.b2 / 12, -(-e.a1 * e.b2 / 12 + e.a3) / 2)
   else
     ((18 * e.b6 - e.b2 * e.b4) / e.c4, (e.b2 * e.b5 + 3 * e.b7) / e.c4)
 
@@ -455,7 +455,9 @@ lemma is_singular_point_singular_point [PerfectRing K] (e : Model K) (h : e.disc
 by
   rw [singular_point]
   split_ifs with hc4 hc4
-  . split
+  . have hc6 : c6 e = 0 := by
+      simpa [h, hc4, pow_succ, mul_eq_zero_iff_factor_eq_zero] using (discr_identity e)
+    split
     -- case _ hchar => TODO get this working, but its subtly different
     . rw [is_singular_point]
       have hchar : ring_char K = 2 := by assumption
@@ -531,27 +533,27 @@ by
       have h12 : (12 : K) ≠ 0 := by
         rw [show 12 = 2 * 2 * 3 by norm_num]
         repeat' apply factors_nzero_mul_nzero
-        sorry
-        sorry
+        assumption
+        assumption
         sorry
       refine ⟨?_, ?_, ?_⟩
       . apply nzero_mul_left_cancel (12 ^ 3) _ _ (pow_nonzero _ _ h12)
         simp only [weierstrass, div_eq_mul_inv, mul_zero]
         rw [show
-          12 ^ 3 * ((-(e.a1 * b2 e * 12⁻¹ + e.a3) * 2⁻¹) ^ 2 +
-          e.a1 * (b2 e * 12⁻¹) * (-(e.a1 * b2 e * 12⁻¹ + e.a3) * 2⁻¹) +
-          e.a3 * (-(e.a1 * b2 e * 12⁻¹ + e.a3) * 2⁻¹) -
-          ((b2 e * 12⁻¹) ^ 3 + e.a2 * (b2 e * 12⁻¹) ^ 2 + e.a4 * (b2 e * 12⁻¹) + e.a6)) =
-          3*(-(e.a1 * b2 e * (12 * 12⁻¹) + 12 * e.a3) * (2 * 2⁻¹)) ^ 2 +
-          e.a1 * (b2 e * (12 * 12⁻¹)) * (-(e.a1 * b2 e * (12 * 12⁻¹) + 12 * e.a3) * (6 * (2 * 2⁻¹))) +
-          12 * e.a3 * (-(e.a1 * b2 e * (12 * 12⁻¹) + 12 * e.a3) * (6 * (2 * 2⁻¹))) -
-          ((b2 e * (12 * 12⁻¹)) ^ 3 + 12 * e.a2 * (b2 e * (12 * 12⁻¹)) ^ 2 + 12 ^ 2 * e.a4 * (b2 e * (12 * 12⁻¹)) + 12 ^ 3 * e.a6) by ring]
+          12 ^ 3 * ((-(-e.a1 * b2 e * 12⁻¹ + e.a3) * 2⁻¹) ^ 2 +
+          e.a1 * (-b2 e * 12⁻¹) * (-(-e.a1 * b2 e * 12⁻¹ + e.a3) * 2⁻¹) +
+          e.a3 * (-(-e.a1 * b2 e * 12⁻¹ + e.a3) * 2⁻¹) -
+          ((-b2 e * 12⁻¹) ^ 3 + e.a2 * (-b2 e * 12⁻¹) ^ 2 + e.a4 * (-b2 e * 12⁻¹) + e.a6)) =
+          3*(-(-e.a1 * b2 e * (12 * 12⁻¹) + 12 * e.a3) * (2 * 2⁻¹)) ^ 2 +
+          e.a1 * (-b2 e * (12 * 12⁻¹)) * (-(-e.a1 * b2 e * (12 * 12⁻¹) + 12 * e.a3) * (6 * (2 * 2⁻¹))) +
+          12 * e.a3 * (-(-e.a1 * b2 e * (12 * 12⁻¹) + 12 * e.a3) * (6 * (2 * 2⁻¹))) -
+          ((-b2 e * (12 * 12⁻¹)) ^ 3 + 12 * e.a2 * (-b2 e * (12 * 12⁻¹)) ^ 2 + 12 ^ 2 * e.a4 * (-b2 e * (12 * 12⁻¹)) + 12 ^ 3 * e.a6) by ring]
         simp only [Field.mul_inv_cancel h2, Field.mul_inv_cancel h12, one_mul, mul_one]
         simp [b2]
-        rw [← mul_zero (4 : K), ← h, discr_eq_neg_singular]
-        -- This is 2*c6 - 2 * b2 * (c4 + 98*b4)
-        -- ring
-        sorry
+        -- This is 2*c6
+        rw [← mul_zero (2 : K), ← hc6]
+        simp [c6, b2, b4, b6]
+        ring
       . apply nzero_mul_left_cancel (12 ^ 2) _ _ (pow_nonzero _ _ h12)
         simp only [dweierstrass_dx, div_eq_mul_inv, mul_zero]
         sorry
