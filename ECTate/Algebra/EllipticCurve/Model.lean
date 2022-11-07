@@ -521,7 +521,10 @@ by
         rw [show e.a1 * (e.a1 * pth_root (-(e.a3 ^ 2) - e.a6) + e.a3) - (2 * e.a2 * pth_root (-(e.a3 ^ 2) - e.a6) + e.a4) =
                  (e.a1 * e.a1 - 2 * e.a2) * pth_root (-(e.a3 ^ 2) - e.a6) + (e.a1 * e.a3 - e.a4)
           by ring]
-        sorry
+        rw [show 2 = -1 by rw [← add_zero (-1), ← hchar'']; norm_num] at hb4
+        rw [show 4 = -2 by rw [← add_zero (-2), ← zero_mul (2 : K), ← hchar'']; norm_num] at hb2
+        simp only [neg_mul, one_mul, ← sub_eq_add_neg] at hb4 hb2
+        rw [hb4, hb2, zero_mul, zero_add]
       . rw [dweierstrass_dy]
         simp only
         rw [show 2 * (e.a1 * pth_root (-(e.a3 ^ 2) - e.a6) + e.a3)
@@ -530,12 +533,11 @@ by
     . rw [is_singular_point]
       -- have hb4 : e.b2 ^ 2 = 24 * e.b4 := sorry
       have h2 : (2 : K) ≠ 0 := sorry
+      have h3 : (3 : K) ≠ 0 := sorry
       have h12 : (12 : K) ≠ 0 := by
         rw [show 12 = 2 * 2 * 3 by norm_num]
         repeat' apply factors_nzero_mul_nzero
-        assumption
-        assumption
-        sorry
+        all_goals assumption
       refine ⟨?_, ?_, ?_⟩
       . apply nzero_mul_left_cancel (12 ^ 3) _ _ (pow_nonzero _ _ h12)
         simp only [weierstrass, div_eq_mul_inv, mul_zero]
@@ -549,17 +551,33 @@ by
           12 * e.a3 * (-(-e.a1 * b2 e * (12 * 12⁻¹) + 12 * e.a3) * (6 * (2 * 2⁻¹))) -
           ((-b2 e * (12 * 12⁻¹)) ^ 3 + 12 * e.a2 * (-b2 e * (12 * 12⁻¹)) ^ 2 + 12 ^ 2 * e.a4 * (-b2 e * (12 * 12⁻¹)) + 12 ^ 3 * e.a6) by ring]
         simp only [Field.mul_inv_cancel h2, Field.mul_inv_cancel h12, one_mul, mul_one]
-        simp [b2]
         -- This is 2*c6
         rw [← mul_zero (2 : K), ← hc6]
-        simp [c6, b2, b4, b6]
+        simp only [c6, b2, b4, b6]
         ring
       . apply nzero_mul_left_cancel (12 ^ 2) _ _ (pow_nonzero _ _ h12)
         simp only [dweierstrass_dx, div_eq_mul_inv, mul_zero]
-        sorry
+        rw [show
+          12 ^ 2 * (e.a1 * (-(-e.a1 * b2 e * 12⁻¹ + e.a3) * 2⁻¹) - (3 * (-b2 e * 12⁻¹) ^ 2 + 2 * e.a2 * (-b2 e * 12⁻¹) + e.a4))
+          =
+          e.a1 * (-(-e.a1 * b2 e * (12 * 12⁻¹) + 12* e.a3) * 6 * (2 * 2⁻¹)) - (3 * (-b2 e * (12 * 12⁻¹)) ^ 2 + 24 * e.a2 * (-b2 e * (12 * 12⁻¹)) + 144 * e.a4)
+          by ring]
+        simp only [Field.mul_inv_cancel h2, Field.mul_inv_cancel h12, one_mul, mul_one]
+        -- This is 2*c6
+        rw [← mul_zero (3 : K), ← hc4]
+        simp only [c4, c6, b2, b4, b6]
+        ring
       . apply nzero_mul_left_cancel 12 _ _ h12
         simp only [dweierstrass_dy, div_eq_mul_inv, mul_zero]
-        sorry
+        rw [show
+          12 * (2 * (-(-e.a1 * b2 e * 12⁻¹ + e.a3) * 2⁻¹) + e.a1 * (-b2 e * 12⁻¹) + e.a3)
+          =
+          (-(-e.a1 * b2 e * (12 * 12⁻¹) + 12 * e.a3) * (2 * 2⁻¹)) + e.a1 * (-b2 e * (12 * 12⁻¹)) + 12 * e.a3
+          by ring]
+        simp only [Field.mul_inv_cancel h2, Field.mul_inv_cancel h12, one_mul, mul_one]
+        -- This is 2*c6
+        simp only [c6, b2, b4, b6]
+        ring
   . rw [is_singular_point]
     refine ⟨?_, ?_, ?_⟩
     . rw [weierstrass]
