@@ -271,7 +271,7 @@ decreasing_by
   . exact Nat.add_lt_add_right (Nat.mul_lt_mul_of_pos_left q.lt_succ_self (Nat.zero_lt_succ 1)) 2
 
 
-def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0 t0 : ℤ) :
+def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 : ℤ := 1) (r0 : ℤ :=0) (s0 : ℤ :=0) (t0 : ℤ :=0) :
   Kodaira × ℕ × ℕ × ReductionType × (ℤ × ℤ × ℤ × ℤ) :=
   --this function shouldn't be called with large primes (yet)
   if smallp : (p : ℤ) ≠ 2 ∧ (p : ℤ) ≠ 3 then unreachable! else
@@ -613,9 +613,9 @@ Tate's algorithm takes an elliptic curve over the integers and a prime and retur
 def tate_algorithm (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) :
   Kodaira × ℕ × ℕ × ReductionType × (ℤ × ℤ × ℤ × ℤ) :=
   if p = 2 then
-    tate_small_prime 2 Int.prime_2 e 1 0 0 0
+    tate_small_prime 2 Int.prime_2 e
   else if p = 3 then
-    tate_small_prime 3 Int.prime_3 e 1 0 0 0
+    tate_small_prime 3 Int.prime_3 e
   else
     tate_big_prime p hp e
 
