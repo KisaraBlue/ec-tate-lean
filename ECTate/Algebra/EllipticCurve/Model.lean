@@ -11,6 +11,7 @@ import Mathlib.Util.WhatsNew
 -- import Aesop
 
 
+-- TODO cleanup variables, sections assumption strength
 
 #print CommGroup.toDivisionCommMonoid
 #print AddCommGroup.toDivisionCommMonoid -- TODO LOL
@@ -265,11 +266,11 @@ lemma rst_iso_to_triple (e : Model R) (r s t : R) : rst_iso r s t e = rst_triple
 
 end Model
 
-structure ValidModel (R : Type u) [IntegralDomain R] extends Model R where
+structure ValidModel (R : Type u) [CommRing R] extends Model R where
   discr_not_zero : toModel.discr ≠ 0
 
 namespace ValidModel
-variable {R : Type u} [IntegralDomain R]
+variable {R : Type u} [CommRing R]
 instance [Repr R] : Repr (ValidModel R) := ⟨ λ (e : ValidModel R) _ => repr e.toModel⟩
 
 def rst_iso (r s t : R) (e : ValidModel R) : ValidModel R := {
@@ -347,8 +348,7 @@ end ValidModel
 
 namespace Model
 
-namespace Field
-variable {K : Type u} [Field K]
+variable {K : Type u} [CommRing K]
 
 def is_singular_point (e : Model K) (P : K × K) : Prop :=
 weierstrass e P = 0 ∧ dweierstrass_dx e P = 0 ∧ dweierstrass_dy e P = 0
@@ -360,23 +360,8 @@ by
   rw [discr_in_jacobian_ideal, h₁, h₂, h₃, mul_zero,
     mul_zero, mul_zero, add_zero, add_zero, neg_eq_zero]
 
-open Classical PerfectRing
-
-/--
-Proposition 1.5.4 of Elliptic Curve Handbook, Ian Connell February, 1999,
-https://www.math.rug.nl/~top/ian.pdf
--/
-noncomputable
-def singular_point [PerfectRing K] (e : Model K) : K × K :=
-  if e.c4 = 0 then
-    match ring_char K with
-    | 2 => (pth_root e.a4, pth_root (e.a2 * e.a4 + e.a6))
-    | 3 => (pth_root (-(e.a3 ^ 2) - e.a6), e.a1 * pth_root (-(e.a3 ^ 2) - e.a6) + e.a3)
-    | _ => (-e.b2 / 12, -(-e.a1 * e.b2 / 12 + e.a3) / 2)
-  else
-    ((18 * e.b6 - e.b2 * e.b4) / e.c4, (e.b2 * e.b5 + 3 * e.b7) / e.c4)
-
 section invariant_lemmas
+variable {K : Type u} [IntegralDomain K]
 
 lemma c4_zero_iff_a1_zero_of_char_two (e : Model K) (h : ring_char K = 2) :
   e.c4 = 0 ↔ e.a1 = 0 :=
@@ -432,6 +417,26 @@ by
 end invariant_lemmas
 
 
+namespace Field
+variable {K : Type u} [Field K]
+
+open Classical PerfectRing
+
+/--
+Proposition 1.5.4 of Elliptic Curve Handbook, Ian Connell February, 1999,
+https://www.math.rug.nl/~top/ian.pdf
+-/
+noncomputable
+def singular_point [PerfectRing K] (e : Model K) : K × K :=
+  if e.c4 = 0 then
+    match ring_char K with
+    | 2 => (pth_root e.a4, pth_root (e.a2 * e.a4 + e.a6))
+    | 3 => (pth_root (-(e.a3 ^ 2) - e.a6), e.a1 * pth_root (-(e.a3 ^ 2) - e.a6) + e.a3)
+    | _ => (-e.b2 / 12, -(-e.a1 * e.b2 / 12 + e.a3) / 2)
+  else
+    ((18 * e.b6 - e.b2 * e.b4) / e.c4, (e.b2 * e.b5 + 3 * e.b7) / e.c4)
+
+
 instance [h : IsAssociative R op] : Lean.IsAssociative op := {h with}
 instance [h : IsCommutative R op] : Lean.IsCommutative op := {h with}
 instance [h : IsIdempotent R op] : Lean.IsIdempotent op := {h with}
@@ -439,17 +444,17 @@ instance [h : IsIdempotent R op] : Lean.IsIdempotent op := {h with}
 instance [Semigroup R] : IsAssociative R (. * .) := {assoc := mul_assoc}
 @[to_additive]
 instance [CommSemigroup R] : IsCommutative R (. * .) := {comm := mul_comm}
-lemma test (e : Model K) :
-  c4 e ^ 3 * ((b2 e * b5 e + 3 * b7 e) ^ 2 * (c4 e)⁻¹ ^ 2) + 0 =
-            c4 e^ 3 * (c4 e)⁻¹ ^ 2 * ((b2 e * b5 e + 3 * b7 e) ^ 2) :=
-by
-  rw [show c4 e ^ 3 * ((b2 e * b5 e+ 3 * b7 e) ^ 2 * (c4 e)⁻¹ ^ 2) =
-            c4 e^ 3 * (c4 e)⁻¹ ^ 2 * ((b2 e * b5 e + 3 * b7 e) ^ 2) by ac_rfl]
-  sorry
+-- lemma test (e : Model K) :
+--   c4 e ^ 3 * ((b2 e * b5 e + 3 * b7 e) ^ 2 * (c4 e)⁻¹ ^ 2) + 0 =
+--             c4 e^ 3 * (c4 e)⁻¹ ^ 2 * ((b2 e * b5 e + 3 * b7 e) ^ 2) :=
+-- by
+--   rw [show c4 e ^ 3 * ((b2 e * b5 e+ 3 * b7 e) ^ 2 * (c4 e)⁻¹ ^ 2) =
+--             c4 e^ 3 * (c4 e)⁻¹ ^ 2 * ((b2 e * b5 e + 3 * b7 e) ^ 2) by ac_rfl]
+--   sorry
 -- TODO a field should be a division comm monoid
 
 -- TODO maybe rewrite to take an explicit point
-set_option maxHeartbeats 600000 in
+-- set_option maxHeartbeats 600000 in
 lemma is_singular_point_singular_point [PerfectRing K] (e : Model K) (h : e.discr = 0) :
   is_singular_point e (singular_point e) :=
 by

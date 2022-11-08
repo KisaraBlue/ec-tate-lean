@@ -35,7 +35,7 @@ open Kodaira
 
 section ring_lemmas
 
-variable {R : Type u} [IntegralDomain R]
+variable {R : Type u} [CommRing R]
 
 lemma factorize1 (root b p : R) (q : ℕ) : root * p ^ q * (p ^ q * b) + root * p ^ q * (root * p ^ q) = p ^ q * p ^ q * ((root + b) * root) := by ring
 

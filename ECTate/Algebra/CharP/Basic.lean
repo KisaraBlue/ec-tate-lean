@@ -11,7 +11,7 @@ variable (R : Type _) [Semiring R]
 noncomputable
 def ring_char := if h : _ then Nat.find (fun n => n ≠ 0 ∧ (n : R) = 0) h else 0
 
-lemma ring_char_eq_zero (R : Type _) [IntegralDomain R] :
+lemma ring_char_eq_zero (R : Type _) [Semiring R] :
   (ring_char R : R) = 0 :=
 by
   rw [ring_char]
