@@ -78,6 +78,14 @@ nav.v (a ^ k) ≥ k • m := by
     simp only [succ_nsmul, pow_succ]
     apply val_mul_ge_of_both_ge _ ha ih
 
+lemma val_pow_eq_of_eq {p : R} (nav : SurjVal p) {a : R} (k : ℕ) (ha : nav.v a = m) :
+nav.v (a ^ k) = k * m := by
+  induction k with
+  | zero => simp [zero_nsmul] -- TODO why isn't this simp?
+  | succ k ih =>
+    simp only [pow_succ, Nat.cast_succ, add_mul, one_mul, add_comm]
+    rw [nav.v_mul_eq_add_v, ha, ih]
+
 lemma val_add_ge_of_ge {p : R} (nav : SurjVal p) {a b : R} (ha : nav.v a ≥ n) (hb : nav.v b ≥ n) :
 nav.v (a + b) ≥ n := le_trans (le_min ha hb) (nav.v_add_ge_min_v a b)
 
@@ -144,8 +152,7 @@ structure EnatValRing {R : Type u} (p : R) [IntegralDomain R] where
   decr_val : R → R
   zero_valtn_decr {x : R} (h : valtn.v x = 0) : decr_val x = x
   pos_valtn_decr {x : R} (h : valtn.v x > 0) : x = p * decr_val x
-  residue_char : ℕ
-  def_char : ∀ n : ℕ, valtn.v (n : R) > 0 ↔ residue_char ∣ n
+  residue_char : ℕ -- ToDo delete
   norm_repr : R → R --generalization of modulo
   quad_roots_in_residue_field : R → R → R → Bool
 
@@ -575,15 +582,12 @@ by rw [decr_val_p, h]
 
 def norm_repr_p (p : ℕ) (x : ℤ) : ℤ := (x % (p : ℤ) + p) % (p : ℤ)
 
-lemma def_char_p (p : ℕ) : ∀ n : ℕ, (primeVal hp).v n > 0 ↔ p ∣ n := sorry
-
 def primeEVR {p : ℕ} (hp : nat_prime p) : EnatValRing (p : ℤ) := {
   valtn := primeVal hp,
   decr_val := decr_val_p p (primeVal hp).v,
   zero_valtn_decr := zero_valtn_decr_p (primeVal hp).v,
   pos_valtn_decr := sorry,
   residue_char := p,
-  def_char := def_char_p p,
   norm_repr := norm_repr_p p,
   quad_roots_in_residue_field := fun a b c => Int.quad_root_in_ZpZ a b c p
 }
