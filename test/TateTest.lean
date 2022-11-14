@@ -38,13 +38,19 @@ def parsefunc (s : String) : Model ℤ × ℕ × Kodaira × ℕ × ℕ × ℤ :=
 def test (N : ℕ) : IO Unit := do
   -- lines of the csv (which is ampersand separated) are
   -- model, p, conductor exponent f, disc exp, denom j exponent, kodaira type k, tamagawa c, reduction type]
+  -- generated from the lmfdb with
+  --  \copy (select ainvs, prime, conductor_valuation , discriminant_valuation, j_denominator_valuation, kodaira_symbol, tamagawa_number, reduction_type from ec_curvedata c inner join ec_localdata using ("lmfdb_label") order by c.conductor limit 300000) to 'test.csv' with delimiter as '&';
   let l ← lines $ mkFilePath ["test/lmfdb.csv"]
   for str in l.zip (Array.range N) do
     let ⟨m, p, ok, of, oc, or⟩ : Model ℤ × ℕ × Kodaira × ℕ × ℕ × ℤ := parsefunc str.1
     if Δnz : m.discr ≠ 0 then
       match Int.tate_algorithm p sorry ⟨m, Δnz⟩ with
       | (k, f, c, r, _, _, _, _) =>
-        if (k, f, c) ≠ (ok, of, oc) ∨ or ≠ r.to_lmfdb then println str
-  println (toString N ++ " lines tested")
+        if (k, f, c) ≠ (ok, of, oc) ∨ or ≠ r.to_lmfdb then
+          println str
+          println (repr (k, f, c, r))
+  println s!"{N} lines tested"
 
-#eval test 30000
+def main (N : List String) : IO Unit := test N[0]!.toNat!
+
+#eval test 300

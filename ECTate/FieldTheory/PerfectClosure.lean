@@ -22,7 +22,7 @@ lemma pth_root_pow_char [PerfectRing R] (h : ring_char R ≠ 0) (x : R) :
   pth_root x ^ (ring_char R) = x :=
 by
   simp only [pth_root, h, dite_false]
-  exact Function.right_inverse_surj_inv (pth_power_bijective_of_char_nonzero h).2 x
+  exact Function.rightInverse_surjInv (pth_power_bijective_of_char_nonzero h).2 x
 
 @[simp]
 lemma pth_root_zero [PerfectRing R] : pth_root (0 : R) = 0 :=

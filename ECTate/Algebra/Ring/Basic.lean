@@ -67,13 +67,13 @@ section CommRing
 variable [CommRing R]
 
 
-theorem square_neg (a : R) : -a ^ 2 = a ^ 2 := by
+theorem square_neg (a : R) : (-a) ^ 2 = a ^ 2 := by
   rw [←one_mul a, neg_mul_left, mul_pow _ a, square_neg_one, one_mul, one_mul]
 
-theorem evenpow_neg {n m : ℕ} (a : R) (h : n = 2 * m) : -a ^ n = a ^ n := by
+theorem evenpow_neg {n m : ℕ} (a : R) (h : n = 2 * m) : (-a) ^ n = a ^ n := by
   rw [h, pow_mul, pow_mul, square_neg]
 
-theorem oddpow_neg {n m : ℕ} (a : R) (h : n = 2 * m + 1) : -a ^ n = -(a ^ n) := by
+theorem oddpow_neg {n m : ℕ} (a : R) (h : n = 2 * m + 1) : (-a) ^ n = -(a ^ n) := by
   rw [h, pow_succ, evenpow_neg a (show 2 * m = 2 * m by rfl), ←neg_mul_left, ←pow_succ,
     Nat.add_one]
 

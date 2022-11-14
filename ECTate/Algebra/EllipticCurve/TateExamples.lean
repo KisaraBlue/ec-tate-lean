@@ -44,3 +44,7 @@ by
   simp only [valc4, valdisc, valdisc']
   rw [if_neg]
   exact not_false
+
+-- lemma aa :
+--   (tate_big_prime 5 sorry ⟨⟨0, 0, 0, 0, 5⟩, sorry⟩).1 = .II := by
+--   dsimp [tate_big_prime]

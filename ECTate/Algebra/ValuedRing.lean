@@ -78,6 +78,14 @@ nav.v (a ^ k) ≥ k • m := by
     simp only [succ_nsmul, pow_succ]
     apply val_mul_ge_of_both_ge _ ha ih
 
+lemma val_pow_eq_of_eq {p : R} (nav : SurjVal p) {a : R} (k : ℕ) (ha : nav.v a = m) :
+nav.v (a ^ k) = k * m := by
+  induction k with
+  | zero => simp [zero_nsmul] -- TODO why isn't this simp?
+  | succ k ih =>
+    simp only [pow_succ, Nat.cast_succ, add_mul, one_mul, add_comm]
+    rw [nav.v_mul_eq_add_v, ha, ih]
+
 lemma val_add_ge_of_ge {p : R} (nav : SurjVal p) {a b : R} (ha : nav.v a ≥ n) (hb : nav.v b ≥ n) :
 nav.v (a + b) ≥ n := le_trans (le_min ha hb) (nav.v_add_ge_min_v a b)
 
@@ -144,8 +152,7 @@ structure EnatValRing {R : Type u} (p : R) [IntegralDomain R] where
   decr_val : R → R
   zero_valtn_decr {x : R} (h : valtn.v x = 0) : decr_val x = x
   pos_valtn_decr {x : R} (h : valtn.v x > 0) : x = p * decr_val x
-  residue_char : ℕ
-  def_char : ∀ n : ℕ, valtn.v (n : R) > 0 ↔ residue_char ∣ n
+  residue_char : ℕ -- ToDo delete
   norm_repr : R → R --generalization of modulo
   quad_roots_in_residue_field : R → R → R → Bool
 
@@ -218,9 +225,9 @@ lemma val_decr_val {p : R} (evr : EnatValRing p) {m : Nat} (x : R) (h : evr.valt
       rw [h]
       exact succ_pos m
     apply add_right_cancel_ofN 1
-    simp at *
+    simp at * -- TODO fix nonterminal
     rw [←evr.valtn.v_uniformizer, ←evr.valtn.v_mul_eq_add_v, mul_comm,
-      ←evr.pos_valtn_decr x_pos_val, Nat.succ_sub_one, h, evr.valtn.v_uniformizer]
+      ←evr.pos_valtn_decr x_pos_val, h, evr.valtn.v_uniformizer]
 
 lemma sub_val_decr_val_comm {p : R} (evr : EnatValRing p) (x : R) (n : ℕ) :
   sub_val evr (evr.decr_val x) n = evr.decr_val (sub_val evr x n) := by
@@ -436,7 +443,6 @@ instance : DecidablePred (nat_prime . : ℕ → Prop) := fun p => sorry
 
 namespace Int
 
-
 def nat_valuation : ℕ → ℕ → ℕ∪∞
   | _, 0 => ∞
   | 0, (_+1) => 0
@@ -447,6 +453,7 @@ decreasing_by
   simp [WellFoundedRelation.rel, measure, invImage, InvImage, Nat.lt_wfRel]
   exact Nat.div_lt_self (Nat.zero_lt_succ m) (Nat.succ_lt_succ (Nat.zero_lt_succ q))
 
+#eval Nat.succ 2147483648
 lemma nat_val_zero (p : ℕ) : nat_valuation p 0 = ∞ := by
   simp [nat_valuation]
 lemma nat_val_succ (q m : ℕ) : nat_valuation (q+2) (m+1) = if (m+1) % (q+2) ≠ 0 then 0 else succ (nat_valuation (q+2) ((m+1) / (q+2))) := by rfl
@@ -575,15 +582,12 @@ by rw [decr_val_p, h]
 
 def norm_repr_p (p : ℕ) (x : ℤ) : ℤ := (x % (p : ℤ) + p) % (p : ℤ)
 
-lemma def_char_p (p : ℕ) : ∀ n : ℕ, (primeVal hp).v n > 0 ↔ p ∣ n := sorry
-
 def primeEVR {p : ℕ} (hp : nat_prime p) : EnatValRing (p : ℤ) := {
   valtn := primeVal hp,
   decr_val := decr_val_p p (primeVal hp).v,
   zero_valtn_decr := zero_valtn_decr_p (primeVal hp).v,
   pos_valtn_decr := sorry,
   residue_char := p,
-  def_char := def_char_p p,
   norm_repr := norm_repr_p p,
   quad_roots_in_residue_field := fun a b c => Int.quad_root_in_ZpZ a b c p
 }
@@ -600,10 +604,11 @@ def modulo (x : ℤ) (p : ℕ) := (x % (p:ℤ) + p) % (p:ℤ)
 def inv_mod (x : ℤ) (p : ℕ) := modulo (x ^ (p - 2)) p
 
 def has_double_root (a b c : ℤ) {p : ℕ} (hp : nat_prime p) :=
-  let v_p := (primeEVR hp).valtn.v;
+  let v_p := (primeEVR hp).valtn.v
   v_p a = 0 ∧ v_p (b ^ 2 - 4 * a * c) > 0
 
 def double_root (a b c : ℤ) (p : ℕ) :=
+  -- dbg_trace (a,b,c)
   if p = 2 then
     modulo c 2
   else

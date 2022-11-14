@@ -21,6 +21,14 @@ lean_lib ECTate {
   -- add any library configuration options here
 }
 
+@[default_target]
+lean_exe tate where
+  root := `ECTate.bin
+
+@[default_target]
+lean_exe test where
+  root := `test.TateTest
+
 
 -- module_facet docs (mod) : FilePath := do
 --   let some docGen4 ← findLeanExe? `«doc-gen4»

@@ -24,6 +24,7 @@ Mathlib TODOs:
 - multiple lets
 - does show_term use dot notation enough?
 - Don't lint sorried stuff
+- code folding for lean 4
 -/
 
 
@@ -140,7 +141,7 @@ def tate_big_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) :
 
 def kodaira_type_Is (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0 t0 : ℤ) (m q : ℕ)
   (hq : 1 < q) (h1 : (primeEVR hp).valtn.v e.a1 ≥ 1) (h2 : (primeEVR hp).valtn.v e.a2 = 1)
-  (h3 : (primeEVR hp).valtn.v e.a3 ≥ q) (h4 : (primeEVR hp).valtn.v e.a4 ≥ (q + 1))
+  (h3 : (primeEVR hp).valtn.v e.a3 ≥ q) (h4 : (primeEVR hp).valtn.v e.a4 ≥ q + 1)
   (h6 : (primeEVR hp).valtn.v e.a6 ≥ ↑(2 * q)) :
   ℕ × ℕ × ℤ × ℤ :=
   let evrp := primeEVR hp
@@ -148,8 +149,7 @@ def kodaira_type_Is (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0 
   let (r, t) := (r0, t0)
   let a3q := sub_val evrp e.a3 q
   let a6q2 := sub_val evrp e.a6 (2 * q)
-  --obvious rewriting lemmas that Lean should generate implicitly
-  have rw_a6 : sub_val evrp e.a6 (2 * q) = a6q2 := rfl
+  have rw_a6 : sub_val evrp e.a6 (2 * q) = a6q2 := rfl --obvious rewriting lemmas that Lean should generate implicitly
 
   if discr_1 : surjvalp.v (a3q ^ 2 + 4 * a6q2) = 0 then
     let c := if quad_root_in_ZpZ 1 a3q (-a6q2) p then 4 else 2
@@ -163,6 +163,7 @@ def kodaira_type_Is (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0 
   let a := double_root 1 a3q (-a6q2) p
 
   let e1 := rst_iso 0 0 (a * (p ^ q : ℕ)) e
+  -- dbg_trace (_root_.repr e1)
   have h1' : surjvalp.v e1.a1 ≥ 1 := by rwa [rt_of_a1]
   have h2' : surjvalp.v e1.a2 = 1 := by rwa [t_of_a2]
   have h3' : surjvalp.v e1.a3 ≥ q + 1 := by
@@ -216,6 +217,7 @@ def kodaira_type_Is (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0 
   have rw_a' : double_root a2p a4pq a6pq2 p = a' := rfl
   --if p = 2 then modulo a6pq2 2 else modulo (2 * a2p * -a4pq) 3
   let e2 := rst_iso (a' * (p ^ q : ℕ)) 0 0 e1
+  -- dbg_trace (_root_.repr e2)
   have h1'' : surjvalp.v e2.a1 ≥ 1 := by rwa [rt_of_a1]
   have h2'' : surjvalp.v e2.a2 = 1 := by
     rwa [r_of_a2, v_add_eq_min_v surjvalp]
@@ -258,8 +260,8 @@ def kodaira_type_Is (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0 
       apply val_mul_ge_of_right_ge surjvalp
       rw [val_of_pow_uniformizer, mul_comm q]
       exact (le_ofN _ _).1 (Nat.add_le_add (le_of_eq rfl) (Nat.succ_le_of_lt hq))
-  let r := r + u0 ^ 2 + a * (p ^ q : ℕ)
-  let t := t + u0 ^ 2 * s0 * a * (p ^ q : ℕ)
+  let r := r + u0 ^ 2 + a' * (p ^ q : ℕ) -- TODO check these
+  let t := t + u0 ^ 2 * s0 * a' * (p ^ q : ℕ)
   kodaira_type_Is p hp e2 u0 r s0 t (m + 2) (q + 1) (Nat.lt_succ_of_lt hq) h1'' h2'' h3'' h4'' h6''
 termination_by _ =>
   val_discr_to_nat (primeEVR hp).valtn e - (2 * q + 2)
@@ -441,12 +443,15 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 : ℤ
     let c := 1 + count_roots_cubic 1 a2p a4p2 a6p3 p
     (Is 0, n - 4, c, .Additive, (u, r, s, t))
   else
+  -- dbg_trace (_root_.repr e2)
+  -- dbg_trace (model_to_cubic evrp e2)
   if test_δcubic : navp.v (δmultiplicity (model_to_cubic evrp e2)) = 0 then
     have e2_cubic_has_double_root : cubic_has_double_root evrp e2 :=
       And.intro (pos_of_ne_zero test_Δcubic) test_δcubic
 
     --let r1 := p * (modulo (if p = 2 then a4p2 else a2p * a4p2) p)
     let e3 := move_cubic_double_root_to_origin_iso evrp e2
+    -- dbg_trace (_root_.repr e3)
     --let r := r + u ^ 2 * r1
     --let t := t + u ^ 2 * s * r1
     have h1' : navp.v e3.a1 ≥ 1 := by
@@ -608,7 +613,7 @@ Tate's algorithm takes an elliptic curve over the integers and a prime and retur
 - Kodaira type
 - Conductor exponent
 - Tamagawa number
-- Reduction type (split/nonsplit multiplicative or additive) and rst isomorphism to a minimal curve?
+- Reduction type (split/nonsplit multiplicative or additive) and urst isomorphism to a minimal curve?
 -/
 def tate_algorithm (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) :
   Kodaira × ℕ × ℕ × ReductionType × (ℤ × ℤ × ℤ × ℤ) :=

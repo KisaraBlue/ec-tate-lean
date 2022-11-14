@@ -242,7 +242,7 @@ instance : Preorder ℕ∪∞ :=
   lt               := Enat.lt}
 
 theorem le_add_right (n k : ℕ∪∞) : n ≤ n + k := by cases n with
-  | top   => rw [top_add]; exact le_refl top
+  | top   => rw [top_add]
   | ofN n => cases k with
     | top   => rw [add_top]; exact le.below_top
     | ofN k => exact le.in_nat (Nat.le_add_right n k)
@@ -291,7 +291,6 @@ by
   | top =>
     simp [add_comm] at h
     rw [eq_top_of_add_eq_top c a (eq_top_of_top_le _ h)]
-    exact le.below_top
   | ofN b => cases c with
     | top => exact le.below_top
     | ofN c =>
