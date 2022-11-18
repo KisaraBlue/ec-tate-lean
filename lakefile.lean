@@ -23,7 +23,7 @@ lean_lib ECTate {
 
 @[default_target]
 lean_exe tate where
-  root := `ECTate.bin
+  root := `ECTate.Bin
 
 @[default_target]
 lean_exe test where
