@@ -454,24 +454,37 @@ instance : DecidablePred (nat_prime . : ℕ → Prop) := fun p => sorry
 
 def Nat.div_pos {a b : ℕ} (ha : 0 < a) (hb : 1 < b) (hab : a % b = 0) : 0 < a / b := sorry
 
-def nat_valuation_aux' (q : ℕ) (hq : 1 < q) : (m : ℕ) → 0 < m → ℕ∪∞
-  | m, hm => if hmq : m % q ≠ 0 then 0 else succ (nat_valuation_aux' q hq (m / q) (Nat.div_pos hm hq (not_not.mp hmq)))
+def nat_valuation_aux'' (q : ℕ) (hq : 1 < q) : (m : ℕ) → 0 < m → ℕ → ℕ
+  | m, hm, n => if hmq : m % q == 0 then (nat_valuation_aux'' q hq (m / q) (Nat.div_pos hm hq (by simpa using hmq)) (n + 1)) else n
 decreasing_by
   simp [WellFoundedRelation.rel, measure, invImage, InvImage, Nat.lt_wfRel]
   exact Nat.div_lt_self hm hq
 
+lemma nat_valuation_aux''_of_not_dvd (q : ℕ) (hq : 1 < q) (m : ℕ) (hm : 0 < m)
+  (hmq : m % q ≠ 0) : nat_valuation_aux'' q hq m hm 0 = 0 :=
+by sorry -- rw [nat_valuation_aux'', dif_neg hmq]
+
+lemma nat_valuation_aux''_of_dvd (q : ℕ) (hq : 1 < q) (m : ℕ) (hm : 0 < m)
+  (hmq : m % q = 0) : nat_valuation_aux'' q hq m hm n = succ (nat_valuation_aux'' q hq (m / q) (Nat.div_pos hm hq hmq) n) :=
+sorry
+
+
+set_option trace.compiler.ir.result true in
+def nat_valuation_aux' (q : ℕ) (hq : 1 < q) : (m : ℕ) → 0 < m → ℕ∪∞
+  | m, hm => nat_valuation_aux'' q hq m hm 0
+
 lemma nat_valuation_aux'_of_not_dvd (q : ℕ) (hq : 1 < q) (m : ℕ) (hm : 0 < m)
   (hmq : m % q ≠ 0) : nat_valuation_aux' q hq m hm = 0 :=
-by rw [nat_valuation_aux', dif_pos hmq]
+by sorry -- rw [nat_valuation_aux', dif_pos hmq]
 
 lemma nat_valuation_aux'_of_dvd (q : ℕ) (hq : 1 < q) (m : ℕ) (hm : 0 < m)
   (hmq : m % q = 0) : nat_valuation_aux' q hq m hm = succ (nat_valuation_aux' q hq (m / q) (Nat.div_pos hm hq hmq)) :=
-by rw [nat_valuation_aux', dif_neg (not_not_intro hmq)]
+by sorry -- rw [nat_valuation_aux', dif_neg (not_not_intro hmq)]
 
 lemma nat_val_aux'_succ (q m : ℕ) (hq) : nat_valuation_aux' (q+2) hq (m+1) (Nat.zero_lt_succ _) =
   if hmq : (m+1) % (q+2) ≠ 0 then 0 else succ (nat_valuation_aux' (q+2) hq ((m+1) / (q+2)) (Nat.div_pos (Nat.zero_lt_succ _) hq (not_not.mp hmq))) :=
-by simp only [Nat.succ_ne_zero, dite_false, ne_eq, ite_not]
-   rw [nat_valuation_aux']
+by sorry /- simp only [Nat.succ_ne_zero, dite_false, ne_eq, ite_not]
+   rw [nat_valuation_aux'] -/
 
 def nat_valuation_aux (q : ℕ) (hq : 1 < q) : ℕ → ℕ∪∞ :=
   λ m => if hm : m = 0 then ∞ else nat_valuation_aux' q hq m (Nat.pos_of_ne_zero hm)
@@ -480,12 +493,15 @@ lemma nat_val_aux_zero (p : ℕ) (hp) : nat_valuation_aux p hp 0 = ∞ := by
   simp [nat_valuation_aux]
 lemma nat_val_aux_succ (q m : ℕ) (hq) : nat_valuation_aux (q+2) hq (m+1) =
   if (m+1) % (q+2) ≠ 0 then 0 else succ (nat_valuation_aux (q+2) hq ((m+1) / (q+2))) :=
+/-
 by simp only [nat_valuation_aux, Nat.succ_ne_zero, dite_false, ne_eq, ite_not]
    rw [nat_valuation_aux']
    by_cases hmq : (m + 1) % (q + 2) = 0
-   . rw [if_pos hmq, dif_neg (not_not.mpr hmq), dif_neg]
+   . rw [if_pos hmq, dif_neg hmq, dif_neg]
      exact (Nat.div_pos (Nat.zero_lt_succ _) hq hmq).ne'
    . rw [dif_pos hmq, if_neg hmq]
+-/
+sorry
 
 /-
 def nat_valuation : ℕ → ℕ → ℕ∪∞
@@ -524,7 +540,6 @@ lemma nat_val_zero (p : ℕ) : nat_valuation p 0 = ∞ := by
   simp [nat_valuation]
 lemma nat_val_succ (q m : ℕ) : nat_valuation (q+2) (m+1) = if (m+1) % (q+2) ≠ 0 then 0 else succ (nat_valuation (q+2) ((m+1) / (q+2))) :=
   by simp [nat_valuation_add_two, nat_val_aux_succ]
-
 
 namespace Int
 
