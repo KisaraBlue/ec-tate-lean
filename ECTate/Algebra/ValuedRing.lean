@@ -441,7 +441,16 @@ instance : DecidablePred (nat_prime . : ℕ → Prop) := fun p => sorry
 
 
 
-namespace Int
+-- @[extern "blah"]
+-- def nat_valuation_aux : ℕ → ℕ → ℕ
+--   | _, 0 => 0
+--   | 0, (_+1) => 0
+--   | 1, (_+1) => 0
+--   | (q+2), (m+1) => if (m+1) % (q+2) ≠ 0 then 0 else Nat.succ (nat_valuation_aux (q+2) ((m+1) / (q+2)))
+-- termination_by nat_valuation_aux p k => k
+-- decreasing_by
+--   simp [WellFoundedRelation.rel, measure, invImage, InvImage, Nat.lt_wfRel]
+--   exact Nat.div_lt_self (Nat.zero_lt_succ m) (Nat.succ_lt_succ (Nat.zero_lt_succ q))
 
 def nat_valuation : ℕ → ℕ → ℕ∪∞
   | _, 0 => ∞
@@ -458,6 +467,8 @@ lemma nat_val_zero (p : ℕ) : nat_valuation p 0 = ∞ := by
   simp [nat_valuation]
 lemma nat_val_succ (q m : ℕ) : nat_valuation (q+2) (m+1) = if (m+1) % (q+2) ≠ 0 then 0 else succ (nat_valuation (q+2) ((m+1) / (q+2))) := by rfl
 
+
+namespace Int
 
 def int_val (p : ℕ) (k : ℤ) : ℕ∪∞ :=
   nat_valuation p (natAbs k)
