@@ -13,13 +13,8 @@ import Mathlib.Util.WhatsNew
 
 -- TODO cleanup variables, sections assumption strength
 
-/-
-#print CommGroup.toDivisionCommMonoid
--- #print AddCommGroup.toDivisionCommMonoid -- TODO LOL
--- attribute [-instance] AddCommGroup.toDivisionCommMonoid
--- attribute [instance] AddCommGroup.toDivisionCommMonoid
--- #print AddCommGroup.toDivisionCommMonoid -- TODO a way to tell if this works
--/
+--#print AddCommGroup.toDivisionCommMonoid -- TODO a way to tell if this works
+
 section ring_with_neg
 namespace ring_neg
 variable {R : Type _} [Ring R]
