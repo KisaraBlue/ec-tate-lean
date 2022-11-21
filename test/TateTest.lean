@@ -40,7 +40,7 @@ def test (N : ℕ) : IO Unit := do
   -- model, p, conductor exponent f, disc exp, denom j exponent, kodaira type k, tamagawa c, reduction type]
   -- generated from the lmfdb with
   --  \copy (select ainvs, prime, conductor_valuation , discriminant_valuation, j_denominator_valuation, kodaira_symbol, tamagawa_number, reduction_type from ec_curvedata c inner join ec_localdata using ("lmfdb_label") order by c.conductor limit 300000) to 'test.csv' with delimiter as '&';
-  let l ← lines $ mkFilePath ["test/lmfdb.csv"]
+  let l ← lines $ mkFilePath ["test/lmfdb04.csv"]
   for str in l.zip (Array.range N) do
     let ⟨m, p, ok, of, oc, or⟩ : Model ℤ × ℕ × Kodaira × ℕ × ℕ × ℤ := parsefunc str.1
     if Δnz : m.discr ≠ 0 then

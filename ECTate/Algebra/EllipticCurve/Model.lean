@@ -14,6 +14,7 @@ import Mathlib.Util.WhatsNew
 -- TODO cleanup variables, sections assumption strength
 
 --#print AddCommGroup.toDivisionCommMonoid -- TODO a way to tell if this works
+
 section ring_with_neg
 namespace ring_neg
 variable {R : Type _} [Ring R]
