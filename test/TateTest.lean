@@ -43,12 +43,12 @@ def test (N : ℕ) : IO Unit := do
   let l ← lines $ mkFilePath ["test/lmfdb04.csv"]
   for str in l.zip (Array.range N) do
     let ⟨m, p, ok, of, oc, or⟩ : Model ℤ × ℕ × Kodaira × ℕ × ℕ × ℤ := parsefunc str.1
-    if Δnz : m.discr ≠ 0 then
-      match Int.tate_algorithm p sorry ⟨m, Δnz⟩ with
-      | (k, f, c, r, _, _, _, _) =>
-        if (k, f, c) ≠ (ok, of, oc) ∨ or ≠ r.to_lmfdb then
-          println str
-          println (repr (k, f, c, r))
+    -- if Δnz : m.discr ≠ 0 then
+    match Int.tate_algorithm p sorry ⟨m, sorry⟩ with
+    | (k, f, c, r, _, _, _, _) =>
+      if (k, f, c) ≠ (ok, of, oc) ∨ or ≠ r.to_lmfdb then
+        println str
+        println (repr (k, f, c, r))
   println s!"{N} lines tested"
 
 def main (N : List String) : IO Unit := test N[0]!.toNat!
