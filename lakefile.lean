@@ -4,12 +4,13 @@ open Lake DSL
 
 meta if get_config? doc = some "on" then -- do not download and build doc-gen4 by default
 require «doc-gen4» from git "https://github.com/leanprover/doc-gen4" @ "main"
---require aesop from git "https://github.com/JLimperg/aesop"
 
 
 package ECTate {
   -- add any package configuration options here
 }
+require std from git
+  "https://github.com/leanprover/std4.git" @ "4261f9bcb56ada27ad9307beaf8c4dba5a0a6883"
 
 require mathlib from git
   "https://github.com/leanprover-community/mathlib4.git"
@@ -20,6 +21,20 @@ lean_lib ECTate {
 
   -- add any library configuration options here
 }
+
+
+-- target ffi.o (pkg : Package) : FilePath := do
+--   let oFile := pkg.buildDir / "c" / "ffi.o"
+--   let srcJob ← inputFile <| pkg.dir / "myfuns.cpp"
+--   buildFileAfterDep oFile srcJob fun srcFile => do
+--     let flags := #["-I", "/usr/local/include", "-I", (← getLeanIncludeDir).toString, "-fPIC"]
+--     compileO "ffi.c" oFile srcFile flags "c++"
+
+
+-- extern_lib libleanffi (pkg : Package) := do
+--   let name := nameToStaticLib "leanffi"
+--   let ffiO ← fetch <| pkg.target ``ffi.o
+--   buildStaticLib (pkg.buildDir / "c" / name) #[ffiO]
 
 @[default_target]
 lean_exe tate where

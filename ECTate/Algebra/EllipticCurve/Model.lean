@@ -199,6 +199,7 @@ by
   ring
 
 
+set_option maxHeartbeats 400000 in
 lemma discr_in_jacobian_ideal (e : Model R) (P : R × R) : e.discr =
   -((48*P.1*P.2*e.a2^2 +24*e.a1*e.a2*e.a6 +216*P.2*e.a6 +P.2*e.a1^6 +11*P.2*e.a1^4*e.a2 +P.1*e.a1^4*e.a3 +38*P.1*e.a1^2*e.a2*e.a3 +8*e.a1^2*e.a2^2*e.a3
   +e.a1^4*e.a2*e.a3 +40*P.2*e.a1^2*e.a2^2 +32*P.2*e.a2^3 +24*P.1*P.2*e.a1*e.a3 +30*P.1^2*e.a2*e.a3 +3*P.1*e.a1^3*e.a4 +60*P.1^2*e.a1*e.a4 +30*P.1^2*e.a1^2*e.a3
@@ -345,6 +346,7 @@ end ValidModel
 
 namespace Model
 
+section
 variable {K : Type u} [CommRing K]
 
 def is_singular_point (e : Model K) (P : K × K) : Prop :=
@@ -357,6 +359,7 @@ by
   rw [discr_in_jacobian_ideal, h₁, h₂, h₃, mul_zero,
     mul_zero, mul_zero, add_zero, add_zero, neg_eq_zero]
 
+end
 section invariant_lemmas
 variable {K : Type u} [IntegralDomain K]
 
@@ -413,7 +416,6 @@ by
 
 end invariant_lemmas
 
-
 namespace Field
 variable {K : Type u} [Field K]
 
@@ -451,7 +453,7 @@ instance [CommSemigroup R] : IsCommutative R (. * .) := {comm := mul_comm}
 -- TODO a field should be a division comm monoid
 
 -- TODO maybe rewrite to take an explicit point
--- set_option maxHeartbeats 600000 in
+set_option maxHeartbeats 600000 in
 lemma is_singular_point_singular_point [PerfectRing K] (e : Model K) (h : e.discr = 0) :
   is_singular_point e (singular_point e) :=
 by

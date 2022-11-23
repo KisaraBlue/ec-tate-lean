@@ -251,6 +251,7 @@ theorem le_add_left (n k : ℕ∪∞) : n ≤ k + n := by
   rw [add_comm]
   exact le_add_right n k
 
+protected
 theorem add_le_add_left {n m : ℕ∪∞} (h : n ≤ m) (k : ℕ∪∞) : k + n ≤ k + m := by
   cases k with
   | top =>
@@ -266,15 +267,6 @@ theorem add_le_add_left {n m : ℕ∪∞} (h : n ≤ m) (k : ℕ∪∞) : k + n 
         apply le.in_nat
         cases h with
           | in_nat h => exact Nat.add_le_add_left h k
-
-theorem add_le_add_right {n m : ℕ∪∞} (h : n ≤ m) (k : ℕ∪∞) : n + k ≤ m + k := by
-  rw [add_comm n k, add_comm m k]
-  apply add_le_add_left
-  assumption
--- #check add_le_add
-
-theorem add_le_add {a b c d : ℕ∪∞} (h₁ : a ≤ b) (h₂ : c ≤ d) : a + c ≤ b + d :=
-  le_trans (add_le_add_right h₁ c) (add_le_add_left h₂ b)
 
 theorem eq_top_of_top_le (a : ℕ∪∞) (h : ∞ ≤ a) : a = ∞ := by
   cases h with

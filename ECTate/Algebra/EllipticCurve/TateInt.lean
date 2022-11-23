@@ -81,7 +81,7 @@ def tate_big_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) :
   let Δ := e.discr
   let n := val_discr_to_nat navp e
   let ⟨vpj, k, integralInv⟩ :=
-    match (primeEVR hp).valtn.v (c4 ^ 3) with
+    match (primeEVR hp).valtn.v (c4 ^ 3) with -- TODO optimize
     | ∞ => (0, n, true)
     | ofN v_c4_3 => if v_c4_3 < n then ((v_c4_3 : ℤ) - (n : ℤ), v_c4_3, false) else (v_c4_3 - n, n, true)
   let ⟨u, r, s, t⟩ :=
