@@ -77,11 +77,9 @@ def tate_big_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) :
   let evrp := primeEVR hp
   let navp := evrp.valtn
   let c4 := e.c4
-  let c6 := e.c6
-  let Δ := e.discr
   let n := val_discr_to_nat navp e
   let ⟨vpj, k, integralInv⟩ :=
-    match (primeEVR hp).valtn.v (c4 ^ 3) with -- TODO optimize
+    match 3 * (primeEVR hp).valtn.v c4 with
     | ∞ => (0, n, true)
     | ofN v_c4_3 => if v_c4_3 < n then ((v_c4_3 : ℤ) - (n : ℤ), v_c4_3, false) else (v_c4_3 - n, n, true)
   let ⟨u, r, s, t⟩ :=
@@ -102,13 +100,13 @@ def tate_big_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) :
       else -a3' / 2
     (u', r', s', t')
   let k := k % 12
-  let Δ := Δ / ofNat (u ^ 12)
-  let c6 := c6 / ofNat (u ^ 6)
-  let c4 := c4 / ofNat (u ^ 4)
-  if not integralInv then
+  if !integralInv then
+    let c6 := e.c6 / (↑u ^ 6)
+    let Δ := e.discr / ofNat (u ^ 12)
     let ν := natAbs vpj
     match k with
-      | 0 => let (c, R) := if kronecker (-c6) p = 1 then (ν, .SplitMultiplicative) else (gcd 2 ν, .NonSplitMultiplicative)
+      | 0 => let (c, R) := if kronecker (-c6) p = 1 then
+                (ν, .SplitMultiplicative) else (gcd 2 ν, .NonSplitMultiplicative)
              (I ν, 1, c, R, (u, r, s, t))
       | 6 => (Is ν, 2,
               natAbs (3 + kronecker (if ν % 2 = 1 then
@@ -118,8 +116,10 @@ def tate_big_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) :
               (u, r, s, t))
       | _ => unreachable!
   else
+    let c6 := e.c6 / (↑u ^ 6)
+    let c4 := c4 / (↑u ^ 4)
     match k with
-      | 0  => (I 0,  0, 1, .Good, (u, r, s, t)) -- TODO check red type
+      | 0  => (I 0,  0, 1, .Good, (u, r, s, t))
       | 2  => (II,   2, 1, .Additive, (u, r, s, t))
       | 3  => (III,  2, 2, .Additive, (u, r, s, t))
       | 4  => (IV,   2,
@@ -276,16 +276,16 @@ decreasing_by
 def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 : ℤ := 1) (r0 : ℤ :=0) (s0 : ℤ :=0) (t0 : ℤ :=0) :
   Kodaira × ℕ × ℕ × ReductionType × (ℤ × ℤ × ℤ × ℤ) :=
   --this function shouldn't be called with large primes (yet)
-  if smallp : (p : ℤ) ≠ 2 ∧ (p : ℤ) ≠ 3 then unreachable! else
+  if smallp : p ≠ 2 ∧ p ≠ 3 then unreachable! else
   have p_is_2_or_3 : (p : ℤ) = 2 ∨ (p : ℤ) = 3 := by
     rw [Decidable.not_and] at smallp
     cases smallp with
     | inl p2 =>
       rw [Decidable.not_not] at p2
-      exact Or.intro_left ((p:ℤ) = 3) p2
+      exact Or.intro_left ((p:ℤ) = 3) (by simp [p2])
     | inr p3 =>
       rw [Decidable.not_not] at p3
-      exact Or.intro_right ((p:ℤ) = 2) p3
+      exact Or.intro_right ((p:ℤ) = 2) (by simp [p3])
   let (u, r, s, t) := (u0, r0, s0, t0)
   let evrp := primeEVR hp
   let navp := evrp.valtn

@@ -9,8 +9,6 @@ require «doc-gen4» from git "https://github.com/leanprover/doc-gen4" @ "main"
 package ECTate {
   -- add any package configuration options here
 }
-require std from git
-  "https://github.com/leanprover/std4.git" @ "4261f9bcb56ada27ad9307beaf8c4dba5a0a6883"
 
 require mathlib from git
   "https://github.com/leanprover-community/mathlib4.git"
@@ -42,6 +40,7 @@ lean_exe tate where
 
 @[default_target]
 lean_exe test where
+  -- moreLinkArgs := #["-lprofiler"]
   root := `test.TateTest
 
 

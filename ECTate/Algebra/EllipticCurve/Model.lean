@@ -4,7 +4,6 @@ import ECTate.FieldTheory.PerfectClosure
 import Mathlib.Tactic.SplitIfs
 import Mathlib.Tactic.NormNum
 import Mathlib.Tactic.Ring
-import Mathlib.Tactic.SimpTrace
 import Mathlib.Tactic.PrintPrefix
 import Mathlib.Tactic.LibrarySearch
 import Mathlib.Util.WhatsNew
