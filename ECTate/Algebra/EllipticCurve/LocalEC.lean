@@ -389,7 +389,7 @@ def Δcubic (c : R × R × R) : R :=
 def model_to_cubic {p : R} (evr : EnatValRing p) (e : ValidModel R) : R × R × R :=
 (evr.sub_val e.a2 1, evr.sub_val e.a4 2, evr.sub_val e.a6 3)
 
-def cubic_has_dinstinct_roots {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop :=
+def cubic_has_distinct_roots {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop :=
 evr.valtn.v (Δcubic (model_to_cubic evr e)) = 0
 
 def δmultiplicity (c : R × R × R) : R := 3 * c.2.1 - c.1 ^ 2

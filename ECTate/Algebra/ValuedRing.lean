@@ -452,10 +452,11 @@ instance : DecidablePred (nat_prime . : ℕ → Prop) := fun p => sorry
 --   simp [WellFoundedRelation.rel, measure, invImage, InvImage, Nat.lt_wfRel]
 --   exact Nat.div_lt_self (Nat.zero_lt_succ m) (Nat.succ_lt_succ (Nat.zero_lt_succ q))
 
-def Nat.div_pos {a b : ℕ} (ha : 0 < a) (hb : 1 < b) (hab : a % b = 0) : 0 < a / b := sorry
+lemma Nat.div_pos_of_mod {a b : ℕ} (ha : 0 < a) (hb : 1 < b) (hab : a % b = 0) : 0 < a / b :=
+Nat.div_pos (Nat.le_of_dvd ha (dvd_of_mod_eq_zero hab)) (lt_of_succ_lt hb)
 
 def nat_valuation_aux'' (q : ℕ) (hq : 1 < q) : (m : ℕ) → 0 < m → ℕ → ℕ
-  | m, hm, n => if hmq : m % q == 0 then (nat_valuation_aux'' q hq (m / q) (Nat.div_pos hm hq (by simpa using hmq)) (n + 1)) else n
+  | m, hm, n => if hmq : m % q == 0 then (nat_valuation_aux'' q hq (m / q) (Nat.div_pos_of_mod hm hq (by simpa using hmq)) (n + 1)) else n
 decreasing_by
   simp [WellFoundedRelation.rel, measure, invImage, InvImage, Nat.lt_wfRel]
   exact Nat.div_lt_self hm hq
@@ -465,7 +466,7 @@ lemma nat_valuation_aux''_of_not_dvd (q : ℕ) (hq : 1 < q) (m : ℕ) (hm : 0 < 
 by sorry -- rw [nat_valuation_aux'', dif_neg hmq]
 
 lemma nat_valuation_aux''_of_dvd (q : ℕ) (hq : 1 < q) (m : ℕ) (hm : 0 < m)
-  (hmq : m % q = 0) : nat_valuation_aux'' q hq m hm n = succ (nat_valuation_aux'' q hq (m / q) (Nat.div_pos hm hq hmq) n) :=
+  (hmq : m % q = 0) : nat_valuation_aux'' q hq m hm n = succ (nat_valuation_aux'' q hq (m / q) (Nat.div_pos_of_mod hm hq hmq) n) :=
 sorry
 
 
@@ -478,11 +479,11 @@ lemma nat_valuation_aux'_of_not_dvd (q : ℕ) (hq : 1 < q) (m : ℕ) (hm : 0 < m
 by sorry -- rw [nat_valuation_aux', dif_pos hmq]
 
 lemma nat_valuation_aux'_of_dvd (q : ℕ) (hq : 1 < q) (m : ℕ) (hm : 0 < m)
-  (hmq : m % q = 0) : nat_valuation_aux' q hq m hm = succ (nat_valuation_aux' q hq (m / q) (Nat.div_pos hm hq hmq)) :=
+  (hmq : m % q = 0) : nat_valuation_aux' q hq m hm = succ (nat_valuation_aux' q hq (m / q) (Nat.div_pos_of_mod hm hq hmq)) :=
 by sorry -- rw [nat_valuation_aux', dif_neg (not_not_intro hmq)]
 
 lemma nat_val_aux'_succ (q m : ℕ) (hq) : nat_valuation_aux' (q+2) hq (m+1) (Nat.zero_lt_succ _) =
-  if hmq : (m+1) % (q+2) ≠ 0 then 0 else succ (nat_valuation_aux' (q+2) hq ((m+1) / (q+2)) (Nat.div_pos (Nat.zero_lt_succ _) hq (not_not.mp hmq))) :=
+  if hmq : (m+1) % (q+2) ≠ 0 then 0 else succ (nat_valuation_aux' (q+2) hq ((m+1) / (q+2)) (Nat.div_pos_of_mod (Nat.zero_lt_succ _) hq (not_not.mp hmq))) :=
 by sorry /- simp only [Nat.succ_ne_zero, dite_false, ne_eq, ite_not]
    rw [nat_valuation_aux'] -/
 
@@ -566,7 +567,7 @@ lemma int_val_uniformizer {p : ℕ} (gt1 : 1 < p) : int_val p p = 1 := by
     exact lt_trans (Nat.lt_succ_self 0) gt1
     exact Ne.irrefl
 
-lemma nat_val_aux'_mul_eq_add (p : ℕ) (prime : nat_prime p) (hp : 1 < p := prime.1) (a b : ℕ) 
+lemma nat_val_aux'_mul_eq_add (p : ℕ) (prime : nat_prime p) (hp : 1 < p := prime.1) (a b : ℕ)
   (ha : 0 < a) (hb : 0 < b) :
   nat_valuation_aux' p hp (a * b) (Nat.mul_pos ha hb) = nat_valuation_aux' p hp a ha + nat_valuation_aux' p hp b hb := by
   have general (n : ℕ) : ∀ c d hc hd, c + d ≤ n → nat_valuation_aux' p hp (c * d) (Nat.mul_pos hc hd) = nat_valuation_aux' p hp c hc + nat_valuation_aux' p hp d hd := by

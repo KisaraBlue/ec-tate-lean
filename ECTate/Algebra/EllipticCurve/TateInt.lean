@@ -255,7 +255,12 @@ def kodaira_type_Is (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 r0 s0 
         ←pow_add, ←Nat.add_assoc, add_self_eq_mul_two q, ←mul_add, ←mul_add, Nat.mul_add,
         ←add_self_eq_mul_two 1, ←Nat.add_assoc, surjvalp.v_mul_eq_add_v, val_of_pow_uniformizer]
       push_cast
-      exact add_le_add (le_of_eq rfl) (succ_le_of_lt (val_poly_of_double_root hp a2p a4pq a6pq2 hdr').1)
+      apply add_le_add (le_of_eq rfl)
+      rw [show 1 = Enat.succ 0 by rfl]
+      apply succ_le_of_lt
+      have := (val_poly_of_double_root hp a2p a4pq a6pq2 hdr').1
+      push_cast at this
+      exact this
     . rw [mul_pow, ←pow_mul, mul_add, mul_one, Nat.mul_succ]
       apply val_mul_ge_of_right_ge surjvalp
       rw [val_of_pow_uniformizer, mul_comm q]

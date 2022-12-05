@@ -1,5 +1,8 @@
 import Mathlib.Algebra.Group.Defs
-import Mathlib.Algebra.Order.Monoid
+import Mathlib.Algebra.Order.Monoid.Lemmas
+import Mathlib.Algebra.Order.Monoid.Defs
+import Mathlib.Algebra.Ring.Basic
+import Mathlib.Data.Nat.Basic
 import Mathlib.Init.Algebra.Order
 import Mathlib.Algebra.Ring.Basic
 import Mathlib.Init.Data.Nat.Lemmas
@@ -143,7 +146,7 @@ theorem succ_add (a b : ℕ∪∞) : succ a + b = succ (a + b) := by
 theorem add_succ (a b : ℕ∪∞) : a + succ b = succ (a + b) := by
   rw [add_comm, succ_add b a, add_comm]
 
-theorem ofN_mul_eq_smul (a b : ℕ) : (a * b : Enat) = a • b := by
+theorem ofN_mul_eq_smul (a b : ℕ) : (a * b : Enat) = a • (b : Enat) := by
 induction a with
 | zero => simp [zero_nsmul]
 | succ k ih => simp [Nat.succ_mul, succ_nsmul, ← ih, add_comm]
