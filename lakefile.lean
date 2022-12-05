@@ -40,7 +40,6 @@ lean_exe tate where
 
 @[default_target]
 lean_exe test where
-  -- moreLinkArgs := #["-lprofiler"]
   root := `test.TateTest
 
 

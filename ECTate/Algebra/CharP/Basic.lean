@@ -2,7 +2,7 @@ import ECTate.Algebra.Field.Basic
 import ECTate.Algebra.Ring.Basic
 import ECTate.Algebra.ValuedRing
 import ECTate.Data.Nat.Enat
-import ECTate.Tactic.GeneralizeProofs
+import Mathlib.Tactic.GeneralizeProofs
 
 open Classical
 variable (R : Type _) [Semiring R]
