@@ -73,7 +73,7 @@ lemma val_of_one {p : R} (nav : SurjVal p) : nav.v 1 = 0 := by
 lemma val_pow_ge_of_ge {p : R} (nav : SurjVal p) {a : R} (k : ℕ) (ha : nav.v a ≥ m) :
 nav.v (a ^ k) ≥ k • m := by
   induction k with
-  | zero => simp [zero_nsmul] -- TODO why isn't this simp?
+  | zero => simp [zero_nsmul]
   | succ k ih =>
     simp only [succ_nsmul, pow_succ]
     apply val_mul_ge_of_both_ge _ ha ih
@@ -81,7 +81,7 @@ nav.v (a ^ k) ≥ k • m := by
 lemma val_pow_eq_of_eq {p : R} (nav : SurjVal p) {a : R} (k : ℕ) (ha : nav.v a = m) :
 nav.v (a ^ k) = k * m := by
   induction k with
-  | zero => simp [zero_nsmul] -- TODO why isn't this simp?
+  | zero => simp
   | succ k ih =>
     simp only [pow_succ, Nat.cast_succ, add_mul, one_mul, add_comm]
     rw [nav.v_mul_eq_add_v, ha, ih]
