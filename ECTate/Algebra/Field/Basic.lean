@@ -17,6 +17,8 @@ instance (K : Type u) [h : Field K] : IntegralDomain K :=
     apply h
     rw [← one_mul x, hh, zero_mul,
         ← one_mul y, hh, zero_mul]
-  factors_nzero_mul_nzero := by
-    intro a b ha hb
-    sorry}
+  eq_zero_or_eq_zero_of_mul_eq_zero := by
+    intro a b h
+    sorry
+
+  }

@@ -408,10 +408,7 @@ by
     show 27 = 3 * 9 by norm_num,
     show 8 = 3 * 3 - 1 by norm_num,
     hchar''] at hdisc
-  -- TODO simp identifier "at" can't be on next line
-  simp at hdisc
-  rwa [pow_eq_zero_iff] at hdisc
-  norm_num
+  simpa using hdisc
 
 end invariant_lemmas
 

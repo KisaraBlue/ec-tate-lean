@@ -4,9 +4,6 @@ import Mathlib.Tactic.LibrarySearch
 import Mathlib.Tactic.Contrapose
 
 
-theorem pow_two {M} [Monoid M] (a : M) : a ^ (2:ℕ) = a * a :=
-by rw [pow_succ, pow_one]
-
 
 variable {R : Type _}
 
@@ -86,16 +83,17 @@ lemma square_sub (a b : R) : (a - b) ^ 2 = a ^ 2 - 2 * (a * b) + b ^ 2 := by
 
 end CommRing
 
-class IntegralDomain (R : Type u) extends CommRing R where
+class IntegralDomain (R : Type u) extends CommRing R, NoZeroDivisors R where
   non_trivial : ¬(1 : R) = 0
-  factors_nzero_mul_nzero {a b : R} : a ≠ 0 → b ≠ 0 → a * b ≠ 0
 
 section IntegralDomain
 variable [IntegralDomain R]
+theorem factors_nzero_mul_nzero {a b : R} : a ≠ 0 → b ≠ 0 → a * b ≠ 0 :=
+by
+  simp [mul_eq_zero]
+  exact fun a_1 a_2 => Prop.distribLattice.proof_1 (a = 0) (b = 0) False a_1 a_2 -- erm
 
 theorem non_trivial : ¬(1 : R) = 0 := IntegralDomain.non_trivial
-
-theorem factors_nzero_mul_nzero {a b : R} : a ≠ 0 → b ≠ 0 → a * b ≠ 0 := IntegralDomain.factors_nzero_mul_nzero
 
 theorem mul_eq_zero_iff_factor_eq_zero (a b : R) : a * b = 0 ↔ a = 0 ∨ b = 0 := by
   apply Iff.intro
@@ -129,15 +127,6 @@ theorem pow_nonzero (a : R) (n : ℕ) : a ≠ 0 → a ^ n ≠ 0 := by
     rw [pow_succ]
     exact factors_nzero_mul_nzero h ih
 
-theorem pow_eq_zero_iff (a : R) (n : ℕ) (hg : 1 ≤ n) : a ^ n = 0 ↔ a = 0 :=
-by
-  apply Iff.intro
-  . intro h
-    contrapose h
-    exact pow_nonzero _ _ h
-  . intro h
-    rw [h, ← @Nat.succ_pred n, pow_succ, zero_mul]
-    exact ne_of_gt hg
 
 end IntegralDomain
 
@@ -146,6 +135,4 @@ end IntegralDomain
 --instance : Numeric ℤ := ⟨Int.ofNat⟩
 
 instance : IntegralDomain ℤ where
-  __ := inferInstanceAs (CommRing ℤ)
   non_trivial := by decide
-  factors_nzero_mul_nzero := by sorry
