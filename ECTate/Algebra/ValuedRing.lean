@@ -147,6 +147,43 @@ theorem val_of_pow_uniformizer {p : R} (nav : SurjVal p) {n : ℕ} : nav.v (p ^ 
 
 end SurjVal
 
+section residue
+
+def congruence_p {p : R} (nav : SurjVal p) (a b : R) : Prop := nav.v (a - b) > 0
+
+variable {p : R}
+variable {nav : SurjVal p}
+
+lemma congruence_p_refl : ∀ x : R, congruence_p nav x x := by
+  simp [congruence_p]
+
+lemma congruence_p_symm : ∀ {x y : R}, congruence_p nav x y → congruence_p nav y x := by
+  simp [congruence_p]
+  intro x y H
+  rw [←neg_neg (y-x), neg_sub, val_neg]
+  exact H
+
+lemma congruence_p_trans : ∀ {x y z : R}, congruence_p nav x y → congruence_p nav y z → congruence_p nav x z := by
+  simp [congruence_p]
+  intro x y z Hxy Hyz
+  rw [←add_zero x, ←sub_self (-y), sub_eq_add_neg, sub_eq_add_neg, neg_neg, ←add_assoc, ←sub_eq_add_neg x, add_assoc, ←sub_eq_add_neg]
+  apply lt_of_lt_of_le (lt_min Hxy Hyz) (nav.v_add_ge_min_v (x-y) (y-z))
+
+instance : Equivalence (congruence_p nav) :=
+{ refl          := congruence_p_refl,
+  symm          := congruence_p_symm,
+  trans         := congruence_p_trans}
+
+--lemma p_congr_zero : congruence_p nav () 0 :=
+
+
+end residue
+
+structure ResidueRing {R : Type u} (p : R) [IntegralDomain R] where
+  valtn : SurjVal p
+  repr_residue : R → R --residue class representatives
+  residue_rel : ∀ a b : R, congruence_p valtn a b → repr_residue a = repr_residue b
+
 structure EnatValRing {R : Type u} (p : R) [IntegralDomain R] where
   valtn : SurjVal p
   decr_val : R → R
