@@ -130,6 +130,11 @@ lemma cast_eq_cast_iff_Nat (m n : ℕ) : (m : Enat) = (n : Enat) ↔ m = n := of
 lemma ofN_eq_ofNat : ofN a = a :=
 rfl
 
+theorem succ_eq_add_one (a : ℕ∪∞) : succ a = a + Enat.one := by
+  cases a with
+  | ofN n => simp [Enat.one]
+  | top => simp [succ]
+
 -- set_option trace.Meta.Tactic.simp.rewrite true
 theorem succ_add (a b : ℕ∪∞) : succ a + b = succ (a + b) := by
   cases a with

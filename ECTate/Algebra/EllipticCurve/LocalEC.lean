@@ -26,8 +26,8 @@ by
 
 def move_singular_point_to_origin_triple (evr : EnatValRing p) (e : Model R) : R × R × R :=
   match evr.residue_char with
-  | 2 => (evr.norm_repr e.a4, 0, evr.norm_repr (e.a6 + e.a4 * e.a2))
-  | 3 => (evr.norm_repr (-e.b6), 0, evr.norm_repr (e.a3 - e.b6 * e.a1))
+  | 2 => (evr.residue.repr_p e.a4, 0, evr.residue.repr_p (e.a6 + e.a4 * e.a2))
+  | 3 => (evr.residue.repr_p (-e.b6), 0, evr.residue.repr_p (e.a3 - e.b6 * e.a1))
   | _ => (0, 0, 0) --need to fill here
 
 def move_singular_point_to_origin_iso (evr : EnatValRing p) (e : Model R) : Model R :=
@@ -402,7 +402,7 @@ evr.valtn.v (Δcubic (model_to_cubic evr e)) > 0 ∧ evr.valtn.v (δmultiplicity
 
 def move_cubic_double_root_to_origin_iso {p : R} (evr : EnatValRing p) (e : ValidModel R) : ValidModel R :=
   let (a2p, a4p2, _) := model_to_cubic evr e
-  rst_iso (p * (evr.norm_repr (if evr.residue_char = 2 then a4p2 else a2p * a4p2))) 0 0 e
+  rst_iso (p * (evr.residue.repr_p (if evr.residue_char = 2 then a4p2 else a2p * a4p2))) 0 0 e
 
 def cubic_double_root_is_zero {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop :=
   let (a2p, a4p2, a6p3) := model_to_cubic evr e
@@ -413,7 +413,7 @@ lemma move_cubic_double_root_to_origin {p : R} (evr : EnatValRing p) (e : ValidM
 
 def move_cubic_triple_root_to_origin_iso {p : R} (evr : EnatValRing p) (e : ValidModel R) : ValidModel R :=
   let (a2p, _, a6p3) := model_to_cubic evr e
-  rst_iso (p * (evr.norm_repr (if evr.residue_char = 2 then -a2p else -a6p3))) 0 0 e
+  rst_iso (p * (evr.residue.repr_p (if evr.residue_char = 2 then -a2p else -a6p3))) 0 0 e
 
 def cubic_triple_root_is_zero {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop :=
   let (a2p, a4p2, a6p3) := model_to_cubic evr e

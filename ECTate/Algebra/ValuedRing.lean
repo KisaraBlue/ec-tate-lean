@@ -181,16 +181,16 @@ end residue
 
 structure ResidueRing {R : Type u} (p : R) [IntegralDomain R] where
   valtn : SurjVal p
-  repr_residue : R → R --residue class representatives
-  residue_rel : ∀ a b : R, congruence_p valtn a b → repr_residue a = repr_residue b
+  repr_p : R → R --residue class representatives
+  congr_of_repr : ∀ a b : R, congruence_p valtn a b → repr_p a = repr_p b
 
 structure EnatValRing {R : Type u} (p : R) [IntegralDomain R] where
   valtn : SurjVal p
   decr_val : R → R
   zero_valtn_decr {x : R} (h : valtn.v x = 0) : decr_val x = x
   pos_valtn_decr {x : R} (h : valtn.v x > 0) : x = p * decr_val x
+  residue : ResidueRing p
   residue_char : ℕ -- ToDo delete
-  norm_repr : R → R --generalization of modulo
   quad_roots_in_residue_field : R → R → R → Bool
 
 namespace EnatValRing
@@ -467,6 +467,7 @@ lemma nat_prime_test (p : ℕ) : nat_prime p ↔ (1 < p ∧ (∀ a b : ℕ, a < 
 
 
 instance : DecidablePred (nat_prime . : ℕ → Prop) := fun p => sorry
+
 --match p with
   --| 0 => sorry --isFalse (not_and_of_not_left _ (not_lt_of_ge (le_of_lt Nat.zero_lt_one)))
   --| 1 => isFalse (not_and_of_not_left _ (not_lt_of_ge (le_of_eq rfl)))
@@ -498,13 +499,34 @@ decreasing_by
   simp [WellFoundedRelation.rel, measure, invImage, InvImage, Nat.lt_wfRel]
   exact Nat.div_lt_self hm hq
 
+lemma x (m q : Nat) : m ≤ q → m < q ∨ m = q := by library_search
+
 lemma nat_valuation_aux''_of_not_dvd (q : ℕ) (hq : 1 < q) (m : ℕ) (hm : 0 < m)
   (hmq : m % q ≠ 0) : nat_valuation_aux'' q hq m hm 0 = 0 :=
-by sorry -- rw [nat_valuation_aux'', dif_neg hmq]
+by
+  have hmq_bool : ¬m % q == 0 := by
+    intro H
+    apply hmq (eq_of_beq H)
+  rw [nat_valuation_aux'', dif_neg hmq_bool]
 
-lemma nat_valuation_aux''_of_dvd (q : ℕ) (hq : 1 < q) (m : ℕ) (hm : 0 < m)
-  (hmq : m % q = 0) : nat_valuation_aux'' q hq m hm n = succ (nat_valuation_aux'' q hq (m / q) (Nat.div_pos_of_mod hm hq hmq) n) :=
-sorry
+lemma nat_valuation_aux''_of_dvd (q : ℕ) (hq : 1 < q) : (m : ℕ) → (hm : 0 < m) → (hmq : m % q = 0) → nat_valuation_aux'' q hq m hm n = succ (nat_valuation_aux'' q hq (m / q) (Nat.div_pos_of_mod hm hq hmq) n) := by
+  have general : ∀ (M m : ℕ) (hM : m ≤ M) (hm : 0 < m) (hmq : m % q = 0), ↑(nat_valuation_aux'' q hq m hm n) = succ ↑(nat_valuation_aux'' q hq (m / q) (Nat.div_pos_of_mod hm hq hmq) n) := by
+    intro M
+    induction M with
+    | zero =>
+      intro m mle0 hm hmq
+      rw [Nat.le_zero] at mle0
+      apply False.elim
+      exact (ne_of_gt hm) mle0
+    | succ M IH =>
+      intro m m_le_sM hm hmq
+      cases LE.le.lt_or_eq m_le_sM with
+      | inl mltsM =>
+        exact IH m (Nat.le_of_lt_succ mltsM) hm hmq
+      | inr meqsM =>
+        sorry
+  exact fun m => general m m (le_refl m)
+
 
 
 set_option trace.compiler.ir.result true in
@@ -513,16 +535,28 @@ def nat_valuation_aux' (q : ℕ) (hq : 1 < q) : (m : ℕ) → 0 < m → ℕ∪�
 
 lemma nat_valuation_aux'_of_not_dvd (q : ℕ) (hq : 1 < q) (m : ℕ) (hm : 0 < m)
   (hmq : m % q ≠ 0) : nat_valuation_aux' q hq m hm = 0 :=
-by sorry -- rw [nat_valuation_aux', dif_pos hmq]
+by
+  rw [nat_valuation_aux']
+  simp [nat_valuation_aux''_of_not_dvd q hq m hm hmq]
 
 lemma nat_valuation_aux'_of_dvd (q : ℕ) (hq : 1 < q) (m : ℕ) (hm : 0 < m)
   (hmq : m % q = 0) : nat_valuation_aux' q hq m hm = succ (nat_valuation_aux' q hq (m / q) (Nat.div_pos_of_mod hm hq hmq)) :=
-by sorry -- rw [nat_valuation_aux', dif_neg (not_not_intro hmq)]
+by
+  rw [nat_valuation_aux', nat_valuation_aux']
+  simp [nat_valuation_aux''_of_dvd q hq m hm hmq]
 
 lemma nat_val_aux'_succ (q m : ℕ) (hq) : nat_valuation_aux' (q+2) hq (m+1) (Nat.zero_lt_succ _) =
   if hmq : (m+1) % (q+2) ≠ 0 then 0 else succ (nat_valuation_aux' (q+2) hq ((m+1) / (q+2)) (Nat.div_pos_of_mod (Nat.zero_lt_succ _) hq (not_not.mp hmq))) :=
-by sorry /- simp only [Nat.succ_ne_zero, dite_false, ne_eq, ite_not]
-   rw [nat_valuation_aux'] -/
+by
+  simp only [Nat.succ_ne_zero, dite_false, ne_eq, ite_not]
+  cases em ((m + 1) % (q + 2) = 0) with
+  | inl h =>
+    --rw [if_neg (not_not_intro h)]
+    sorry
+  | inr h =>
+    --rw [if_pos h]
+    sorry
+  /- rw [nat_valuation_aux'] -/
 
 def nat_valuation_aux (q : ℕ) (hq : 1 < q) : ℕ → ℕ∪∞ :=
   λ m => if hm : m = 0 then ∞ else nat_valuation_aux' q hq m (Nat.pos_of_ne_zero hm)
@@ -719,7 +753,20 @@ def decr_val_p (p : ℕ) (val : ℤ → ℕ∪∞) (k : ℤ) : ℤ :=
 lemma zero_valtn_decr_p {p: ℕ} {k : ℤ} (val : ℤ → ℕ∪∞) (h : val k = 0) : decr_val_p p val k = k :=
 by rw [decr_val_p, h]
 
-def norm_repr_p (p : ℕ) (x : ℤ) : ℤ := (x % (p : ℤ) + p) % (p : ℤ)
+--def norm_repr_p (p : ℕ) (x : ℤ) : ℤ := (x % (p : ℤ) + p) % (p : ℤ)
+
+lemma congr_of_repr_Z {p : ℕ} (hp : nat_prime p) : ∀ a b : ℤ, congruence_p (primeVal hp) a b → emod a p = emod b p := by
+  simp [congruence_p]
+  sorry
+
+
+
+def primeResidue {p : ℕ} (hp : nat_prime p) : ResidueRing (p : ℤ) := {
+  valtn := primeVal hp,
+  repr_p := fun x => emod x p,
+  congr_of_repr := congr_of_repr_Z hp
+}
+
 
 def primeEVR {p : ℕ} (hp : nat_prime p) : EnatValRing (p : ℤ) := {
   valtn := primeVal hp,
@@ -727,7 +774,7 @@ def primeEVR {p : ℕ} (hp : nat_prime p) : EnatValRing (p : ℤ) := {
   zero_valtn_decr := zero_valtn_decr_p (primeVal hp).v,
   pos_valtn_decr := sorry,
   residue_char := p,
-  norm_repr := norm_repr_p p,
+  residue := primeResidue hp,
   quad_roots_in_residue_field := fun a b c => Int.quad_root_in_ZpZ a b c p
 }
 
