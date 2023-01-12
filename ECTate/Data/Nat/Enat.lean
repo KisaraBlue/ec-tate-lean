@@ -423,6 +423,23 @@ instance : OrderedAddCommMonoid ℕ∪∞ :=
 { Enat.instLinearOrderEnat with
   add_le_add_left := fun _ _ h c => Enat.add_le_add_left h c }
 
+lemma enat_trichotomous (a b : ℕ∪∞) : a < b ∨ a = b ∨ b < a := by
+  cases a with
+  | top => cases b with
+    | top => simp
+    | ofN b => right; right; exact lt_top b
+  | ofN a => cases b with
+    | top => left; exact lt_top a
+    | ofN b =>
+      rw [ofN_inj, ofN_eq_ofNat, ofN_eq_ofNat, ←lt_ofN a b, ←lt_ofN b a]
+      exact IsTrichotomous.trichotomous a b
+
+
+
+instance : IsTrichotomous ℕ∪∞ (. < .) :=
+{ trichotomous := fun a b => enat_trichotomous a b
+}
+
 protected def mul : ℕ∪∞ → ℕ∪∞ → ℕ∪∞
   | ofN a, ofN b => ofN (a * b)
   | 0, ∞ => 0

@@ -169,12 +169,21 @@ lemma congruence_p_trans : ∀ {x y z : R}, congruence_p nav x y → congruence_
   rw [←add_zero x, ←sub_self (-y), sub_eq_add_neg, sub_eq_add_neg, neg_neg, ←add_assoc, ←sub_eq_add_neg x, add_assoc, ←sub_eq_add_neg]
   apply lt_of_lt_of_le (lt_min Hxy Hyz) (nav.v_add_ge_min_v (x-y) (y-z))
 
-instance : Equivalence (congruence_p nav) :=
+instance eqv_congr : Equivalence (congruence_p nav) :=
 { refl          := congruence_p_refl,
   symm          := congruence_p_symm,
-  trans         := congruence_p_trans}
+  trans         := congruence_p_trans
+}
 
 --lemma p_congr_zero : congruence_p nav () 0 :=
+
+instance : Setoid R :=
+{ r := congruence_p nav
+  iseqv := eqv_congr
+}
+
+def quotient (_ : Setoid R) :=
+  @Quot R (congruence_p nav)
 
 
 end residue
@@ -477,7 +486,7 @@ instance : DecidablePred (nat_prime . : ℕ → Prop) := fun p => sorry
 
 --def fmul_eq_addf {R R' : Type u} [Mul R] [Add R'] (f : R → R') (x y : R) : Prop := f (x * y) = f x + f y
 
-
+--library_search
 
 -- @[extern "blah"]
 -- def nat_valuation_aux : ℕ → ℕ → ℕ
@@ -499,7 +508,8 @@ decreasing_by
   simp [WellFoundedRelation.rel, measure, invImage, InvImage, Nat.lt_wfRel]
   exact Nat.div_lt_self hm hq
 
-lemma x (m q : Nat) : m ≤ q → m < q ∨ m = q := by library_search
+def nat_valuation_aux''_def (q : ℕ) (hq : 1 < q) (m : ℕ) (hm : 0 < m) (n : ℕ) : nat_valuation_aux'' q hq m hm n = if hmq : m % q == 0 then (nat_valuation_aux'' q hq (m / q) (Nat.div_pos_of_mod hm hq (by simpa using hmq)) (n + 1)) else n := by
+  sorry
 
 lemma nat_valuation_aux''_of_not_dvd (q : ℕ) (hq : 1 < q) (m : ℕ) (hm : 0 < m)
   (hmq : m % q ≠ 0) : nat_valuation_aux'' q hq m hm 0 = 0 :=
@@ -509,23 +519,35 @@ by
     apply hmq (eq_of_beq H)
   rw [nat_valuation_aux'', dif_neg hmq_bool]
 
-lemma nat_valuation_aux''_of_dvd (q : ℕ) (hq : 1 < q) : (m : ℕ) → (hm : 0 < m) → (hmq : m % q = 0) → nat_valuation_aux'' q hq m hm n = succ (nat_valuation_aux'' q hq (m / q) (Nat.div_pos_of_mod hm hq hmq) n) := by
-  have general : ∀ (M m : ℕ) (hM : m ≤ M) (hm : 0 < m) (hmq : m % q = 0), ↑(nat_valuation_aux'' q hq m hm n) = succ ↑(nat_valuation_aux'' q hq (m / q) (Nat.div_pos_of_mod hm hq hmq) n) := by
+lemma nat_valuation_aux''_of_dvd_induction : ∀ (M m : ℕ) (hM : m ≤ M) (hm : 0 < m) (n : ℕ) (hmq : m % q = 0), ↑(nat_valuation_aux'' q hq m hm n) = succ ↑(nat_valuation_aux'' q hq (m / q) (Nat.div_pos_of_mod hm hq hmq) n) := by
     intro M
     induction M with
     | zero =>
-      intro m mle0 hm hmq
+      intro m mle0 hm n hmq
       rw [Nat.le_zero] at mle0
       apply False.elim
       exact (ne_of_gt hm) mle0
     | succ M IH =>
-      intro m m_le_sM hm hmq
+      intro m m_le_sM hm n hmq
       cases LE.le.lt_or_eq m_le_sM with
       | inl mltsM =>
-        exact IH m (Nat.le_of_lt_succ mltsM) hm hmq
+        exact IH m (Nat.le_of_lt_succ mltsM) hm n hmq
       | inr meqsM =>
-        sorry
-  exact fun m => general m m (le_refl m)
+        cases em ((m / q) % q == 0) with
+        | inl h =>
+          rw [nat_valuation_aux''_def, nat_valuation_aux''_def, dif_pos h, dif_pos]
+          simp [meqsM]
+          rw [meqsM] at hm
+          rw [meqsM] at h
+          rw [meqsM] at hmq
+          exact IH (M.succ/q) (Nat.le_of_lt_succ (Nat.div_lt_self hm hq)) (Nat.div_pos_of_mod hm hq hmq) (n+1) (by simpa using h)
+        | inr h =>
+          rw [nat_valuation_aux''_def, nat_valuation_aux''_def, dif_neg h, dif_pos, nat_valuation_aux''_def, dif_neg h]
+          . simp
+          . simp only [hmq]
+
+lemma nat_valuation_aux''_of_dvd (q : ℕ) (hq : 1 < q) (m : ℕ) (hm : 0 < m) (n : ℕ) (hmq : m % q = 0) : nat_valuation_aux'' q hq m hm n = succ (nat_valuation_aux'' q hq (m / q) (Nat.div_pos_of_mod hm hq hmq) n) := by
+  exact nat_valuation_aux''_of_dvd_induction m m (le_refl m) hm n hmq
 
 
 
@@ -543,7 +565,7 @@ lemma nat_valuation_aux'_of_dvd (q : ℕ) (hq : 1 < q) (m : ℕ) (hm : 0 < m)
   (hmq : m % q = 0) : nat_valuation_aux' q hq m hm = succ (nat_valuation_aux' q hq (m / q) (Nat.div_pos_of_mod hm hq hmq)) :=
 by
   rw [nat_valuation_aux', nat_valuation_aux']
-  simp [nat_valuation_aux''_of_dvd q hq m hm hmq]
+  simp [nat_valuation_aux''_of_dvd q hq m hm 0 hmq]
 
 lemma nat_val_aux'_succ (q m : ℕ) (hq) : nat_valuation_aux' (q+2) hq (m+1) (Nat.zero_lt_succ _) =
   if hmq : (m+1) % (q+2) ≠ 0 then 0 else succ (nat_valuation_aux' (q+2) hq ((m+1) / (q+2)) (Nat.div_pos_of_mod (Nat.zero_lt_succ _) hq (not_not.mp hmq))) :=
@@ -551,29 +573,32 @@ by
   simp only [Nat.succ_ne_zero, dite_false, ne_eq, ite_not]
   cases em ((m + 1) % (q + 2) = 0) with
   | inl h =>
-    --rw [if_neg (not_not_intro h)]
-    sorry
+    rw [dif_neg (not_not_intro h)]
+    exact nat_valuation_aux'_of_dvd _ _ _ _ h
   | inr h =>
-    --rw [if_pos h]
-    sorry
-  /- rw [nat_valuation_aux'] -/
+    rw [dif_pos h]
+    exact nat_valuation_aux'_of_not_dvd _ _ _ _ h
+
 
 def nat_valuation_aux (q : ℕ) (hq : 1 < q) : ℕ → ℕ∪∞ :=
   λ m => if hm : m = 0 then ∞ else nat_valuation_aux' q hq m (Nat.pos_of_ne_zero hm)
 
 lemma nat_val_aux_zero (p : ℕ) (hp) : nat_valuation_aux p hp 0 = ∞ := by
   simp [nat_valuation_aux]
+
+lemma x' {a b : Nat} : (a+1) % (b+1) = 0 → (a+1) ≥ (b+1) := by sorry
+
 lemma nat_val_aux_succ (q m : ℕ) (hq) : nat_valuation_aux (q+2) hq (m+1) =
-  if (m+1) % (q+2) ≠ 0 then 0 else succ (nat_valuation_aux (q+2) hq ((m+1) / (q+2))) :=
-/-
-by simp only [nat_valuation_aux, Nat.succ_ne_zero, dite_false, ne_eq, ite_not]
-   rw [nat_valuation_aux']
-   by_cases hmq : (m + 1) % (q + 2) = 0
-   . rw [if_pos hmq, dif_neg hmq, dif_neg]
-     exact (Nat.div_pos (Nat.zero_lt_succ _) hq hmq).ne'
-   . rw [dif_pos hmq, if_neg hmq]
--/
-sorry
+  if (m+1) % (q+2) ≠ 0 then 0 else succ (nat_valuation_aux (q+2) hq ((m+1) / (q+2))) := by
+  simp only [nat_valuation_aux, Nat.succ_ne_zero, dite_false, ne_eq, ite_not]
+  by_cases hmq : (m + 1) % (q + 2) = 0
+  . have h : (m + 1) / (q + 2) ≠ 0 := by
+      apply Nat.ne_of_gt
+      apply Nat.div_pos (x' hmq) (lt_trans (Nat.lt_succ_self 0) hq)
+    rw [if_pos hmq, dif_neg h]
+    exact nat_valuation_aux'_of_dvd (q+2) hq (m+1) _ hmq
+  . rw [if_neg hmq]
+    exact nat_valuation_aux'_of_not_dvd (q+2) hq (m+1) _ hmq
 
 /-
 def nat_valuation : ℕ → ℕ → ℕ∪∞
@@ -586,6 +611,7 @@ decreasing_by
   simp [WellFoundedRelation.rel, measure, invImage, InvImage, Nat.lt_wfRel]
   exact Nat.div_lt_self (Nat.zero_lt_succ m) (Nat.succ_lt_succ (Nat.zero_lt_succ q))
 -/
+
 def nat_valuation : ℕ → ℕ → ℕ∪∞
   | _, 0 => ∞
   | 0, (_+1) => 0
@@ -638,6 +664,19 @@ lemma int_val_uniformizer {p : ℕ} (gt1 : 1 < p) : int_val p p = 1 := by
     exact lt_trans (Nat.lt_succ_self 0) gt1
     exact Ne.irrefl
 
+lemma mod_mul (a b c : Nat) : a % c = 0 → (a * b) % c = 0 := by sorry
+
+
+lemma nat_mul_div_assoc' (a b c : Nat) : c > 0 → a % c = 0 → a * b / c = a / c * b := by
+  intro hc hmod
+  apply nat_mul_left_cancel c _ _ (ne_of_gt hc)
+  rw [Nat.mul_div_cancel' (Nat.dvd_of_mod_eq_zero _), ←mul_assoc, Nat.mul_div_cancel' (Nat.dvd_of_mod_eq_zero hmod)]
+  exact mod_mul a b c hmod
+
+lemma nat_mul_div_assoc (a b c : Nat) : c > 0 → b % c = 0 → a * b / c = a * (b / c) := by
+  intro hc hmod
+  rw [mul_comm, nat_mul_div_assoc' b a c hc hmod, mul_comm]
+
 lemma nat_val_aux'_mul_eq_add (p : ℕ) (prime : nat_prime p) (hp : 1 < p := prime.1) (a b : ℕ)
   (ha : 0 < a) (hb : 0 < b) :
   nat_valuation_aux' p hp (a * b) (Nat.mul_pos ha hb) = nat_valuation_aux' p hp a ha + nat_valuation_aux' p hp b hb := by
@@ -657,8 +696,8 @@ lemma nat_val_aux'_mul_eq_add (p : ℕ) (prime : nat_prime p) (hp : 1 < p := pri
           match Nat.le.dest (Nat.succ_le_of_lt prime.left) with
           | ⟨q, hq⟩ =>
             rw [(show Nat.succ 1 = 2 by rfl), Nat.add_comm] at hq
-            simp only [←hq, (show c.succ * d.succ = (c * d + c + d).succ
-              by simp [Nat.succ_mul, Nat.mul_succ, Nat.add_succ]), nat_valuation_add_two, nat_valuation_aux]
+            have mul_s_s : c.succ * d.succ = (c * d + c + d).succ := by simp [Nat.succ_mul, Nat.mul_succ, Nat.add_succ]
+            simp only [←hq, mul_s_s, nat_valuation_add_two, nat_valuation_aux]
             simp only [hq, (show c * d + c + d + 1 = (c + 1) * (d + 1) by ring)]
             cases Nat.eq_zero_or_pos ((c + 1) * (d + 1) % p) with
             | inl h =>
@@ -674,14 +713,9 @@ lemma nat_val_aux'_mul_eq_add (p : ℕ) (prime : nat_prime p) (hp : 1 < p := pri
                   rw [Nat.add_comm]
                   apply Nat.lt_add_right 0 1 c (Nat.lt_succ_self 0)
                 rw [←ih ((c + 1) / (q + 2)) (d + 1) _ _ sum_le_n]
-                have mul_div_assoc : (c + 1) * (d + 1) / (q + 2) = (c + 1) / (q + 2) * (d + 1) := by
-                  apply nat_mul_left_cancel (q + 2) _ _ (ne_of_gt (Nat.lt_trans (Nat.lt_succ_self 0) prime.1))
-                  rw [Nat.mul_div_cancel' (Nat.dvd_of_mod_eq_zero h), ←mul_assoc,
-                    Nat.mul_div_cancel' (Nat.dvd_of_mod_eq_zero h')]
-                sorry
-                /-
-                rw [mul_div_assoc]
-                -/
+                have hey := nat_mul_div_assoc' (c+1) (d+1) (q+2) (lt_trans (Nat.lt_succ_self 0) (prime.1)) h'
+                simp only [hey.symm, mul_s_s.symm]
+                apply nat_valuation_aux'_of_dvd (q+2) hp ((c+1) * (d+1)) _ h
               | inr h' =>
                 subst hq
                 rw [nat_valuation_aux'_of_dvd _ _ _ _ h', add_succ]
@@ -693,25 +727,24 @@ lemma nat_val_aux'_mul_eq_add (p : ℕ) (prime : nat_prime p) (hp : 1 < p := pri
                   rw [Nat.add_comm]
                   apply Nat.lt_add_right 0 1 d (Nat.lt_succ_self 0)
                 rw [←ih (c + 1) ((d + 1) / (q + 2)) _ _ sum_le_n]
-                have mul_div_assoc : (c + 1) * (d + 1) / (q + 2) = (c + 1) * ((d + 1) / (q + 2)) := by
-                  apply nat_mul_left_cancel (q + 2) _ _ (ne_of_gt (Nat.lt_trans (Nat.lt_succ_self 0) prime.1))
-                  rw [Nat.mul_div_cancel' (Nat.dvd_of_mod_eq_zero h), ←mul_assoc, mul_comm (q + 2),
-                    mul_assoc, Nat.mul_div_cancel' (Nat.dvd_of_mod_eq_zero h')]
-                sorry
-                /-
-                rw [mul_div_assoc]
-                -/
+                have hey := nat_mul_div_assoc (c+1) (d+1) (q+2) (lt_trans (Nat.lt_succ_self 0) (prime.1)) h'
+                simp only [hey.symm, mul_s_s.symm]
+                apply nat_valuation_aux'_of_dvd (q+2) hp ((c+1) * (d+1)) _ h
             | inr h =>
               have hc := ndiv_mul_left _ _ _ (ne_of_gt h)
               have hd := ndiv_mul_right _ _ _ (ne_of_gt h)
               simp [nat_valuation_aux'_of_not_dvd _ _ _ _ hc, nat_valuation_aux'_of_not_dvd _ _ _ _ hd]
-              sorry
+              simp [←mul_s_s, nat_valuation_aux'_of_not_dvd _ _ _ _ (ne_of_gt h)]
   apply general (a + b) a b ha hb (le_refl _)
 
 lemma nat_val_aux_mul_eq_add (p : ℕ) (prime : nat_prime p) (hp : 1 < p := prime.1) (a b : ℕ) :
   nat_valuation_aux p hp (a * b) = nat_valuation_aux p hp a + nat_valuation_aux p hp b := by
-convert nat_val_aux'_mul_eq_add p prime prime.1 a b sorry sorry <;>
-  sorry
+  cases a with
+  | zero => simp [nat_valuation_aux]
+  | succ a => cases b with
+    | zero => simp [nat_valuation_aux]
+    | succ b =>
+      exact nat_val_aux'_mul_eq_add p prime prime.1 a.succ b.succ _ _
 
 lemma nat_val_mul_eq_add (p : ℕ) (prime : nat_prime p) (a b : ℕ) :
   nat_valuation p (a * b) = nat_valuation p a + nat_valuation p b := by
@@ -723,20 +756,54 @@ lemma int_val_mul_eq_add (p : ℕ) (prime : nat_prime p) (a b : ℤ) :
   simp [int_val, natAbs_mul]
   exact nat_val_mul_eq_add p prime (natAbs a) (natAbs b)
 
+lemma nat_val_add_eq_min (p a b : ℕ) (h : nat_valuation p a < nat_valuation p b) :
+  nat_valuation p (a + b) = nat_valuation p a := by sorry
 
-lemma nat_val_add_ge_min (p a b : ℕ) : nat_valuation p (a + b) ≥ min (nat_valuation p a) (nat_valuation p b) := by sorry
+lemma nat_val_add_ge_min (p a b : ℕ) : nat_valuation p (a + b) ≥ min (nat_valuation p a) (nat_valuation p b) := by
+  cases enat_trichotomous (nat_valuation p a) (nat_valuation p b) with
+  | inl h =>
+    simp only [min, if_pos (le_of_lt h)]
+    exact le_of_eq (nat_val_add_eq_min p a b h).symm
+  | inr h => cases h with
+    | inl h =>
+      simp only [min, if_pos (le_of_eq h)]
+      sorry
+    | inr h =>
+      simp only [add_comm a b, min, if_neg (not_le_of_lt h)]
+      exact le_of_eq (nat_val_add_eq_min p b a h).symm
 
-lemma natAbs_add (a b : ℤ) : natAbs (a + b) = max (natAbs a) (natAbs b) - min (natAbs a) (natAbs b) := by sorry
+--lemma natAbs_add (a b : ℤ) : natAbs (a + b) = max (natAbs a) (natAbs b) - min (natAbs a) (natAbs b) := by sorry
 
 lemma int_val_add_ge_min (p : ℕ) (a b : ℤ) : int_val p (a + b) ≥ min (int_val p a) (int_val p b) := by
-  simp [int_val, natAbs_add]
+  simp [int_val]
   -- exact nat_val_add_ge_min p (natAbs a) (natAbs b)
   sorry
 
 lemma int_val_add_eq_min (p : ℕ) (a b : ℤ) (h : int_val p a < int_val p b) :
   int_val p (a + b) = int_val p a := by sorry
 
-lemma int_val_eq_top_iff_zero (p : ℕ) (gt1 : 1 < p) (a : ℤ) : int_val p a = ∞ ↔ a = 0 := by sorry
+lemma int_val_eq_top_iff_zero (p : ℕ) (gt1 : 1 < p) (a : ℤ) : int_val p a = ∞ ↔ a = 0 := by
+  apply Iff.intro
+  . intro hval
+    simp [int_val, nat_valuation] at hval
+    cases abs_a : (natAbs a) with
+    | zero => exact natAbs_eq_zero.1 abs_a
+    | succ n =>
+      cases hp : p with
+      | zero =>
+        rw [hp] at gt1
+        apply False.elim ((of_decide_eq_true rfl : ¬1 < 0) gt1)
+      | succ p' =>
+        cases hp' : p' with
+        | zero =>
+          rw [hp, hp'] at gt1
+          apply False.elim ((of_decide_eq_true rfl : ¬1 < 1) gt1)
+        | succ n =>
+          simp [hp, hp', abs_a, nat_valuation_aux, nat_valuation_aux'] at hval
+          rw [←ofN_eq_ofNat] at hval
+          exact False.elim (Enat.noConfusion hval)
+  . intro ha
+    simp [ha, int_val, nat_valuation]
 
 def primeVal {p : ℕ} (hp : nat_prime p) : SurjVal (p : ℤ) := {
   v := int_val p,
