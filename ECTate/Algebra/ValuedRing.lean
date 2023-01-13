@@ -151,6 +151,7 @@ section residue
 
 def congruence_p {p : R} (nav : SurjVal p) (a b : R) : Prop := nav.v (a - b) > 0
 
+
 variable {p : R}
 variable {nav : SurjVal p}
 
@@ -177,20 +178,20 @@ instance eqv_congr : Equivalence (congruence_p nav) :=
 
 --lemma p_congr_zero : congruence_p nav () 0 :=
 
-instance : Setoid R :=
+def setoid_congr {p : R} (nav : SurjVal p) : Setoid R :=
 { r := congruence_p nav
   iseqv := eqv_congr
 }
 
-def quotient (_ : Setoid R) :=
-  @Quot R (congruence_p nav)
+--#lint
 
+def x := Quotient.mk (setoid_congr nav) p
 
 end residue
 
 structure ResidueRing {R : Type u} (p : R) [IntegralDomain R] where
   valtn : SurjVal p
-  repr_p : R → R --residue class representatives
+  repr_p : R → (Quotient (setoid_congr valtn)) --residue class representatives
   congr_of_repr : ∀ a b : R, congruence_p valtn a b → repr_p a = repr_p b
 
 structure EnatValRing {R : Type u} (p : R) [IntegralDomain R] where
@@ -519,6 +520,26 @@ by
     apply hmq (eq_of_beq H)
   rw [nat_valuation_aux'', dif_neg hmq_bool]
 
+/-
+
+def debug_fun' (q : ℕ) (hq : 1 < q) (m : ℕ) (a : 0 < m) : ℕ := q + 163
+
+def debug_fun (q : ℕ) (hq : 1 < q) (m : ℕ) (a : 0 < m) : ℕ :=  if hmq : m % q = 0 then debug_fun' q hq (m / q) (Nat.div_pos_of_mod a hq hmq) else q
+
+lemma minimal_error (q: ℕ) (hq: 1 < q) (M: ℕ) (m: ℕ) (hm: 0 < m) (n: ℕ) (hmq: m % q = 0) (meqsM: m = Nat.succ M) (h : m / q % q = 0) (hm' : 0 < M.succ) (hmq' : M.succ % q = 0) (h': M.succ / q % q = 0) : (debug_fun' q hq (Nat.succ M / q) (Nat.div_pos_of_mod hm' hq hmq')) = 0 → (debug_fun q hq m hm) = 0 := by
+    intro H
+    simp only [debug_fun]
+    rw [dif_pos]
+    simp only [meqsM]
+    rw [meqsM] at hm
+    apply H
+
+-/
+
+
+lemma decidable_nat_eq {a b : Nat} : Decidable (a = b) → a = b → ((a == b) = true) := by library_search
+
+
 lemma nat_valuation_aux''_of_dvd_induction : ∀ (M m : ℕ) (hM : m ≤ M) (hm : 0 < m) (n : ℕ) (hmq : m % q = 0), ↑(nat_valuation_aux'' q hq m hm n) = succ ↑(nat_valuation_aux'' q hq (m / q) (Nat.div_pos_of_mod hm hq hmq) n) := by
     intro M
     induction M with
@@ -535,12 +556,13 @@ lemma nat_valuation_aux''_of_dvd_induction : ∀ (M m : ℕ) (hM : m ≤ M) (hm 
       | inr meqsM =>
         cases em ((m / q) % q == 0) with
         | inl h =>
-          rw [nat_valuation_aux''_def, nat_valuation_aux''_def, dif_pos h, dif_pos]
-          simp [meqsM]
-          rw [meqsM] at hm
-          rw [meqsM] at h
-          rw [meqsM] at hmq
-          exact IH (M.succ/q) (Nat.le_of_lt_succ (Nat.div_lt_self hm hq)) (Nat.div_pos_of_mod hm hq hmq) (n+1) (by simpa using h)
+          rw [nat_valuation_aux''_def, nat_valuation_aux''_def, dif_pos h]
+          rw [dif_pos (decidable_nat_eq inferInstance hmq)]
+          . simp only [meqsM]
+            rw [meqsM] at hm
+            rw [meqsM] at h
+            rw [meqsM] at hmq
+            exact IH (M.succ/q) (Nat.le_of_lt_succ (Nat.div_lt_self hm hq)) (Nat.div_pos_of_mod hm hq hmq) (n+1) (by simpa using h)
         | inr h =>
           rw [nat_valuation_aux''_def, nat_valuation_aux''_def, dif_neg h, dif_pos, nat_valuation_aux''_def, dif_neg h]
           . simp
@@ -551,7 +573,7 @@ lemma nat_valuation_aux''_of_dvd (q : ℕ) (hq : 1 < q) (m : ℕ) (hm : 0 < m) (
 
 
 
-set_option trace.compiler.ir.result true in
+--set_option trace.compiler.ir.result true in
 def nat_valuation_aux' (q : ℕ) (hq : 1 < q) : (m : ℕ) → 0 < m → ℕ∪∞
   | m, hm => nat_valuation_aux'' q hq m hm 0
 
@@ -830,7 +852,7 @@ lemma congr_of_repr_Z {p : ℕ} (hp : nat_prime p) : ∀ a b : ℤ, congruence_p
 
 def primeResidue {p : ℕ} (hp : nat_prime p) : ResidueRing (p : ℤ) := {
   valtn := primeVal hp,
-  repr_p := fun x => emod x p,
+  repr_p := Quotient.mk (setoid_congr (primeVal hp)),
   congr_of_repr := congr_of_repr_Z hp
 }
 
