@@ -537,7 +537,7 @@ lemma minimal_error (q: ℕ) (hq: 1 < q) (M: ℕ) (m: ℕ) (hm: 0 < m) (n: ℕ) 
 -/
 
 
-lemma decidable_nat_eq {a b : Nat} : Decidable (a = b) → a = b → ((a == b) = true) := by library_search
+lemma decidable_nat_eq {a b : Nat} : Decidable (a = b) → a = b → ((a == b) = true) := by sorry
 
 
 lemma nat_valuation_aux''_of_dvd_induction : ∀ (M m : ℕ) (hM : m ≤ M) (hm : 0 < m) (n : ℕ) (hmq : m % q = 0), ↑(nat_valuation_aux'' q hq m hm n) = succ ↑(nat_valuation_aux'' q hq (m / q) (Nat.div_pos_of_mod hm hq hmq) n) := by
