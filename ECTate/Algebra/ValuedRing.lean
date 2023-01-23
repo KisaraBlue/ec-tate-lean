@@ -537,6 +537,7 @@ lemma nat_valuation_of_one_lt (p m : ℕ) (hp : 1 < p) : nat_valuation p m = nat
          . rfl
          . simp [nat_valuation]
 
+@[simp]
 lemma nat_val_zero (p : ℕ) : nat_valuation p 0 = ∞ := by
   simp [nat_valuation]
 lemma nat_val_succ (q m : ℕ) : nat_valuation (q+2) (m+1) = if (m+1) % (q+2) ≠ 0 then 0 else succ (nat_valuation (q+2) ((m+1) / (q+2))) :=

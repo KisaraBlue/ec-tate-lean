@@ -367,7 +367,7 @@ lemma c4_zero_iff_a1_zero_of_char_two (e : Model K) (h : ring_char K = 2) :
 by
   have hchar' : (ring_char K : K) = 2 := by simp [h]
   have hchar'' : (2 : K) = 0 := by simp [← hchar', ring_char_eq_zero]
-  rw [c4, b2, show 24 = 2 * 12 by norm_num, show 4 = 2 * 2 by norm_num, hchar'', ← pow_two]
+  rw [c4, b2, show (24 : K) = 2 * 12 by norm_num, show (4 : K) = 2 * 2 by norm_num, hchar'', ← pow_two] -- TODO this used to work without type ascription
   simp only [mul_zero, zero_mul, add_zero, ← pow_mul, sub_zero] -- TODO simp? doesn't do back arrows
   rw [pow_eq_zero_iff]
   norm_num
@@ -377,7 +377,7 @@ lemma c4_zero_iff_b2_zero_of_char_three (e : Model K) (h : ring_char K = 3) :
 by
   have hchar' : (ring_char K : K) = 3 := by simp [h]
   have hchar'' : (3 : K) = 0 := by simp [← hchar', ring_char_eq_zero]
-  rw [c4, show 24 = 3 * 8 by norm_num, hchar'']
+  rw [c4, show (24 : K) = 3 * 8 by norm_num, hchar'']
   simp only [mul_zero, zero_mul, add_zero, sub_zero] -- TODO simp? doesn't do back arrows
   rw [pow_eq_zero_iff]
   norm_num
@@ -390,7 +390,7 @@ by
   have hchar' : (ring_char K : K) = 2 := by simp [h]
   have hchar'' : (2 : K) = 0 := by simp [← hchar', ring_char_eq_zero]
   rw [discr, b2, b4, b6, b8, ha1,
-    show 8 = 2 * 4 by norm_num, show 4 = 2 * 2 by norm_num, show 27 = 2 * 13 + 1 by norm_num, hchar''] at hdisc
+    show (8 : K) = 2 * 4 by norm_num, show (4 : K) = 2 * 2 by norm_num, show (27 : K) = 2 * 13 + 1 by norm_num, hchar''] at hdisc
   -- TODO simp identifier "at" can't be on next line
   simp only [mul_zero, zero_mul, add_zero, neg_zero, sub_self, zero_add, one_mul, zero_sub, neg_eq_zero] at hdisc
   rw [← pow_two, ← pow_two, ← pow_mul] at hdisc
@@ -405,8 +405,8 @@ by
   have hchar' : (ring_char K : K) = 3 := by simp [h]
   have hchar'' : (3 : K) = 0 := by simp [← hchar', ring_char_eq_zero]
   rw [discr, hb2,
-    show 27 = 3 * 9 by norm_num,
-    show 8 = 3 * 3 - 1 by norm_num,
+    show (27 : K) = 3 * 9 by norm_num,
+    show (8 : K) = 3 * 3 - 1 by norm_num,
     hchar''] at hdisc
   simpa using hdisc
 
@@ -510,8 +510,8 @@ by
         rw [show 2 * e.a1 ^ 2 - e.a2 = 0 from ?_]
         rw [show 4 * e.a1 * e.a3 - e.a4 = 0 from ?_]
         simp only [zero_mul, add_zero, hchar'']
-        . rw [show 2 = -1 by rw [← add_zero (-1), ← hchar'']; norm_num] at hb4
-          rw [show 4 = 1 by rw [← add_zero 1, ← hchar'']; norm_num]
+        . rw [show (2 : K) = -1 by rw [← add_zero (-1), ← hchar'']; norm_num] at hb4
+          rw [show (4 : K) = 1 by rw [← add_zero 1, ← hchar'']; norm_num]
           simp only [neg_mul, one_mul] at hb4
           simp [sub_eq_add_neg, hb4]
         . sorry
@@ -521,8 +521,8 @@ by
         rw [show e.a1 * (e.a1 * pth_root (-(e.a3 ^ 2) - e.a6) + e.a3) - (2 * e.a2 * pth_root (-(e.a3 ^ 2) - e.a6) + e.a4) =
                  (e.a1 * e.a1 - 2 * e.a2) * pth_root (-(e.a3 ^ 2) - e.a6) + (e.a1 * e.a3 - e.a4)
           by ring]
-        rw [show 2 = -1 by rw [← add_zero (-1), ← hchar'']; norm_num] at hb4
-        rw [show 4 = -2 by rw [← add_zero (-2), ← zero_mul (2 : K), ← hchar'']; norm_num] at hb2
+        rw [show (2 : K) = -1 by rw [← add_zero (-1), ← hchar'']; norm_num] at hb4
+        rw [show (4 : K) = -2 by rw [← add_zero (-2), ← zero_mul (2 : K), ← hchar'']; norm_num] at hb2
         simp only [neg_mul, one_mul, ← sub_eq_add_neg] at hb4 hb2
         rw [hb4, hb2, zero_mul, zero_add]
       . rw [dweierstrass_dy]
@@ -535,7 +535,7 @@ by
       have h2 : (2 : K) ≠ 0 := sorry
       have h3 : (3 : K) ≠ 0 := sorry
       have h12 : (12 : K) ≠ 0 := by
-        rw [show 12 = 2 * 2 * 3 by norm_num]
+        rw [show (12 : K) = 2 * 2 * 3 by norm_num]
         repeat' apply factors_nzero_mul_nzero
         all_goals assumption
       refine ⟨?_, ?_, ?_⟩
@@ -550,7 +550,7 @@ by
           e.a1 * (-b2 e * (12 * 12⁻¹)) * (-(-e.a1 * b2 e * (12 * 12⁻¹) + 12 * e.a3) * (6 * (2 * 2⁻¹))) +
           12 * e.a3 * (-(-e.a1 * b2 e * (12 * 12⁻¹) + 12 * e.a3) * (6 * (2 * 2⁻¹))) -
           ((-b2 e * (12 * 12⁻¹)) ^ 3 + 12 * e.a2 * (-b2 e * (12 * 12⁻¹)) ^ 2 + 12 ^ 2 * e.a4 * (-b2 e * (12 * 12⁻¹)) + 12 ^ 3 * e.a6) by ring]
-        simp only [Field.mul_inv_cancel h2, Field.mul_inv_cancel h12, one_mul, mul_one]
+        simp only [mul_inv_cancel h2, mul_inv_cancel h12, one_mul, mul_one]
         -- This is 2*c6
         rw [← mul_zero (2 : K), ← hc6]
         simp only [c6, b2, b4, b6]
@@ -562,7 +562,7 @@ by
           =
           e.a1 * (-(-e.a1 * b2 e * (12 * 12⁻¹) + 12* e.a3) * 6 * (2 * 2⁻¹)) - (3 * (-b2 e * (12 * 12⁻¹)) ^ 2 + 24 * e.a2 * (-b2 e * (12 * 12⁻¹)) + 144 * e.a4)
           by ring]
-        simp only [Field.mul_inv_cancel h2, Field.mul_inv_cancel h12, one_mul, mul_one]
+        simp only [mul_inv_cancel h2, mul_inv_cancel h12, one_mul, mul_one]
         -- This is 2*c6
         rw [← mul_zero (3 : K), ← hc4]
         simp only [c4, c6, b2, b4, b6]
@@ -574,7 +574,7 @@ by
           =
           (-(-e.a1 * b2 e * (12 * 12⁻¹) + 12 * e.a3) * (2 * 2⁻¹)) + e.a1 * (-b2 e * (12 * 12⁻¹)) + 12 * e.a3
           by ring]
-        simp only [Field.mul_inv_cancel h2, Field.mul_inv_cancel h12, one_mul, mul_one]
+        simp only [mul_inv_cancel h2, mul_inv_cancel h12, one_mul, mul_one]
         -- This is 2*c6
         simp only [c6, b2, b4, b6]
         ring
@@ -602,7 +602,7 @@ by
         c4 e * (c4 e)⁻¹ * c4 e * (c4 e)⁻¹ * c4 e * e.a2 * ((18 * b6 e - b2 e * b4 e)) ^ 2 +
           c4 e * (c4 e)⁻¹ * c4 e * c4 e * e.a4 * ((18 * b6 e - b2 e * b4 e)) +
         c4 e * c4 e * c4 e * e.a6)) by ring]
-      simp only [Field.mul_inv_cancel hc4, one_mul]
+      simp only [mul_inv_cancel hc4, one_mul]
       rw [b5, b7, c4, b2, b4, b6]
       -- what remains factors the discriminant (up to sign)
       rw [← mul_zero (e.a1^6 + 12*e.a1^4*e.a2 + 48*e.a1^2*e.a2^2 - 36*e.a1^3*e.a3 + 64*e.a2^3
@@ -622,7 +622,7 @@ by
           - c4 e * (c4 e)⁻¹ * c4 e * (c4 e)⁻¹ *
           3 * (18 * b6 e - b2 e * b4 e) ^ 2 - e.a4 * c4 e * c4 e
         by ring]
-      simp only [Field.mul_inv_cancel hc4, one_mul]
+      simp only [mul_inv_cancel hc4, one_mul]
       rw [b5, b7, c4, b2, b4, b6]
       -- what remains is just 36 times the discriminant (up to sign)
       rw [← mul_zero (36 : K), ← h, discr_eq_neg_singular]
@@ -634,7 +634,7 @@ by
           + e.a1 * ((18 * b6 e - b2 e * b4 e) * (c4 e)⁻¹) + e.a3) =
         c4 e * (c4 e)⁻¹ * (2 * (b2 e * b5 e + 3 * b7 e)
         + e.a1 * ((18 * b6 e - b2 e * b4 e))) + c4 e * e.a3 by ring]
-      simp only [Field.mul_inv_cancel hc4, one_mul]
+      simp only [mul_inv_cancel hc4, one_mul]
       rw [b5, b7, c4, b2, b4, b6]
       ring
 

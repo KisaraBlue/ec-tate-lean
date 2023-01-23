@@ -240,7 +240,7 @@ def kodaira_type_Is (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 r0 s0 
     apply le_trans (le_min _ _) (surjvalp.v_add_ge_min_v _ _)
     . rw [Nat.add_succ q, Nat.succ_eq_add_one, surjvalp.v_mul_eq_add_v, val_of_pow_uniformizer]
       rw [Nat.cast_add, Nat.cast_one, add_assoc]
-      rw [show 2 = 1 + 1 by norm_num, ← add_assoc, ← add_assoc]
+      rw [show (2 : ℕ∪∞) = 1 + 1 by norm_num, ← add_assoc, ← add_assoc]
       apply add_le_add (le_of_eq rfl)
       exact (succ_le_of_lt (val_poly_of_double_root hp a2p a4pq a6pq2 hdr').2)
     . rw [pow_two, factorize3 a' p q, ←pow_add]
@@ -321,10 +321,8 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
   let (r, s) := (r + r1s1t1.fst * u ^ 2, s + u * r1s1t1.snd.fst)
   let t := t + r1s1t1.snd.snd * u ^ 3 + s * r1s1t1.fst * u ^ 2
 
-  have sing_origin : Model.is_local_singular_point navp e1.toModel (0, 0) := by
-    apply Model.move_singular_point_to_origin
-    apply Model.singular_of_val_discr
-    apply lt_of_succ_le hΔ
+  have sing_origin : Model.is_local_singular_point navp e1.toModel (0, 0) :=
+    Model.move_singular_point_to_origin evrp e.toModel (Model.singular_of_val_discr navp e.toModel (lt_of_succ_le hΔ))
 
   have h3 : navp.v e1.a3 ≥ 1 := by
     delta Model.is_local_singular_point at sing_origin
@@ -380,7 +378,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
     rw [mul_one, ←neg_mul_right, sub_eq_add_neg, neg_neg, pow_succ, pow_one]
     simp only [Model.b6] at hb6
     rw [factor_p_of_le_val evrp h3, factor_p_of_le_val evrp h6, factorize5, navp.v_mul_eq_add_v,
-      val_of_pow_uniformizer, show 3 = 2 + 1 by rfl] at hb6
+      val_of_pow_uniformizer, show (3 : ℕ∪∞) = 2 + 1 by rfl] at hb6
     exact Enat.le_of_add_le_add_left hb6
 
   let s1 := double_root 1 e1.a1 (-e1.a2) p
@@ -415,7 +413,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
     rw [←val_neg, st_of_a6, sub_eq_add_neg, sub_eq_add_neg, neg_add, neg_add, neg_neg, neg_neg,
       add_comm _ (_ ^ 2), add_comm (-e1.a6), ←add_assoc, mul_pow,
       factor_p_of_le_val evrp h3, factor_p_of_le_val evrp h6, neg_mul_right, factorize6,
-      navp.v_mul_eq_add_v, show 3 = 2 + 1 by rfl]
+      navp.v_mul_eq_add_v, show (3 : ℕ∪∞) = 2 + 1 by rfl]
     apply add_le_add (le_of_eq (val_of_pow_uniformizer navp).symm)
     exact succ_le_of_lt (val_poly_of_double_root hp 1 a3p (-a6p2) hdr_b6).1
 
@@ -487,7 +485,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
         rw [r_of_a4, factor_p_of_le_val evrp h4, factor_p_of_le_val evrp h2, factorize7]
         apply val_mul_ge_of_left_ge navp _
         exact le_of_eq (val_of_pow_uniformizer navp).symm
-      rw [factor_p_of_le_val evrp h4'', navp.v_mul_eq_add_v, show 3 = 2 + 1 by rfl]
+      rw [factor_p_of_le_val evrp h4'', navp.v_mul_eq_add_v, show (3 : ℕ∪∞) = 2 + 1 by rfl]
       apply add_le_add
       . exact le_of_eq (val_of_pow_uniformizer navp).symm
       . exact succ_le_of_lt (move_cubic_double_root_to_origin evrp e2 e2_cubic_has_double_root).2.1
@@ -498,7 +496,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
         rw [r_of_a6, factor_p_of_le_val evrp h6, factor_p_of_le_val evrp h4, factor_p_of_le_val evrp h2, factorize8]
         apply val_mul_ge_of_left_ge navp _
         exact le_of_eq (val_of_pow_uniformizer navp).symm
-      rw [factor_p_of_le_val evrp h6', navp.v_mul_eq_add_v, show 4 = 3 + 1 by rfl]
+      rw [factor_p_of_le_val evrp h6', navp.v_mul_eq_add_v, show (4 : ℕ∪∞) = 3 + 1 by rfl]
       apply add_le_add
       . exact le_of_eq (val_of_pow_uniformizer navp).symm
       . exact succ_le_of_lt (move_cubic_double_root_to_origin evrp e2 e2_cubic_has_double_root).2.2
@@ -522,7 +520,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
       rw [r_of_a2, factor_p_of_le_val evrp h2, pow_one, ←mul_assoc, mul_comm 3, mul_assoc, ←mul_add]
       apply val_mul_ge_of_left_ge
       exact le_of_eq navp.v_uniformizer.symm
-    rw [factor_p_of_le_val evrp h2'', navp.v_mul_eq_add_v, pow_one, show 2 = 1 + 1 by rfl]
+    rw [factor_p_of_le_val evrp h2'', navp.v_mul_eq_add_v, pow_one, show (2 : ℕ∪∞) = 1 + 1 by rfl]
     apply add_le_add
     . exact le_of_eq navp.v_uniformizer.symm
     . exact succ_le_of_lt (move_cubic_triple_root_to_origin evrp e2 e2_cubic_has_triple_root).1
@@ -538,10 +536,11 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
   have h6 : navp.v e3.a6 ≥ 4 := by
     have h6' : navp.v e3.a6 ≥ 3 := by
       simp only [move_cubic_triple_root_to_origin_iso]
-      rw [r_of_a6, factor_p_of_le_val evrp h6, factor_p_of_le_val evrp h4, factor_p_of_le_val evrp h2, factorize8]
+      rw [r_of_a6, factor_p_of_le_val evrp h6, factor_p_of_le_val evrp h4,
+        factor_p_of_le_val evrp h2, factorize8]
       apply val_mul_ge_of_left_ge navp _
       exact le_of_eq (val_of_pow_uniformizer navp).symm
-    rw [factor_p_of_le_val evrp h6', navp.v_mul_eq_add_v, show 4 = 3 + 1 by rfl]
+    rw [factor_p_of_le_val evrp h6', navp.v_mul_eq_add_v, show (4 : ℕ∪∞) = 3 + 1 by rfl]
     apply add_le_add
     . exact le_of_eq (val_of_pow_uniformizer navp).symm
     . exact succ_le_of_lt (move_cubic_triple_root_to_origin evrp e2 e2_cubic_has_triple_root).2.2
@@ -569,7 +568,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
   let t := t + k * u ^ 3
   have h3 : navp.v e4.a3 ≥ 3 := by
     rw [t_of_a3, ←mul_one 2, factor_p_of_le_val evrp h3, ←mul_assoc (2*1), mul_comm ((2*1) * _),
-      Nat.cast_pow, ←mul_add, add_comm, show 3 = 2 + 1 by rfl, navp.v_mul_eq_add_v]
+      Nat.cast_pow, ←mul_add, add_comm, show (3 : ℕ∪∞) = 2 + 1 by rfl, navp.v_mul_eq_add_v]
     apply add_le_add
     . exact le_of_eq (val_of_pow_uniformizer navp).symm
     . exact succ_le_of_lt (val_poly_of_double_root hp 1 a3p2 (-a6p4) h_b6p4).2
