@@ -83,28 +83,20 @@ lemma square_sub (a b : R) : (a - b) ^ 2 = a ^ 2 - 2 * (a * b) + b ^ 2 := by
 
 end CommRing
 
-class IntegralDomain (R : Type u) extends CommRing R, NoZeroDivisors R where
-  non_trivial : ¬(1 : R) = 0
 
 section IntegralDomain
-variable [IntegralDomain R]
+variable [CommRing R] [IsDomain R]
+-- TODO maybe delete
 theorem factors_nzero_mul_nzero {a b : R} : a ≠ 0 → b ≠ 0 → a * b ≠ 0 :=
-by
-  simp [mul_eq_zero]
-  exact fun a_1 a_2 => Prop.distribLattice.proof_1 (a = 0) (b = 0) False a_1 a_2 -- erm
+mul_ne_zero
 
-theorem non_trivial : ¬(1 : R) = 0 := IntegralDomain.non_trivial
+-- theorem non_trivial : ¬(1 : R) = 0 := NonTrivial.1
 
-theorem mul_eq_zero_iff_factor_eq_zero (a b : R) : a * b = 0 ↔ a = 0 ∨ b = 0 := by
-  apply Iff.intro
-  . intro mul_eq_zero
-    contrapose! mul_eq_zero
-    exact factors_nzero_mul_nzero mul_eq_zero.1 mul_eq_zero.2
-  . intro factor_eq_zero
-    cases factor_eq_zero with
-    | inl a_zero => rw [a_zero, zero_mul]
-    | inr b_zero => rw [b_zero, mul_zero]
+-- TODO maybe delete
+theorem mul_eq_zero_iff_factor_eq_zero (a b : R) : a * b = 0 ↔ a = 0 ∨ b = 0 :=
+mul_eq_zero
 
+-- TODO maybe delete
 theorem nzero_mul_left_cancel (a b c : R) : a ≠ 0 → a * b = a * c → b = c := by
   intro a_ne_z ab_eq_ac
   rw [←add_left_inj (-(a * c)), add_neg_self (a * c), neg_mul_right, ←mul_add] at ab_eq_ac
@@ -115,24 +107,14 @@ theorem nzero_mul_left_cancel (a b c : R) : a ≠ 0 → a * b = a * c → b = c 
     exact h
 
 
+-- TODO maybe delete
 theorem pow_nonzero (a : R) (n : ℕ) : a ≠ 0 → a ^ n ≠ 0 := by
   intro h
   induction n with
   | zero =>
     simp
-    intro hh
-    apply h
-    rw [←one_mul a, hh, zero_mul]
   | succ n ih =>
     rw [pow_succ]
-    exact factors_nzero_mul_nzero h ih
-
+    exact mul_ne_zero h ih
 
 end IntegralDomain
-
-
-
---instance : Numeric ℤ := ⟨Int.ofNat⟩
-
-instance : IntegralDomain ℤ where
-  non_trivial := by decide

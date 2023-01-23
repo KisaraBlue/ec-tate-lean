@@ -28,14 +28,14 @@ Nat.eq_of_mul_eq_mul_left (Nat.pos_of_ne_zero h)
 
 end Obvious
 
-structure SurjVal {R : Type u} (p : R) [IntegralDomain R] where
+structure SurjVal {R : Type u} (p : R) [CommRing R] [IsDomain R] where
   v : R → ℕ∪∞
   v_uniformizer : v p = 1
   v_mul_eq_add_v (a b : R) : v (a * b) = v a + v b
   v_add_ge_min_v (a b : R) : v (a + b) ≥ min (v a) (v b)
   v_eq_top_iff_zero (a : R) : v a = ∞ ↔ a = 0
 
-variable {R : Type u} [IntegralDomain R]
+variable {R : Type u} [CommRing R] [IsDomain R]
 
 section SurjVal
 
@@ -149,7 +149,7 @@ theorem val_of_pow_uniformizer {p : R} (nav : SurjVal p) {n : ℕ} : nav.v (p ^ 
 
 end SurjVal
 
-structure EnatValRing {R : Type u} (p : R) [IntegralDomain R] where
+structure EnatValRing {R : Type u} (p : R) [CommRing R] [IsDomain R] where
   valtn : SurjVal p
   decr_val : R → R
   zero_valtn_decr {x : R} (h : valtn.v x = 0) : decr_val x = x
@@ -176,7 +176,7 @@ lemma decr_val_zero {p : R} (evr : EnatValRing p) : evr.decr_val 0 = 0 := by
     apply evr.pos_valtn_decr
     rw [val_zero]
     exact Enat.lt_top 0
-  rw [mul_eq_zero_iff_factor_eq_zero] at v_decr_zero
+  rw [mul_eq_zero] at v_decr_zero
   exact Or.resolve_left v_decr_zero (p_non_zero evr.valtn)
 
 @[simp]

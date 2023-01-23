@@ -12,7 +12,7 @@ import Mathlib.Tactic.Linarith
 
 open Enat
 
-variable {R : Type u} [inst : IntegralDomain R]
+variable {R : Type u} [CommRing R] [inst : IsDomain R]
 
 
 namespace Model
@@ -94,7 +94,7 @@ by
   rw [←evr.sub_val_mul_right h4, ←evr.sub_val_mul_left h4, evr.sub_val_sub_val]
   have h116 := val_mul_ge_of_both_ge evr.valtn (val_mul_ge_of_both_ge evr.valtn h1 h1) h6
   have h134 := (val_mul_ge_of_both_ge evr.valtn (val_mul_ge_of_both_ge evr.valtn h1 h3) h4)
-  have h26 := val_mul_ge_of_both_ge evr.valtn (@val_mul_ge_of_right_ge R _ (ofN 2) p evr.valtn 4 e.a2 h2) h6
+  have h26 := val_mul_ge_of_both_ge evr.valtn (@val_mul_ge_of_right_ge R _ _ 2 p evr.valtn 4 e.a2 h2) h6
   have h233 := val_mul_ge_of_both_ge evr.valtn (val_mul_ge_of_both_ge evr.valtn h2 h3) h3
   have h44 := val_mul_ge_of_both_ge evr.valtn h4 h4
   simp only [add_ofN] at h116 h134 h44 h26 h233

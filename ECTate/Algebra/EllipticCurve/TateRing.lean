@@ -13,7 +13,7 @@ open Enat
 open Kodaira
 section ring_lemmas
 
-variable {R : Type u} [IntegralDomain R]
+variable {R : Type u} [CommRing R] [IsDomain R]
 
 lemma factorize1 (root b p : R) (q : ℕ) : root * p ^ q * (p ^ q * b) + root * p ^ q * (root * p ^ q) = p ^ q * p ^ q * ((root + b) * root) := by ring
 
@@ -28,7 +28,7 @@ lemma factorize5 (b c p : R) : p ^ 1 * b * (p ^ 1 * b) + 4 * (p ^ 2 * c) = p ^ 2
 end ring_lemmas
 
 -- unsafe
--- def tate_algorithm {R : Type u} [IntegralDomain R] {pi : R} (evr : EnatValRing pi)
+-- def tate_algorithm {R : Type u} [CommRing R] [IsDomain R] {pi : R} (evr : EnatValRing pi)
 --   (e : ValidModel R) (u0 r0 s0 t0 : R) : Kodaira × ℕ × ℕ × (R × R × R × R) :=
 --   let (u, r, s, t) := (u0, r0, s0, t0)
 

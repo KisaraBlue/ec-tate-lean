@@ -360,7 +360,7 @@ by
 
 end
 section invariant_lemmas
-variable {K : Type u} [IntegralDomain K]
+variable {K : Type u} [CommRing K] [IsDomain K]
 
 lemma c4_zero_iff_a1_zero_of_char_two (e : Model K) (h : ring_char K = 2) :
   e.c4 = 0 ↔ e.a1 = 0 :=
@@ -432,13 +432,10 @@ def singular_point [PerfectRing K] (e : Model K) : K × K :=
     ((18 * e.b6 - e.b2 * e.b4) / e.c4, (e.b2 * e.b5 + 3 * e.b7) / e.c4)
 
 
+-- TODO probably can be deleted
 instance [h : IsAssociative R op] : Lean.IsAssociative op := {h with}
-instance [h : IsCommutative R op] : Lean.IsCommutative op := {h with}
+instance [h : IsCommutative R op] : Lean.IsCommutative op := by infer_instance
 instance [h : IsIdempotent R op] : Lean.IsIdempotent op := {h with}
-@[to_additive]
-instance [Semigroup R] : IsAssociative R (. * .) := {assoc := mul_assoc}
-@[to_additive]
-instance [CommSemigroup R] : IsCommutative R (. * .) := {comm := mul_comm}
 -- lemma test (e : Model K) :
 --   c4 e ^ 3 * ((b2 e * b5 e + 3 * b7 e) ^ 2 * (c4 e)⁻¹ ^ 2) + 0 =
 --             c4 e^ 3 * (c4 e)⁻¹ ^ 2 * ((b2 e * b5 e + 3 * b7 e) ^ 2) :=
@@ -456,7 +453,7 @@ by
   rw [singular_point]
   split_ifs with hc4 hc4
   . have hc6 : c6 e = 0 := by
-      simpa [h, hc4, pow_succ, mul_eq_zero_iff_factor_eq_zero] using (discr_identity e)
+      simpa [h, hc4, pow_succ, mul_eq_zero] using discr_identity e
     split
     -- case _ hchar => TODO get this working, but its subtly different
     . rw [is_singular_point]
@@ -536,7 +533,7 @@ by
       have h3 : (3 : K) ≠ 0 := sorry
       have h12 : (12 : K) ≠ 0 := by
         rw [show (12 : K) = 2 * 2 * 3 by norm_num]
-        repeat' apply factors_nzero_mul_nzero
+        repeat' apply mul_ne_zero
         all_goals assumption
       refine ⟨?_, ?_, ?_⟩
       . apply nzero_mul_left_cancel (12 ^ 3) _ _ (pow_nonzero _ _ h12)

@@ -36,5 +36,5 @@ by
     rw [Nat.gcd_eq_left_iff_dvd]
     sorry
 
-lemma ring_char_is_zero_or_prime (R : Type _) [IntegralDomain R] :
+lemma ring_char_is_zero_or_prime (R : Type _) [CommRing R] [IsDomain R] :
   ring_char R = 0 ∨ Nat.Prime (ring_char R) := sorry
