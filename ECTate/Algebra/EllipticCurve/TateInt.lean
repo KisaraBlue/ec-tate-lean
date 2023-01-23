@@ -147,9 +147,9 @@ def kodaira_type_Is (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 r0 s0 
   let evrp := primeEVR hp
   let surjvalp := evrp.valtn
   let (r, t) := (r0, t0)
-  let a3q := sub_val evrp e.a3 q
-  let a6q2 := sub_val evrp e.a6 (2 * q)
-  have rw_a6 : sub_val evrp e.a6 (2 * q) = a6q2 := rfl --obvious rewriting lemmas that Lean should generate implicitly
+  let a3q := sub_val evrp q e.a3
+  let a6q2 := sub_val evrp (2 * q) e.a6
+  have rw_a6 : sub_val evrp (2 * q) e.a6 = a6q2 := rfl --obvious rewriting lemmas that Lean should generate implicitly
 
   if discr_1 : surjvalp.v (a3q ^ 2 + 4 * a6q2) = 0 then
     let c := if quad_root_in_ZpZ 1 a3q (-a6q2) p then 4 else 2
@@ -193,15 +193,15 @@ def kodaira_type_Is (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 r0 s0 
     push_cast
     exact add_le_add (le_of_eq rfl) (succ_le_of_lt (val_poly_of_double_root hp 1 a3q (-a6q2) hdr).1)
   let t := t + u0 ^ 3 * a * (p ^ q : ℕ)
-  let a2p := sub_val evrp e1.a2 1
-  let a4pq := sub_val evrp e1.a4 (q + 1)
-  let a6pq2 := sub_val evrp e1.a6 (2 * q + 1)
+  let a2p := sub_val evrp 1 e1.a2
+  let a4pq := sub_val evrp (q + 1) e1.a4
+  let a6pq2 := sub_val evrp (2 * q + 1) e1.a6
   --obvious rewriting lemmas that Lean should generate implicitly
-  have rw_a2' : sub_val evrp e1.a2 1 = a2p := rfl
-  have rw_a4' : sub_val evrp e1.a4 (q + 1) = a4pq := rfl
-  have rw_a6' : sub_val evrp e1.a6 (2 * q + 1) = a6pq2 := rfl
+  have rw_a2' : sub_val evrp 1 e1.a2 = a2p := rfl
+  have rw_a4' : sub_val evrp (q + 1) e1.a4 = a4pq := rfl
+  have rw_a6' : sub_val evrp (2 * q + 1) e1.a6 = a6pq2 := rfl
   --less obvious lemma
-  have rw_a2 : sub_val evrp e.a2 1 = a2p := by rw [←rw_a2', t_of_a2]
+  have rw_a2 : sub_val evrp 1 e.a2 = a2p := by rw [←rw_a2', t_of_a2]
   if discr_2 : surjvalp.v (a4pq ^ 2 - 4 * a2p * a6pq2) = 0 then
     let c := if quad_root_in_ZpZ a2p a4pq a6pq2 p then 4 else 2
     (m + 1, c, (r, t))
@@ -353,7 +353,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
   have hb8 : navp.v e1.b8 ≥ 3 := le_of_not_lt test_b8
 
   if test_b6 : navp.v e1.b6 < 3 then
-    let (a3p, a6p2) := (sub_val evrp e1.a3 1, sub_val evrp e1.a6 2)
+    let (a3p, a6p2) := (sub_val evrp 1 e1.a3, sub_val evrp 2 e1.a6)
     let c := if quad_root_in_ZpZ 1 a3p (-a6p2) p then 3 else 1
     (IV, n - 2, c, .Additive, (u, r, s, t))
   else
@@ -369,8 +369,8 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
     apply lt_of_succ_le
     rwa [mul_one, ←neg_mul_right, sub_eq_add_neg, neg_neg, pow_succ, pow_one]
 
-  let a3p := sub_val evrp e1.a3 1
-  let a6p2 := sub_val evrp e1.a6 2
+  let a3p := sub_val evrp 1 e1.a3
+  let a6p2 := sub_val evrp 2 e1.a6
 
   have hdr_b6 : has_double_root 1 a3p (-a6p2) hp := by
     apply And.intro (val_of_one navp) _
@@ -545,8 +545,8 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
     . exact le_of_eq (val_of_pow_uniformizer navp).symm
     . exact succ_le_of_lt (move_cubic_triple_root_to_origin evrp e2 e2_cubic_has_triple_root).2.2
 
-  let a3p2 := sub_val evrp e3.a3 2
-  let a6p4 := sub_val evrp e3.a6 4
+  let a3p2 := sub_val evrp 2 e3.a3
+  let a6p4 := sub_val evrp 4 e3.a6
 
   if discr_b6p4 : navp.v (a3p2 ^ 2 + 4 * a6p4) = 0 then
     let c := if quad_root_in_ZpZ 1 a3p2 (-a6p4) p then 3 else 1
@@ -560,7 +560,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
     exact discr_b6p4
 
   let a := double_root 1 a3p2 (-a6p4) p
-  have Ha : double_root 1 (sub_val evrp e3.a3 2) (-sub_val evrp e3.a6 4) p = a := by rfl
+  have Ha : double_root 1 (sub_val evrp 2 e3.a3) (-sub_val evrp 4 e3.a6) p = a := by rfl
 
   let k := a * (p ^ 2 : ℕ)
   let e4 := rst_iso 0 0 k e3

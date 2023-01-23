@@ -117,7 +117,7 @@ def test (N : ℕ) : IO Unit := do
            (← lines $ mkFilePath ["test/lmfdb03.csv"]) ++
            (← lines $ mkFilePath ["test/lmfdb04.csv"]) ++
            (← lines $ mkFilePath ["test/lmfdb05.csv"])
-  print l.size
+  println l.size
   let ma := min N l.size
   while n < ma do
     let str := l[n]!

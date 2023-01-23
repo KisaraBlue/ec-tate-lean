@@ -41,15 +41,15 @@ lemma move_singular_point_to_origin (evr : EnatValRing p) (e : Model R) :
   is_local_singular_point valp (move_singular_point_to_origin_iso evr e) (0, 0) := by sorry
 
 def pi_scaling (evr : EnatValRing p) (e : Model R) : Model R := {
-  a1 := evr.sub_val e.a1 1,
-  a2 := evr.sub_val e.a2 2,
-  a3 := evr.sub_val e.a3 3,
-  a4 := evr.sub_val e.a4 4,
-  a6 := evr.sub_val e.a6 6 }
+  a1 := evr.sub_val 1 e.a1,
+  a2 := evr.sub_val 2 e.a2,
+  a3 := evr.sub_val 3 e.a3,
+  a4 := evr.sub_val 4 e.a4,
+  a6 := evr.sub_val 6 e.a6 }
 
 lemma pi_scaling_of_b2 (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ 1)
   (h2 : evr.valtn.v e.a2 ≥ 2) :
-  evr.sub_val e.b2 2 = evr.sub_val e.a1 1 * evr.sub_val e.a1 1 + 4 * evr.sub_val e.a2 2 := by
+  evr.sub_val 2 e.b2 = evr.sub_val 1 e.a1 * evr.sub_val 1 e.a1 + 4 * evr.sub_val 2 e.a2 := by
   rw [←evr.sub_val_mul_right h1, ←evr.sub_val_mul_left h1, evr.sub_val_sub_val,
     ←evr.sub_val_mul_right h2, ←evr.sub_val_add _ _]
   . rfl
@@ -58,7 +58,7 @@ lemma pi_scaling_of_b2 (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a
 
 lemma pi_scaling_of_b4 (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ 1)
   (h3 : evr.valtn.v e.a3 ≥ 3) (h4 : evr.valtn.v e.a4 ≥ 4) :
-  evr.sub_val e.b4 4 = evr.sub_val e.a1 1 * evr.sub_val e.a3 3 + 2 * evr.sub_val e.a4 4 := by
+  evr.sub_val 4 e.b4 = evr.sub_val 1 e.a1 * evr.sub_val 3 e.a3 + 2 * evr.sub_val 4 e.a4 := by
   rw [←evr.sub_val_mul_right h3, ←evr.sub_val_mul_left h1, evr.sub_val_sub_val,
     ←evr.sub_val_mul_right h4, ←evr.sub_val_add _ _]
   . rfl
@@ -67,7 +67,7 @@ lemma pi_scaling_of_b4 (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a
 
 lemma pi_scaling_of_b6 (evr : EnatValRing p) (e : Model R) (h3 : evr.valtn.v e.a3 ≥ 3)
   (h6 : evr.valtn.v e.a6 ≥ 6) :
-  evr.sub_val e.b6 6 = evr.sub_val e.a3 3 * evr.sub_val e.a3 3 + 4 * evr.sub_val e.a6 6 := by
+  evr.sub_val 6 e.b6 = evr.sub_val 3 e.a3 * evr.sub_val 3 e.a3 + 4 * evr.sub_val 6 e.a6 := by
   rw [←evr.sub_val_mul_right h3, ←evr.sub_val_mul_left h3, evr.sub_val_sub_val,
     ←evr.sub_val_mul_right h6, ←evr.sub_val_add _ _]
   . rfl
@@ -77,11 +77,11 @@ lemma pi_scaling_of_b6 (evr : EnatValRing p) (e : Model R) (h3 : evr.valtn.v e.a
 lemma pi_scaling_of_b8 (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ 1)
   (h2 : evr.valtn.v e.a2 ≥ 2) (h3 : evr.valtn.v e.a3 ≥ 3) (h4 : evr.valtn.v e.a4 ≥ 4)
   (h6 : evr.valtn.v e.a6 ≥ 6) :
-  evr.sub_val e.b8 8 = evr.sub_val e.a1 1 * evr.sub_val e.a1 1 * evr.sub_val e.a6 6
-    - evr.sub_val e.a1 1 * evr.sub_val e.a3 3 * evr.sub_val e.a4 4
-    + 4 * evr.sub_val e.a2 2 * evr.sub_val e.a6 6
-    + evr.sub_val e.a2 2 * evr.sub_val e.a3 3 * evr.sub_val e.a3 3
-    - evr.sub_val e.a4 4 * evr.sub_val e.a4 4 :=
+  evr.sub_val 8 e.b8 = evr.sub_val 1 e.a1 * evr.sub_val 1 e.a1 * evr.sub_val 6 e.a6
+    - evr.sub_val 1 e.a1 * evr.sub_val 3 e.a3 * evr.sub_val 4 e.a4
+    + 4 * evr.sub_val 2 e.a2 * evr.sub_val 6 e.a6
+    + evr.sub_val 2 e.a2 * evr.sub_val 3 e.a3 * evr.sub_val 3 e.a3
+    - evr.sub_val 4 e.a4 * evr.sub_val 4 e.a4 :=
 by
   rw [←evr.sub_val_mul_right h1, ←evr.sub_val_mul_left h1, evr.sub_val_sub_val,
     ←evr.sub_val_mul_right h6, ←evr.sub_val_mul_left (val_mul_ge_of_both_ge evr.valtn h1 h1), evr.sub_val_sub_val]
@@ -114,9 +114,9 @@ open EnatValRing in
 lemma pi_scaling_of_discr (evr : EnatValRing p) (e : Model R)
   (hb2 : evr.valtn.v e.b2 ≥ 2) (hb4 : evr.valtn.v e.b4 ≥ 4)
   (hb6 : evr.valtn.v e.b6 ≥ 6) (hb8 : evr.valtn.v e.b8 ≥ 8) :
-  evr.sub_val e.discr 12 = -evr.sub_val e.b2 2 * evr.sub_val e.b2 2 * evr.sub_val e.b8 8
-    - 8 * ((evr.sub_val e.b4 4) ^ 3) - 27 * evr.sub_val e.b6 6 * evr.sub_val e.b6 6
-    + 9 * evr.sub_val e.b2 2 * evr.sub_val e.b4 4 * evr.sub_val e.b6 6 :=
+  evr.sub_val 12 e.discr = -evr.sub_val 2 e.b2 * evr.sub_val 2 e.b2 * evr.sub_val 8 e.b8
+    - 8 * ((evr.sub_val 4 e.b4) ^ 3) - 27 * evr.sub_val 6 e.b6 * evr.sub_val 6 e.b6
+    + 9 * evr.sub_val 2 e.b2 * evr.sub_val 4 e.b4 * evr.sub_val 6 e.b6 :=
 by
   rw [discr,
       sub_val_add,
@@ -162,25 +162,25 @@ by
       evr.valtn (val_mul_ge_of_both_ge evr.valtn (val_mul_ge_of_right_ge evr.valtn hb2) hb4) hb6
 
 lemma b2_of_pi_scaling (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ 1)
-  (h2 : evr.valtn.v e.a2 ≥ 2) : (pi_scaling evr e).b2 = evr.sub_val e.b2 2 := by
+  (h2 : evr.valtn.v e.a2 ≥ 2) : (pi_scaling evr e).b2 = evr.sub_val 2 e.b2 := by
   simp only [b2, pi_scaling]
   exact (pi_scaling_of_b2 evr e h1 h2).symm
 
 lemma b4_of_pi_scaling (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ 1)
   (h3 : evr.valtn.v e.a3 ≥ 3) (h4 : evr.valtn.v e.a4 ≥ 4) :
-  (pi_scaling evr e).b4 = evr.sub_val e.b4 4 := by
+  (pi_scaling evr e).b4 = evr.sub_val 4 e.b4 := by
   simp only [b4, pi_scaling]
   exact (pi_scaling_of_b4 evr e h1 h3 h4).symm
 
 lemma b6_of_pi_scaling (evr : EnatValRing p) (e : Model R) (h3 : evr.valtn.v e.a3 ≥ 3)
   (h6 : evr.valtn.v e.a6 ≥ 6) :
-  (pi_scaling evr e).b6 = evr.sub_val e.b6 6 := by
+  (pi_scaling evr e).b6 = evr.sub_val 6 e.b6 := by
   simp only [b6, pi_scaling]
   exact (pi_scaling_of_b6 evr e h3 h6).symm
 
 lemma b8_of_pi_scaling (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ 1)
   (h2 : evr.valtn.v e.a2 ≥ 2) (h3 : evr.valtn.v e.a3 ≥ 3) (h4 : evr.valtn.v e.a4 ≥ 4)
-  (h6 : evr.valtn.v e.a6 ≥ 6) : (pi_scaling evr e).b8 = evr.sub_val e.b8 8 := by
+  (h6 : evr.valtn.v e.a6 ≥ 6) : (pi_scaling evr e).b8 = evr.sub_val 8 e.b8 := by
   simp only [b8, pi_scaling]
   exact (pi_scaling_of_b8 evr e h1 h2 h3 h4 h6).symm
 
@@ -225,7 +225,7 @@ lemma val_b8_of_val_ai (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a
 lemma discr_of_pi_scaling (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn.v e.a1 ≥ 1)
   (h2 : evr.valtn.v e.a2 ≥ 2) (h3 : evr.valtn.v e.a3 ≥ 3)
   (h4 : evr.valtn.v e.a4 ≥ 4) (h6 : evr.valtn.v e.a6 ≥ 6) :
-  (pi_scaling evr e).discr = evr.sub_val e.discr 12 := by
+  (pi_scaling evr e).discr = evr.sub_val 12 e.discr := by
   simp only [discr, b2_of_pi_scaling evr e h1 h2, b4_of_pi_scaling evr e h1 h3 h4,
     b6_of_pi_scaling evr e h3 h6, b8_of_pi_scaling evr e h1 h2 h3 h4 h6]
   exact (pi_scaling_of_discr evr e (val_b2_of_val_a12 evr e h1 h2)
@@ -390,7 +390,7 @@ def Δcubic (c : R × R × R) : R :=
 18 * c.1 * c.2.1 * c.2.2 - 4 * c.1 ^ 3 * c.2.2 + c.1 ^ 2 * c.2.1 ^ 2 - 4 * c.2.1 ^ 3 - 27 * c.2.2 ^ 2
 
 def model_to_cubic {p : R} (evr : EnatValRing p) (e : ValidModel R) : R × R × R :=
-(evr.sub_val e.a2 1, evr.sub_val e.a4 2, evr.sub_val e.a6 3)
+(evr.sub_val 1 e.a2, evr.sub_val 2 e.a4, evr.sub_val 3 e.a6)
 
 def cubic_has_distinct_roots {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop :=
 evr.valtn.v (Δcubic (model_to_cubic evr e)) = 0
