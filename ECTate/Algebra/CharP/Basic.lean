@@ -37,4 +37,4 @@ by
     sorry
 
 lemma ring_char_is_zero_or_prime (R : Type _) [IntegralDomain R] :
-  ring_char R = 0 ∨ nat_prime (ring_char R) := sorry
+  ring_char R = 0 ∨ Nat.Prime (ring_char R) := sorry

@@ -19,7 +19,7 @@ by
     pow_succ, pow_zero, mul_one,  b6, zero_add, zero_sub, neg_mul, neg_inj]
   ring
 
-lemma val_discr_mordell (p : ℕ) (hp : nat_prime p) (hn23 : p ≠ 2 ∧ p ≠ 3) (h) :
+lemma val_discr_mordell (p : ℕ) (hp : Nat.Prime p) (hn23 : p ≠ 2 ∧ p ≠ 3) (h) :
   val_discr_to_nat (primeEVR hp).valtn ⟨⟨0,0,0,0, (p : Int)⟩, h⟩ = 2 :=
 by
   rw [Enat.eq_ofN, ofN_val_discr_to_nat, discr_mordell]
@@ -30,7 +30,7 @@ by
   convert zero_add (2 : Enat) -- TODO lean needs help here why, no _
   sorry
 
-lemma Mordell_KodairaTypeII (p) (hp : nat_prime p) (hn23 : p ≠ 2 ∧ p ≠ 3) :
+lemma Mordell_KodairaTypeII (p) (hp : Nat.Prime p) (hn23 : p ≠ 2 ∧ p ≠ 3) :
   (tate_big_prime p hp ⟨⟨0, 0, 0, 0, p⟩, sorry⟩).1 = .II := -- TODO maybe expand this to say more about conductor exponent etc
 by
   rw [tate_big_prime]
