@@ -1,0 +1,44 @@
+name: Build project
+
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches: ["master"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+
+  cancel:
+    if: github.repository == 'KisaraBlue/ec-tate-lean'
+    name: 'Cancel Previous Runs (CI)'
+    runs-on: ubuntu-latest
+    # timeout-minutes: 3
+    steps:
+      - uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          all_but_latest: true
+          access_token: ${{ github.token }}
+
+  build:
+    if: github.repository == 'KisaraBlue/ec-tate-lean'
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: cleanup
+        run: |
+          find . -name . -o -prune -exec rm -rf -- {} +
+      - name: install elan
+        run: |
+          set -o pipefail
+          curl -sSfL https://github.com/leanprover/elan/releases/download/v1.4.2/elan-x86_64-unknown-linux-gnu.tar.gz | tar xz
+          ./elan-init -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> $GITHUB_PATH
+      - uses: actions/checkout@v2
+
+      - name: get cache
+        run: lake exe cache get
+
+      - name: build project
+        run: lake build
