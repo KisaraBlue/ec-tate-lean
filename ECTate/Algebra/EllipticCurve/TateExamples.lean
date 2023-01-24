@@ -35,7 +35,7 @@ lemma Mordell_KodairaTypeII (p) (hp : Nat.Prime p) (hn23 : p ≠ 2 ∧ p ≠ 3) 
 by
   rw [tate_big_prime]
   generalize h : (⟨⟨0,0,0,0,p⟩, _⟩ : ValidModel ℤ) = e
-  have valc4 : 3 * SurjVal.v (primeEVR hp).valtn e.c4 = ∞ := by
+  have valc4 : 3 * (primeEVR hp).valtn e.c4 = ∞ := by
     simp [← h, c4_mordell]
   have valdisc : val_discr_to_nat (primeEVR hp).valtn e = 2 := by
     rw [← h, val_discr_mordell _ _ hn23]

@@ -20,7 +20,7 @@ variable {R : Type _} [Ring R]
 lemma sub_add_comm' {x y z : R} : (x - y) + z = x + z - y :=
 by rw [sub_eq_add_neg, sub_eq_add_neg, add_assoc, add_assoc, add_comm z]
 lemma neg_mul_neg {y z : R} : -y * -z = y * z :=
-by simp [← neg_mul_left, ← neg_mul_right, neg_neg]
+by simp [← neg_mul_eq_neg_mul, ← neg_mul_eq_mul_neg, neg_neg]
 lemma neg_pow_three {y : R} : (- y)^3 = - (y ^ 3) :=
 by simp [pow_succ, mul_assoc]
 lemma sub_sub' {x y z : R} : (x - (y - z)) = x + z - y :=
@@ -480,7 +480,7 @@ by
         simp only [add_sub_add_right_eq_sub, sub_eq_iff_eq_add, zero_add]
         rw [show (3 : K) = 2 * 2 - 1 by norm_num]
         rw [hchar'']
-        simp [← neg_mul_left]
+        simp [← neg_mul_eq_neg_mul]
       . simp [dweierstrass_dy, ha1, ha3, hchar'']
     . rw [is_singular_point]
       have hchar : ring_char K = 3 := by assumption
@@ -536,7 +536,7 @@ by
         repeat' apply mul_ne_zero
         all_goals assumption
       refine ⟨?_, ?_, ?_⟩
-      . apply nzero_mul_left_cancel (12 ^ 3) _ _ (pow_nonzero _ _ h12)
+      . apply nzero_mul_left_cancel (12 ^ 3) _ _ (pow_ne_zero _ h12)
         simp only [weierstrass, div_eq_mul_inv, mul_zero]
         rw [show
           12 ^ 3 * ((-(-e.a1 * b2 e * 12⁻¹ + e.a3) * 2⁻¹) ^ 2 +
@@ -552,7 +552,7 @@ by
         rw [← mul_zero (2 : K), ← hc6]
         simp only [c6, b2, b4, b6]
         ring
-      . apply nzero_mul_left_cancel (12 ^ 2) _ _ (pow_nonzero _ _ h12)
+      . apply nzero_mul_left_cancel (12 ^ 2) _ _ (pow_ne_zero _ h12)
         simp only [dweierstrass_dx, div_eq_mul_inv, mul_zero]
         rw [show
           12 ^ 2 * (e.a1 * (-(-e.a1 * b2 e * 12⁻¹ + e.a3) * 2⁻¹) - (3 * (-b2 e * 12⁻¹) ^ 2 + 2 * e.a2 * (-b2 e * 12⁻¹) + e.a4))
@@ -579,7 +579,7 @@ by
     refine ⟨?_, ?_, ?_⟩
     . rw [weierstrass]
       -- simp [b2, b5, b7]
-      apply nzero_mul_left_cancel (e.c4 ^ 3) _ _ (pow_nonzero _ _ hc4)
+      apply nzero_mul_left_cancel (e.c4 ^ 3) _ _ (pow_ne_zero _ hc4)
       rw [mul_zero]
       -- simp only [mul_add, mul_sub, div_eq_mul_inv, mul_pow]
       -- have : c4 e ^ 3 * ((b2 e * b5 e + 3 * b7 e) ^ 2 * (c4 e)⁻¹ ^ 2) =
@@ -607,7 +607,7 @@ by
         ← h, discr_eq_neg_singular]
       ring
     . rw [dweierstrass_dx]
-      apply nzero_mul_left_cancel (e.c4 ^ 2) _ _ (pow_nonzero _ _ hc4)
+      apply nzero_mul_left_cancel (e.c4 ^ 2) _ _ (pow_ne_zero _ hc4)
       rw [mul_zero, pow_two]
       simp only [div_eq_mul_inv]
       rw [show c4 e * c4 e *

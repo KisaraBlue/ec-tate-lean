@@ -28,74 +28,94 @@ Nat.eq_of_mul_eq_mul_left (Nat.pos_of_ne_zero h)
 
 end Obvious
 
+@[ext]
 structure SurjVal {R : Type u} (p : R) [CommRing R] [IsDomain R] where
   v : R → ℕ∪∞
-  v_uniformizer : v p = 1
-  v_mul_eq_add_v (a b : R) : v (a * b) = v a + v b
-  v_add_ge_min_v (a b : R) : v (a + b) ≥ min (v a) (v b)
-  v_eq_top_iff_zero (a : R) : v a = ∞ ↔ a = 0
+  v_uniformizer' : v p = 1
+  v_mul_eq_add_v' (a b : R) : v (a * b) = v a + v b
+  v_add_ge_min_v' (a b : R) : v (a + b) ≥ min (v a) (v b)
+  v_eq_top_iff_zero' (a : R) : v a = ∞ ↔ a = 0
+
+instance {R : Type u} (p : R) [CommRing R] [IsDomain R] : FunLike (SurjVal p) R (λ _ => ℕ∪∞) :=
+{ coe := SurjVal.v
+  coe_injective' := by
+    intro x y h
+    ext :1
+    assumption }
+
+instance {R : Type u} (p : R) [CommRing R] [IsDomain R] : CoeFun (SurjVal p) (λ _ => R → ℕ∪∞) := ⟨SurjVal.v⟩
+
+namespace SurjVal
+variable {R : Type u} {p : R} [CommRing R] [IsDomain R] (v : SurjVal p)
+-- TODO make naming consistent
+theorem v_uniformizer : v p = 1 := v.v_uniformizer'
+theorem v_mul_eq_add_v (a b : R) : v (a * b) = v a + v b := v.v_mul_eq_add_v' a b
+theorem v_add_ge_min_v (a b : R) : v (a + b) ≥ min (v a) (v b) := v.v_add_ge_min_v' a b
+theorem v_eq_top_iff_zero (a : R) : v a = ∞ ↔ a = 0 := v.v_eq_top_iff_zero' a
+end SurjVal
 
 variable {R : Type u} [CommRing R] [IsDomain R]
 
 section SurjVal
 
+-- TODO namespace these
 lemma p_non_zero {p : R} (nav : SurjVal p) : ¬p = 0 := by
   rw [←nav.v_eq_top_iff_zero, nav.v_uniformizer]
   simp
 
 @[simp]
-lemma val_zero {p : R} (nav : SurjVal p) : nav.v 0 = ∞ := (nav.v_eq_top_iff_zero 0).2 rfl
+lemma val_zero {p : R} (nav : SurjVal p) : nav 0 = ∞ := (nav.v_eq_top_iff_zero 0).2 rfl
 
-lemma val_mul_ge_left {p : R} (nav : SurjVal p) (a b : R) : nav.v (a * b) ≥ nav.v a :=
-le_trans (le_add_right (nav.v a) (nav.v b)) (le_of_eq (nav.v_mul_eq_add_v a b).symm)
+lemma val_mul_ge_left {p : R} (nav : SurjVal p) (a b : R) : nav (a * b) ≥ nav a :=
+le_trans (le_add_right (nav a) (nav b)) (le_of_eq (nav.v_mul_eq_add_v a b).symm)
 
-lemma val_mul_ge_right {p : R} (nav : SurjVal p) (a b : R) : nav.v (a * b) ≥ nav.v b := by
+lemma val_mul_ge_right {p : R} (nav : SurjVal p) (a b : R) : nav (a * b) ≥ nav b := by
   rw [mul_comm]
   exact val_mul_ge_left nav b a
 
-lemma val_mul_ge_of_left_ge {p : R} (nav : SurjVal p) {a b : R} (ha : nav.v a ≥ n) :
-nav.v (a * b) ≥ n :=
+lemma val_mul_ge_of_left_ge {p : R} (nav : SurjVal p) {a b : R} (ha : nav a ≥ n) :
+  nav (a * b) ≥ n :=
 le_trans ha (val_mul_ge_left nav a b)
 
-lemma val_mul_ge_of_right_ge {p : R} (nav : SurjVal p) {a b : R} (hb : nav.v b ≥ n) :
-nav.v (a * b) ≥ n :=
+lemma val_mul_ge_of_right_ge {p : R} (nav : SurjVal p) {a b : R} (hb : nav b ≥ n) :
+  nav (a * b) ≥ n :=
 le_trans hb (val_mul_ge_right nav a b)
 
-lemma val_mul_ge_of_both_ge {p : R} (nav : SurjVal p) {a b : R} (ha : nav.v a ≥ m) (hb : nav.v b ≥ n) :
-nav.v (a * b) ≥ m + n := by
+lemma val_mul_ge_of_both_ge {p : R} (nav : SurjVal p) {a b : R} (ha : nav a ≥ m) (hb : nav b ≥ n) :
+  nav (a * b) ≥ m + n := by
   rw [nav.v_mul_eq_add_v]
   apply add_le_add ha hb
 
 @[simp]
-lemma val_of_one {p : R} (nav : SurjVal p) : nav.v 1 = 0 := by
+lemma val_of_one {p : R} (nav : SurjVal p) : nav 1 = 0 := by
   apply Enat.add_right_cancel_ofN 1
   simp only [Nat.cast_one, zero_add]
   rw [←SurjVal.v_uniformizer nav, ←SurjVal.v_mul_eq_add_v nav, one_mul]
 
-lemma val_pow_ge_of_ge {p : R} (nav : SurjVal p) {a : R} (k : ℕ) (ha : nav.v a ≥ m) :
-nav.v (a ^ k) ≥ k • m := by
+lemma val_pow_ge_of_ge {p : R} (nav : SurjVal p) {a : R} (k : ℕ) (ha : nav a ≥ m) :
+  nav (a ^ k) ≥ k • m := by
   induction k with
   | zero => simp [zero_nsmul]
   | succ k ih =>
     simp only [succ_nsmul, pow_succ]
     apply val_mul_ge_of_both_ge _ ha ih
 
-lemma val_pow_eq_of_eq {p : R} (nav : SurjVal p) {a : R} (k : ℕ) (ha : nav.v a = m) :
-nav.v (a ^ k) = k * m := by
+lemma val_pow_eq_of_eq {p : R} (nav : SurjVal p) {a : R} (k : ℕ) (ha : nav a = m) :
+  nav (a ^ k) = k * m := by
   induction k with
   | zero => simp
   | succ k ih =>
     simp only [pow_succ, Nat.cast_succ, add_mul, one_mul, add_comm]
     rw [nav.v_mul_eq_add_v, ha, ih]
 
-lemma val_add_ge_of_ge {p : R} (nav : SurjVal p) {a b : R} (ha : nav.v a ≥ n) (hb : nav.v b ≥ n) :
-nav.v (a + b) ≥ n := le_trans (le_min ha hb) (nav.v_add_ge_min_v a b)
+lemma val_add_ge_of_ge {p : R} (nav : SurjVal p) {a b : R} (ha : nav a ≥ n) (hb : nav b ≥ n) :
+  nav (a + b) ≥ n := le_trans (le_min ha hb) (nav.v_add_ge_min_v a b)
 
 def nat_of_val {p : R} (nav : SurjVal p) {a : R} (h : a ≠ 0) : ℕ :=
   to_nat ((not_iff_not.2 (nav.v_eq_top_iff_zero a)).2 h)
 
 /-
-lemma val_of_add_one {p : R} (nav : SurjVal p) (h : nav.v x ≥ 1): nav.v (x + 1) = 0 := by
+lemma val_of_add_one {p : R} (nav : SurjVal p) (h : nav x ≥ 1): nav (x + 1) = 0 := by
   apply le_antisymm
   . apply le_of_not_lt
     intro h'
@@ -105,40 +125,40 @@ lemma val_of_add_one {p : R} (nav : SurjVal p) (h : nav.v x ≥ 1): nav.v (x + 1
 -/
 
 @[simp]
-lemma val_of_minus_one {p : R} (nav : SurjVal p) : nav.v (-1) = 0 := by
-  cases eq_zero_or_pos (nav.v (-1)) with
+lemma val_of_minus_one {p : R} (nav : SurjVal p) : nav (-1) = 0 := by
+  cases eq_zero_or_pos (nav (-1)) with
   | inl h => exact h
   | inr h =>
-    have contradiction : nav.v 1 > 0 := by
-      rw [←neg_neg 1, ←one_mul 1, neg_mul_left, neg_mul_right, nav.v_mul_eq_add_v]
+    have contradiction : nav 1 > 0 := by
+      rw [←neg_neg 1, ←one_mul 1, neg_mul_eq_neg_mul, neg_mul_eq_mul_neg, nav.v_mul_eq_add_v]
       apply lt_add_right _ _ _ h
     rw [val_of_one] at contradiction
     exact False.elim ((lt_irrefl 0) contradiction)
 
 @[simp]
-lemma val_neg {p : R} (nav : SurjVal p) : nav.v (-x) = nav.v x := by
-  rw [←one_mul x, neg_mul_left, nav.v_mul_eq_add_v, val_of_minus_one, one_mul, zero_add]
+lemma val_neg {p : R} (nav : SurjVal p) : nav (-x) = nav x := by
+  rw [←one_mul x, neg_mul_eq_neg_mul, nav.v_mul_eq_add_v, val_of_minus_one, one_mul, zero_add]
 
-lemma val_sub_ge_of_ge {p : R} (nav : SurjVal p) {a b : R} (ha : nav.v a ≥ n) (hb : nav.v b ≥ n) :
-nav.v (a - b) ≥ n := by
+lemma val_sub_ge_of_ge {p : R} (nav : SurjVal p) {a b : R} (ha : nav a ≥ n) (hb : nav b ≥ n) :
+  nav (a - b) ≥ n := by
   rw [sub_eq_add_neg]
   apply val_add_ge_of_ge
   assumption
   simpa
 
-theorem v_add_eq_min_v {p : R} (nav : SurjVal p) {a b : R} (h : nav.v a < nav.v b) :
-  nav.v (a + b) = nav.v a := by
+theorem v_add_eq_min_v {p : R} (nav : SurjVal p) {a b : R} (h : nav a < nav b) :
+  nav (a + b) = nav a := by
   apply le_antisymm
   . apply le_of_not_lt
     intro h'
-    have hm : nav.v a < nav.v (-b) := by rwa [val_neg]
-    apply lt_irrefl (nav.v a)
+    have hm : nav a < nav (-b) := by rwa [val_neg]
+    apply lt_irrefl (nav a)
     apply lt_of_lt_of_le (lt_min h' hm)
-    rw [(show nav.v a = nav.v (a + b + -b) by simp)]
+    rw [(show nav a = nav (a + b + -b) by simp)]
     exact nav.v_add_ge_min_v (a + b) (-b)
   . exact le_trans (le_min (le_of_eq rfl) (le_of_lt h)) (SurjVal.v_add_ge_min_v nav a b)
 
-theorem val_of_pow_uniformizer {p : R} (nav : SurjVal p) {n : ℕ} : nav.v (p ^ n) = n := by
+theorem val_of_pow_uniformizer {p : R} (nav : SurjVal p) {n : ℕ} : nav (p ^ n) = n := by
   induction n with
   | zero      =>
     rw [pow_zero]
@@ -155,8 +175,8 @@ structure EnatValRing {R : Type u} (p : R) [CommRing R] [IsDomain R] where
   /-- reduce the element x by valuation n (by dividing by an appropriate power of the uniformizer) -/
   sub_val : ℕ → R → R := Nat.iterate decr_val
   sub_val_eq : sub_val = Nat.iterate decr_val := by rfl
-  zero_valtn_decr {x : R} (h : valtn.v x = 0) : decr_val x = x
-  pos_valtn_decr {x : R} (h : valtn.v x > 0) : x = p * decr_val x
+  zero_valtn_decr {x : R} (h : valtn x = 0) : decr_val x = x
+  pos_valtn_decr {x : R} (h : valtn x > 0) : x = p * decr_val x
   residue_char : ℕ -- ToDo delete
   norm_repr : R → R --generalization of modulo
   quad_roots_in_residue_field : R → R → R → Bool
@@ -167,7 +187,7 @@ namespace EnatValRing
 --   match n with
 --   | 0 => x
 --   | Nat.succ n =>
---     match evr.valtn.v x with
+--     match evr.valtn x with
 --     | 0 => x
 --     | _ => sub_val evr (evr.decr_val x) n
 
@@ -183,14 +203,14 @@ lemma decr_val_zero {p : R} (evr : EnatValRing p) : evr.decr_val 0 = 0 := by
 
 @[simp]
 lemma decr_val_neg {p : R} (evr : EnatValRing p) (x : R) : evr.decr_val (-x) = -evr.decr_val x := by
-  cases eq_zero_or_pos (evr.valtn.v x) with
+  cases eq_zero_or_pos (evr.valtn x) with
   | inl h =>
-    have hm : evr.valtn.v (-x) = 0 := by simp [h]
+    have hm : evr.valtn (-x) = 0 := by simp [h]
     rw [evr.zero_valtn_decr h, evr.zero_valtn_decr hm]
   | inr h =>
-    have hm : evr.valtn.v (-x) > 0 := by simp [h]
+    have hm : evr.valtn (-x) > 0 := by simp [h]
     apply nzero_mul_left_cancel p _ _ (p_non_zero evr.valtn)
-    rw [←neg_mul_right, ←evr.pos_valtn_decr h, ←evr.pos_valtn_decr hm]
+    rw [←neg_mul_eq_mul_neg, ←evr.pos_valtn_decr h, ←evr.pos_valtn_decr hm]
 
 @[simp]
 lemma decr_val_p_mul {p : R} (evr : EnatValRing p) (x : R) : evr.decr_val (p * x) = x := by
@@ -210,7 +230,7 @@ lemma sub_val_zero_n {p : R} (evr : EnatValRing p) (n : ℕ) : sub_val evr n 0 =
 @[simp]
 lemma sub_val_x_zero {p : R} (evr : EnatValRing p) (x : R) : sub_val evr 0 x = x := by simp [sub_val_eq]
 
-lemma sub_val_val_zero {p : R} (evr : EnatValRing p) (x : R) (m : ℕ) (h : evr.valtn.v x = 0) :
+lemma sub_val_val_zero {p : R} (evr : EnatValRing p) (x : R) (m : ℕ) (h : evr.valtn x = 0) :
   sub_val evr m x = x := by
   induction m with
   | zero => exact sub_val_x_zero evr x
@@ -220,12 +240,12 @@ lemma sub_val_val_pos_succ {p : R} (evr : EnatValRing p) (x : R) (m : ℕ) :
   sub_val evr (Nat.succ m) x = sub_val evr m (evr.decr_val x) := by
   simp [sub_val_eq]
 
-lemma val_decr_val {p : R} (evr : EnatValRing p) {m : Nat} (x : R) (h : evr.valtn.v x = m) :
-  evr.valtn.v (evr.decr_val x) = ↑(m - 1) := by
+lemma val_decr_val {p : R} (evr : EnatValRing p) {m : Nat} (x : R) (h : evr.valtn x = m) :
+  evr.valtn (evr.decr_val x) = ↑(m - 1) := by
   cases m with
   | zero => rwa [evr.zero_valtn_decr h]
   | succ m =>
-    have x_pos_val : evr.valtn.v x > 0 := by
+    have x_pos_val : evr.valtn x > 0 := by
       rw [h]
       exact succ_pos m
     apply add_right_cancel_ofN 1
@@ -239,8 +259,8 @@ lemma sub_val_decr_val_comm {p : R} (evr : EnatValRing p) (x : R) (n : ℕ) :
   rw [← Function.iterate_succ_apply' evr.decr_val]
   rw [← Function.iterate_succ_apply evr.decr_val]
 
-lemma val_sub_val_eq {p : R} (evr : EnatValRing p) (x : R) {m : ℕ} (n : ℕ) (h : evr.valtn.v x = m) :
-  evr.valtn.v (sub_val evr n x) = ↑(m - n) := by
+lemma val_sub_val_eq {p : R} (evr : EnatValRing p) (x : R) {m : ℕ} (n : ℕ) (h : evr.valtn x = m) :
+  evr.valtn (sub_val evr n x) = ↑(m - n) := by
   induction n with
   | zero => rwa [sub_val_x_zero, Nat.sub_zero]
   | succ n ih =>
@@ -253,15 +273,15 @@ lemma val_sub_val_eq {p : R} (evr : EnatValRing p) (x : R) {m : ℕ} (n : ℕ) (
       rw [sub_val_val_pos_succ, sub_val_decr_val_comm, val_decr_val evr (sub_val evr n x) ih,
         Nat.succ_eq_add_one n, Nat.sub_sub]
 
-lemma val_sub_val_le {p : R} (evr : EnatValRing p) (x : R) {m : ℕ} (n : ℕ) (h : evr.valtn.v x ≥ m) :
-  evr.valtn.v (sub_val evr n x) ≥ ↑(m - n) := by
-  cases enat_disjunction (evr.valtn.v x) with
+lemma val_sub_val_le {p : R} (evr : EnatValRing p) (x : R) {m : ℕ} (n : ℕ) (h : evr.valtn x ≥ m) :
+  evr.valtn (sub_val evr n x) ≥ ↑(m - n) := by
+  cases enat_disjunction (evr.valtn x) with
   | inl h' =>
     have topcase : x = 0 := (evr.valtn.v_eq_top_iff_zero x).1 h'
     rw [topcase, sub_val_zero_n, (evr.valtn.v_eq_top_iff_zero 0).2 rfl]
     exact le.below_top
   | inr h' =>
-    have H : ∀ (a : ℕ), evr.valtn.v x = a → evr.valtn.v (sub_val evr n x) ≥ (m - n) := by
+    have H : ∀ (a : ℕ), evr.valtn x = a → evr.valtn (sub_val evr n x) ≥ (m - n) := by
       intro a ha
       have h'' := val_sub_val_eq evr x n ha
       rw [h'']
@@ -270,13 +290,13 @@ lemma val_sub_val_le {p : R} (evr : EnatValRing p) (x : R) {m : ℕ} (n : ℕ) (
       apply Nat.sub_le_sub_right ((le_ofN m a).2 h)
     exact Exists.elim h' H
 
-lemma factor_p_of_le_val {p : R} (evr : EnatValRing p) {x : R} {n : ℕ} (h : evr.valtn.v x ≥ n) :
+lemma factor_p_of_le_val {p : R} (evr : EnatValRing p) {x : R} {n : ℕ} (h : evr.valtn x ≥ n) :
   x = p ^ n * sub_val evr n x := by
   induction n with
   | zero => simp [sub_val_eq]
   | succ n ih =>
     rw [sub_val_val_pos_succ, sub_val_decr_val_comm, pow_succ', mul_assoc]
-    have pos_val : evr.valtn.v (sub_val evr n x) > 0 := by
+    have pos_val : evr.valtn (sub_val evr n x) > 0 := by
       have h' := val_sub_val_le evr x n h
       rw [Nat.succ_eq_add_one, Nat.add_sub_self_left] at h'
       exact lt_of_succ_le h'
@@ -284,7 +304,7 @@ lemma factor_p_of_le_val {p : R} (evr : EnatValRing p) {x : R} {n : ℕ} (h : ev
     apply ih
     exact le_of_succ_le h
 
-lemma factor_p_of_eq_val {p : R} (evr : EnatValRing p) {x : R} {n : ℕ} (h : evr.valtn.v x = n) :
+lemma factor_p_of_eq_val {p : R} (evr : EnatValRing p) {x : R} {n : ℕ} (h : evr.valtn x = n) :
   x = p ^ n * sub_val evr n x := factor_p_of_le_val evr (le_of_eq (Eq.symm h))
 
 lemma sub_val_p_mul {p : R} (evr : EnatValRing p) (x : R) (n : ℕ) : sub_val evr n (p ^ n * x) = x :=
@@ -300,59 +320,59 @@ lemma sub_val_neg {p : R} (evr : EnatValRing p) {x : R} {n : ℕ} : sub_val evr 
   induction n with
   | zero => simp [sub_val_x_zero]
   | succ n ih =>
-    cases eq_zero_or_pos (evr.valtn.v x) with
+    cases eq_zero_or_pos (evr.valtn x) with
     | inl h' =>
-      have h'm : evr.valtn.v (-x) = 0 := by simp [h']
+      have h'm : evr.valtn (-x) = 0 := by simp [h']
       rw [sub_val_val_zero evr _ _ h', sub_val_val_zero evr _ _ h'm]
     | inr h' =>
       rw [sub_val_val_pos_succ evr _ _, sub_val_val_pos_succ evr _ _, sub_val_decr_val_comm, ih,
       decr_val_neg, sub_val_decr_val_comm]
 
-lemma sub_val_add {p : R} (evr : EnatValRing p) {x y : R} {n : ℕ} (hx : evr.valtn.v x ≥ n)
-  (hy : evr.valtn.v y ≥ n) : sub_val evr n (x + y) = sub_val evr n x + sub_val evr n y := by
+lemma sub_val_add {p : R} (evr : EnatValRing p) {x y : R} {n : ℕ} (hx : evr.valtn x ≥ n)
+  (hy : evr.valtn y ≥ n) : sub_val evr n (x + y) = sub_val evr n x + sub_val evr n y := by
   apply nzero_mul_left_cancel (p ^ n)
-  . exact pow_nonzero p n (p_non_zero evr.valtn)
-  . rw [←factor_p_of_le_val evr (_ : evr.valtn.v (x + y) ≥ n), mul_add, ←factor_p_of_le_val evr hx, ←factor_p_of_le_val evr hy]
+  . exact pow_ne_zero n (p_non_zero evr.valtn)
+  . rw [←factor_p_of_le_val evr (_ : evr.valtn (x + y) ≥ n), mul_add, ←factor_p_of_le_val evr hx, ←factor_p_of_le_val evr hy]
     exact le_trans (le_min hx hy) (evr.valtn.v_add_ge_min_v x y)
 
-lemma sub_val_sub {p : R} (evr : EnatValRing p) {x y : R} {n : ℕ} (hx : evr.valtn.v x ≥ n)
-  (hy : evr.valtn.v y ≥ n) : sub_val evr n (x - y) = sub_val evr n x - sub_val evr n y :=
+lemma sub_val_sub {p : R} (evr : EnatValRing p) {x y : R} {n : ℕ} (hx : evr.valtn x ≥ n)
+  (hy : evr.valtn y ≥ n) : sub_val evr n (x - y) = sub_val evr n x - sub_val evr n y :=
 by
   rw [sub_eq_add_neg, sub_eq_add_neg, sub_val_add evr hx, sub_val_neg]
   simpa
 
-lemma sub_val_mul_left {p : R} (evr : EnatValRing p) {x y : R} {n : ℕ} (hx : evr.valtn.v x ≥ n) :
+lemma sub_val_mul_left {p : R} (evr : EnatValRing p) {x y : R} {n : ℕ} (hx : evr.valtn x ≥ n) :
   sub_val evr n (x * y) = sub_val evr n x * y := by
   apply nzero_mul_left_cancel (p ^ n)
-  . exact pow_nonzero p n (p_non_zero evr.valtn)
-  . rw [←factor_p_of_le_val evr (_ : evr.valtn.v (x * y) ≥ n), ←mul_assoc, ←factor_p_of_le_val evr hx]
+  . exact pow_ne_zero n (p_non_zero evr.valtn)
+  . rw [←factor_p_of_le_val evr (_ : evr.valtn (x * y) ≥ n), ←mul_assoc, ←factor_p_of_le_val evr hx]
     exact le_trans hx (val_mul_ge_left evr.valtn x y)
 
-lemma sub_val_mul_right {p : R} (evr : EnatValRing p) {x y : R} {n : ℕ} (hy : evr.valtn.v y ≥ n) :
+lemma sub_val_mul_right {p : R} (evr : EnatValRing p) {x y : R} {n : ℕ} (hy : evr.valtn y ≥ n) :
   sub_val evr n (x * y) = x * sub_val evr n y :=
 by rw [mul_comm x y, sub_val_mul_left evr hy, mul_comm]
 
 lemma sub_val_mul_sub_val {p : R} (evr : EnatValRing p) {x y : R} (n m : ℕ)
-  (hx : evr.valtn.v x ≥ n) (hy : evr.valtn.v y ≥ m) :
+  (hx : evr.valtn x ≥ n) (hy : evr.valtn y ≥ m) :
   sub_val evr n x * sub_val evr m y = sub_val evr (n + m) (x * y) := by
-  apply nzero_mul_left_cancel (p ^ (n + m)) _ _ (pow_nonzero p _ (p_non_zero evr.valtn))
-  rw [←factor_p_of_le_val evr (_ : evr.valtn.v (x * y) ≥ (n + m)), pow_add, mul_assoc,
+  apply nzero_mul_left_cancel (p ^ (n + m)) _ _ (pow_ne_zero _ (p_non_zero evr.valtn))
+  rw [←factor_p_of_le_val evr (_ : evr.valtn (x * y) ≥ (n + m)), pow_add, mul_assoc,
     mul_comm (p ^ m), ← mul_assoc,
     ← mul_assoc,
-    ←factor_p_of_le_val evr (_ : evr.valtn.v x ≥ n), mul_assoc, mul_comm _ (p ^ m),
-    ←factor_p_of_le_val evr (_ : evr.valtn.v y ≥ m)]
+    ←factor_p_of_le_val evr (_ : evr.valtn x ≥ n), mul_assoc, mul_comm _ (p ^ m),
+    ←factor_p_of_le_val evr (_ : evr.valtn y ≥ m)]
   . assumption
   . assumption
   . rw [SurjVal.v_mul_eq_add_v]
     exact add_le_add hx hy
 
 lemma sub_val_mul {p : R} (evr : EnatValRing p) {x y : R} (n m : ℕ) {nm : ℕ} (h : n + m = nm)
-  (hx : evr.valtn.v x ≥ n) (hy : evr.valtn.v y ≥ m) :
+  (hx : evr.valtn x ≥ n) (hy : evr.valtn y ≥ m) :
   sub_val evr nm (x * y) = sub_val evr n x * sub_val evr m y := by
   rw [← h, sub_val_mul_sub_val _ _ _ hx hy]
 
 lemma sub_val_pow {p : R} (evr : EnatValRing p) {x : R} (n k : ℕ) {nm : ℕ} (h : k * n = nm)
-  (hx : evr.valtn.v x ≥ n) :
+  (hx : evr.valtn x ≥ n) :
   sub_val evr nm (x ^ k) = sub_val evr n x ^ k := by
   induction k generalizing nm with
   | zero => simp [← h]
@@ -371,7 +391,7 @@ lemma sub_val_sub_val {p : R} (evr : EnatValRing p) {x : R} {m n : ℕ} :
     | zero => simp [sub_val_x_zero]
     | succ m ih =>
       intro y
-      cases eq_zero_or_pos (evr.valtn.v y) with
+      cases eq_zero_or_pos (evr.valtn y) with
       | inl h' => simp [sub_val_val_zero evr y _ h']
       | inr h' =>
         rw [sub_val_val_pos_succ evr y m, Nat.succ_add, sub_val_val_pos_succ evr y _]
@@ -379,7 +399,7 @@ lemma sub_val_sub_val {p : R} (evr : EnatValRing p) {x : R} {m n : ℕ} :
   exact general x
 
 def has_double_root {p : R} (evr : EnatValRing p) (a b c : R) :=
-  evr.valtn.v a = 0 ∧ evr.valtn.v (b ^ 2 - 4 * a * c) > 0
+  evr.valtn a = 0 ∧ evr.valtn (b ^ 2 - 4 * a * c) > 0
 
 end EnatValRing
 
@@ -650,10 +670,11 @@ lemma int_val_eq_top_iff_zero (p : ℕ) (gt1 : 1 < p) (a : ℤ) : int_val p a = 
 
 def primeVal {p : ℕ} (hp : Nat.Prime p) : SurjVal (p : ℤ) := {
   v := int_val p,
-  v_uniformizer := int_val_uniformizer hp.one_lt,
-  v_mul_eq_add_v := int_val_mul_eq_add p hp,
-  v_add_ge_min_v := int_val_add_ge_min p,
-  v_eq_top_iff_zero := int_val_eq_top_iff_zero p hp.one_lt }
+  v_uniformizer' := int_val_uniformizer hp.one_lt,
+  v_mul_eq_add_v' := int_val_mul_eq_add p hp,
+  v_add_ge_min_v' := int_val_add_ge_min p,
+  v_eq_top_iff_zero' := int_val_eq_top_iff_zero p hp.one_lt }
+
 
 def decr_val_p (p : ℕ) (k : ℤ) : ℤ :=
   if k % p == 0 then k / p else k
@@ -686,10 +707,11 @@ by
   sorry
 
 @[simp]
-lemma primeVal_eq_zero_iff {p : ℕ} {k : ℤ} (hp : Nat.Prime p) : (primeVal hp).v k = 0 ↔ k % p ≠ 0 :=
-by simp [primeVal, int_valuation_eq_zero_iff hp.one_lt]
+lemma primeVal_eq_zero_iff {p : ℕ} {k : ℤ} (hp : Nat.Prime p) : (primeVal hp) k = 0 ↔ k % p ≠ 0 :=
+-- by rw [primeVal, int_valuation_eq_zero_iff hp.one_lt]
+sorry
 
-lemma zero_valtn_decr_p {p : ℕ} {k : ℤ} (hp : Nat.Prime p) (h : (primeVal hp).v k = 0) :
+lemma zero_valtn_decr_p {p : ℕ} {k : ℤ} (hp : Nat.Prime p) (h : (primeVal hp) k = 0) :
   decr_val_p p k = k :=
 by
   simp [decr_val_p] at *
@@ -725,8 +747,8 @@ def double_root (a b c : ℤ) (p : ℕ) :=
 
 lemma val_poly_of_double_root {p : ℕ} (hp : Nat.Prime p) (a b c : ℤ)
   (H : has_double_root a b c hp) :
-  (primeEVR hp).valtn.v (a * (double_root a b c p)^2 + b * (double_root a b c p) + c) > 0 ∧
-  (primeEVR hp).valtn.v (2*a*(double_root a b c p) + b) > 0 := by sorry
+  (primeEVR hp).valtn (a * (double_root a b c p)^2 + b * (double_root a b c p) + c) > 0 ∧
+  (primeEVR hp).valtn (2*a*(double_root a b c p) + b) > 0 := by sorry
 
 
 
