@@ -655,25 +655,54 @@ def primeVal {p : ℕ} (hp : Nat.Prime p) : SurjVal (p : ℤ) := {
   v_add_ge_min_v := int_val_add_ge_min p,
   v_eq_top_iff_zero := int_val_eq_top_iff_zero p hp.one_lt }
 
-def decr_val_p (p : ℕ) (val : ℤ → ℕ∪∞) (k : ℤ) : ℤ :=
-  match val k with
-  | 0 => k
-  | _ => k / p
+def decr_val_p (p : ℕ) (k : ℤ) : ℤ :=
+  if k % p == 0 then k / p else k
 
 def sub_val_p (p : ℕ) (val : ℤ → ℕ∪∞) (n : ℕ) (k : ℤ) : ℤ :=
   k / (p ^ ((min (n : ℕ∪∞) (val k)).to_nat sorry) : ℕ)
 
-lemma zero_valtn_decr_p {p: ℕ} {k : ℤ} (val : ℤ → ℕ∪∞) (h : val k = 0) : decr_val_p p val k = k :=
-by rw [decr_val_p, h]
+
+@[simp]
+lemma nat_valuation_eq_zero_iff {p : ℕ} (hp : 1 < p) {k : ℕ} : nat_valuation p k = 0 ↔ k % p ≠ 0 :=
+by
+  simp [nat_valuation]
+  -- aesop
+  sorry
+
+@[simp]
+lemma int_valuation_eq_zero_iff {p : ℕ} {k : ℤ} (hp : 1 < p) : int_val p k = 0 ↔ k % p ≠ 0 :=
+by
+  simp [int_val]
+  rw [nat_valuation_eq_zero_iff]
+  cases k
+  . aesop
+    . apply a_1
+      rw [← Int.ofNat_emod] at *
+      simpa [- Int.ofNat_emod, -coe_nat_mod] using a_2
+    . apply a_1
+      rw [← Int.ofNat_emod] at *
+      simpa [- Int.ofNat_emod, -coe_nat_mod] using a_2
+  sorry
+  sorry
+
+@[simp]
+lemma primeVal_eq_zero_iff {p : ℕ} {k : ℤ} (hp : Nat.Prime p) : (primeVal hp).v k = 0 ↔ k % p ≠ 0 :=
+by simp [primeVal, int_valuation_eq_zero_iff hp.one_lt]
+
+lemma zero_valtn_decr_p {p : ℕ} {k : ℤ} (hp : Nat.Prime p) (h : (primeVal hp).v k = 0) :
+  decr_val_p p k = k :=
+by
+  simp [decr_val_p] at *
+  aesop
 
 def norm_repr_p (p : ℕ) (x : ℤ) : ℤ := (x % (p : ℤ) + p) % (p : ℤ)
 
 def primeEVR {p : ℕ} (hp : Nat.Prime p) : EnatValRing (p : ℤ) := {
   valtn := primeVal hp
-  decr_val := decr_val_p p (primeVal hp).v
-  sub_val := sub_val_p p (primeVal hp).v
-  sub_val_eq := sorry
-  zero_valtn_decr := zero_valtn_decr_p (primeVal hp).v
+  decr_val := decr_val_p p
+  -- sub_val := sub_val_p p (primeVal hp).v
+  -- sub_val_eq := sorry
+  zero_valtn_decr := zero_valtn_decr_p hp
   pos_valtn_decr := sorry
   residue_char := p
   norm_repr := norm_repr_p p
