@@ -48,7 +48,9 @@ instance {R : Type u} (p : R) [CommRing R] [IsDomain R] : CoeFun (SurjVal p) (λ
 namespace SurjVal
 variable {R : Type u} {p : R} [CommRing R] [IsDomain R] (v : SurjVal p)
 -- TODO make naming consistent
+@[simp]
 theorem v_uniformizer : v p = 1 := v.v_uniformizer'
+@[simp]
 theorem v_mul_eq_add_v (a b : R) : v (a * b) = v a + v b := v.v_mul_eq_add_v' a b
 theorem v_add_ge_min_v (a b : R) : v (a + b) ≥ min (v a) (v b) := v.v_add_ge_min_v' a b
 theorem v_eq_top_iff_zero (a : R) : v a = ∞ ↔ a = 0 := v.v_eq_top_iff_zero' a
@@ -108,6 +110,10 @@ lemma val_pow_eq_of_eq {p : R} (nav : SurjVal p) {a : R} (k : ℕ) (ha : nav a =
     simp only [pow_succ, Nat.cast_succ, add_mul, one_mul, add_comm]
     rw [nav.v_mul_eq_add_v, ha, ih]
 
+@[simp]
+lemma val_pow_eq {p : R} (nav : SurjVal p) {a : R} (k : ℕ)  :
+  nav (a ^ k) = k * nav a := val_pow_eq_of_eq nav k rfl
+
 lemma val_add_ge_of_ge {p : R} (nav : SurjVal p) {a b : R} (ha : nav a ≥ n) (hb : nav b ≥ n) :
   nav (a + b) ≥ n := le_trans (le_min ha hb) (nav.v_add_ge_min_v a b)
 
@@ -124,7 +130,6 @@ lemma val_of_add_one {p : R} (nav : SurjVal p) (h : nav x ≥ 1): nav (x + 1) = 
     apply le_min (le_trans (le_succ 0) h) (le_of_eq (val_of_one nav).symm)
 -/
 
-@[simp]
 lemma val_of_minus_one {p : R} (nav : SurjVal p) : nav (-1) = 0 := by
   cases eq_zero_or_pos (nav (-1)) with
   | inl h => exact h
@@ -166,6 +171,7 @@ theorem val_of_pow_uniformizer {p : R} (nav : SurjVal p) {n : ℕ} : nav (p ^ n)
   | succ n ih =>
     rw [pow_succ, SurjVal.v_mul_eq_add_v nav, ih, SurjVal.v_uniformizer nav]
     simp [Nat.succ_eq_add_one, add_comm]
+
 
 end SurjVal
 
