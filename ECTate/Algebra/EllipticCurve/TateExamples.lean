@@ -34,15 +34,17 @@ by
   conv =>
     lhs
     rw [discr_mordell]
-  simp [neg_mul, val_neg, SurjVal.v_mul_eq_add_v] -- need simp lemma coe_of_nat_of_val
+  simp [neg_mul, val_neg, SurjVal.v_mul_eq_add_v, nat_of_val] -- need simp lemma coe_of_nat_of_val
   norm_num
-  -- convert zero_add (2 : Enat) -- TODO lean needs help here why, no _
+  convert zero_add (?_ : Enat) -- TODO lean needs help here why, no _
   sorry
+  exact rfl
+  exact rfl
 
 lemma Mordell_KodairaTypeII (p) (hp : Nat.Prime p) (hn23 : p ≠ 2 ∧ p ≠ 3) :
-  (tate_big_prime p hp ⟨⟨0, 0, 0, 0, p⟩, by simp [hp.ne_zero]⟩).1 = .II := -- TODO maybe expand this to say more about conductor exponent etc
+  (tate_algorithm p hp ⟨⟨0, 0, 0, 0, p⟩, by simp [hp.ne_zero]⟩).1 = .II := -- TODO maybe expand this to say more about conductor exponent etc
 by
-  rw [tate_big_prime]
+  rw [tate_algorithm, if_neg hn23.1, if_neg hn23.2, tate_big_prime]
   generalize h : (⟨⟨0,0,0,0,p⟩, _⟩ : ValidModel ℤ) = e
   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ∞ := by
     simp [← h, c4_mordell]
@@ -54,9 +56,9 @@ by
   simp [valc4, valdisc']
 
 lemma Mordell_KodairaTypeIIs (p) (hp : Nat.Prime p) (hn23 : p ≠ 2 ∧ p ≠ 3) :
-  (tate_big_prime p hp ⟨⟨0, 0, 0, 0, (p : ℤ)^5⟩, by simp [hp.ne_zero]⟩).1 = .IIs := -- TODO maybe expand this to say more about conductor exponent etc
+  (tate_algorithm p hp ⟨⟨0, 0, 0, 0, (p : ℤ)^5⟩, by simp [hp.ne_zero]⟩).1 = .IIs := -- TODO maybe expand this to say more about conductor exponent etc
 by
-  rw [tate_big_prime]
+  rw [tate_algorithm, if_neg hn23.1, if_neg hn23.2, tate_big_prime]
   generalize h : (⟨⟨0,0,0,0,(p:ℤ)^5⟩, _⟩ : ValidModel ℤ) = e
   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ∞ := by
     simp [← h, c4_mordell]
@@ -68,9 +70,9 @@ by
   simp [valc4, valdisc']
 
 lemma Mordell_KodairaTypeIV (p) (hp : Nat.Prime p) (hn23 : p ≠ 2 ∧ p ≠ 3) :
-  (tate_big_prime p hp ⟨⟨0, 0, 0, 0, (p : ℤ)^2⟩, by simp [hp.ne_zero]⟩).1 = .IV := -- TODO maybe expand this to say more about conductor exponent etc
+  (tate_algorithm p hp ⟨⟨0, 0, 0, 0, (p : ℤ)^2⟩, by simp [hp.ne_zero]⟩).1 = .IV := -- TODO maybe expand this to say more about conductor exponent etc
 by
-  rw [tate_big_prime]
+  rw [tate_algorithm, if_neg hn23.1, if_neg hn23.2, tate_big_prime]
   generalize h : (⟨⟨0,0,0,0,(p : ℤ)^2⟩, _⟩ : ValidModel ℤ) = e
   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ∞ := by
     simp [← h, c4_mordell]
@@ -81,11 +83,10 @@ by
     simp [valdisc]
   simp [valc4, valdisc']
 
--- TODO make all the examples about tate rather than tate_big
 lemma Mordell_KodairaTypeIVs (p) (hp : Nat.Prime p) (hn23 : p ≠ 2 ∧ p ≠ 3) :
-  (tate_big_prime p hp ⟨⟨0, 0, 0, 0, (p : ℤ)^4⟩, by simp [hp.ne_zero]⟩).1 = .IVs := -- TODO maybe expand this to say more about conductor exponent etc
+  (tate_algorithm p hp ⟨⟨0, 0, 0, 0, (p : ℤ)^4⟩, by simp [hp.ne_zero]⟩).1 = .IVs := -- TODO maybe expand this to say more about conductor exponent etc
 by
-  rw [tate_big_prime]
+  rw [tate_algorithm, if_neg hn23.1, if_neg hn23.2, tate_big_prime]
   generalize h : (⟨⟨0,0,0,0,(p : ℤ)^4⟩, _⟩ : ValidModel ℤ) = e
   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ∞ := by
     simp [← h, c4_mordell]
