@@ -409,6 +409,10 @@ def to_nat {a : ℕ∪∞} (h : a ≠ ∞) : ℕ := by
   | top => exact False.elim (h (Eq.refl ∞))
   | ofN n => exact n
 
+@[simp]
+lemma to_nat_ofN {a : ℕ} (h : (a : ℕ∪∞) ≠ ∞) : to_nat h = a := rfl
+
+@[simp]
 lemma ofN_to_nat_eq_self {a : ℕ∪∞} (h : a ≠ ∞) : to_nat h = a := by
   cases a with
   | top => exact False.elim (h (Eq.refl ∞))

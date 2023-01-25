@@ -53,6 +53,7 @@ theorem v_uniformizer : v p = 1 := v.v_uniformizer'
 @[simp]
 theorem v_mul_eq_add_v (a b : R) : v (a * b) = v a + v b := v.v_mul_eq_add_v' a b
 theorem v_add_ge_min_v (a b : R) : v (a + b) ≥ min (v a) (v b) := v.v_add_ge_min_v' a b
+@[simp]
 theorem v_eq_top_iff_zero (a : R) : v a = ∞ ↔ a = 0 := v.v_eq_top_iff_zero' a
 end SurjVal
 
@@ -756,6 +757,7 @@ lemma val_poly_of_double_root {p : ℕ} (hp : Nat.Prime p) (a b c : ℤ)
   (primeEVR hp).valtn (a * (double_root a b c p)^2 + b * (double_root a b c p) + c) > 0 ∧
   (primeEVR hp).valtn (2*a*(double_root a b c p) + b) > 0 := by sorry
 
-
-
 end Int
+
+
+-- #lint

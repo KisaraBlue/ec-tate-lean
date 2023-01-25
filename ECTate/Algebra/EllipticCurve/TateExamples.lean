@@ -3,23 +3,11 @@ import ECTate.Algebra.EllipticCurve.TateInt
 open Int Model ValidModel
 
 
-@[simp]
-lemma b2_mordell (p) : Model.b2 ⟨0,0,0,0, (p : Int)⟩ = 0 :=
-by simp [b2]
-@[simp]
-lemma b4_mordell (p) : Model.b4 ⟨0,0,0,0, (p : Int)⟩ = 0 :=
-by simp [b4]
-@[simp]
-lemma b6_mordell (p) : Model.b6 ⟨0,0,0,0, (p : Int)⟩ = 4 * p :=
-by simp [b6]
-@[simp]
-lemma b8_mordell (p) : Model.b8 ⟨0,0,0,0, (p : Int)⟩ = 0 :=
-by simp [b8]
-
-@[simp]
-lemma c4_mordell (p) : Model.c4 ⟨0,0,0,0, (p : Int)⟩ = 0 :=
-by simp [c4]
-
+@[simp] lemma b2_mordell (p) : Model.b2 ⟨0,0,0,0, (p : Int)⟩ = 0 := by simp [b2]
+@[simp] lemma b4_mordell (p) : Model.b4 ⟨0,0,0,0, (p : Int)⟩ = 0 := by simp [b4]
+@[simp] lemma b6_mordell (p) : Model.b6 ⟨0,0,0,0, (p : Int)⟩ = 4 * p := by simp [b6]
+@[simp] lemma b8_mordell (p) : Model.b8 ⟨0,0,0,0, (p : Int)⟩ = 0 := by simp [b8]
+@[simp] lemma c4_mordell (p) : Model.c4 ⟨0,0,0,0, (p : Int)⟩ = 0 := by simp [c4]
 @[simp]
 lemma c6_mordell (p) : Model.c6 ⟨0,0,0,0, (p : Int)⟩ = - 864 * p :=
 by
@@ -59,8 +47,8 @@ by
   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ∞ := by
     simp [← h, c4_mordell]
   have valdisc : val_discr_to_nat (primeEVR hp).valtn e = 2 := by
-    rw [← h, val_discr_mordell _ _ hn23]
-    sorry
+    rw [← h, val_discr_mordell _ _ hn23, nat_of_val]
+    simp
   have valdisc' : val_discr_to_nat (primeEVR hp).valtn e % 12 = 2 := by
     simp [valdisc]
   simp [valc4, valdisc']
@@ -73,8 +61,8 @@ by
   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ∞ := by
     simp [← h, c4_mordell]
   have valdisc : val_discr_to_nat (primeEVR hp).valtn e = 10 := by
-    rw [← h, val_discr_mordell _ _ hn23]
-    sorry
+    rw [← h, val_discr_mordell _ _ hn23, nat_of_val]
+    simp [SurjVal.v_uniformizer]
   have valdisc' : val_discr_to_nat (primeEVR hp).valtn e % 12 = 10 := by
     simp [valdisc]
   simp [valc4, valdisc']
@@ -87,12 +75,13 @@ by
   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ∞ := by
     simp [← h, c4_mordell]
   have valdisc : val_discr_to_nat (primeEVR hp).valtn e = 4 := by
-    rw [← h, val_discr_mordell _ _ hn23]
-    sorry
+    rw [← h, val_discr_mordell _ _ hn23, nat_of_val]
+    simp
   have valdisc' : val_discr_to_nat (primeEVR hp).valtn e % 12 = 4 := by
     simp [valdisc]
   simp [valc4, valdisc']
 
+-- TODO make all the examples about tate rather than tate_big
 lemma Mordell_KodairaTypeIVs (p) (hp : Nat.Prime p) (hn23 : p ≠ 2 ∧ p ≠ 3) :
   (tate_big_prime p hp ⟨⟨0, 0, 0, 0, (p : ℤ)^4⟩, by simp [hp.ne_zero]⟩).1 = .IVs := -- TODO maybe expand this to say more about conductor exponent etc
 by
@@ -101,8 +90,8 @@ by
   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ∞ := by
     simp [← h, c4_mordell]
   have valdisc : val_discr_to_nat (primeEVR hp).valtn e = 8 := by
-    rw [← h, val_discr_mordell _ _ hn23]
-    sorry
+    rw [← h, val_discr_mordell _ _ hn23, nat_of_val]
+    simp
   have valdisc' : val_discr_to_nat (primeEVR hp).valtn e % 12 = 8 := by
     simp [valdisc]
   simp [valc4, valdisc']
