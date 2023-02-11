@@ -181,7 +181,7 @@ instance equiv_p (nav : SurjVal p) : HasEquiv R :=
 }
 --lemma p_congr_zero : congruence_p nav () 0 :=
 
-def setoid_of_val (nav : SurjVal p) : Setoid R :=
+def val_setoid (nav : SurjVal p) : Setoid R :=
 { r := congruence_p nav
   iseqv := eqv_congr
 }
@@ -190,13 +190,172 @@ def setoid_of_val (nav : SurjVal p) : Setoid R :=
 
 --def x := Quotient.mk (setoid_congr nav) p
 
+notation "≈p" => congruence_p
 
+theorem add_repr_eq_repr_add (nav : SurjVal p) (a b : R) : ∀ (a' b' : R), ≈p nav a' a → ≈p nav b' b → ≈p nav (a' + b') (a + b) := by
+  intro a' b' ha hb
+  rw [congruence_p, sub_add_eq_sub_sub_swap, add_sub_assoc, sub_eq_add_neg, add_assoc, add_comm _ (-a), ←add_assoc, ←sub_eq_add_neg]
+  apply lt_of_lt_of_le _ (nav.v_add_ge_min_v _ _)
+  apply lt_min ha hb
+
+theorem equiv_of_congr (nav : SurjVal p) (a b : R) : ≈p nav a b → (equiv_p nav).Equiv a b := by
+  intro h
+  exact h
+
+def add_quot' (a b : R) : Quotient (val_setoid nav) := ⟦a + b⟧
+
+def add_quot : Quotient (val_setoid nav) → Quotient (val_setoid nav) → Quotient (val_setoid nav) := by
+  apply Quotient.lift₂ (add_quot')
+  intro a b a' b' ha hb
+  rw [add_quot', add_quot']
+  apply Quotient.sound
+  apply equiv_of_congr nav _ _ (add_repr_eq_repr_add nav a' b' a b ha hb)
+
+instance : Add (Quotient (val_setoid nav)) :=
+{ add := add_quot
+}
+
+theorem add_quot_eq_quot_add_rep {a b : R} {x y : Quotient (val_setoid nav)} (hx : ⟦a⟧ = x) (hy : ⟦b⟧ = y) : x + y = ⟦a + b⟧ := by
+  rw [←hx, ←hy]
+  rfl
+
+lemma add_quot_assoc (a b c : Quotient (val_setoid nav)) : a + b + c = a + (b + c) := by
+  match Quotient.exists_rep a, Quotient.exists_rep b, Quotient.exists_rep c with
+  | ⟨ra, ha⟩, ⟨rb, hb⟩, ⟨rc, hc⟩ =>
+    rw [add_quot_eq_quot_add_rep ha hb, add_quot_eq_quot_add_rep hb hc, add_quot_eq_quot_add_rep ha rfl, add_quot_eq_quot_add_rep rfl hc, add_assoc]
+
+instance : Zero (Quotient (val_setoid nav)) :=
+{ zero := ⟦0⟧
+}
+
+lemma quot_zero : (0 : Quotient (val_setoid nav)) = ⟦0⟧ := rfl
+
+lemma zero_add_quot (a : Quotient (val_setoid nav)) : 0 + a = a := by
+  match Quotient.exists_rep a with
+  | ⟨ra, ha⟩ =>
+    rw [quot_zero, add_quot_eq_quot_add_rep rfl ha, zero_add, ha]
+
+lemma add_quot_zero (a : Quotient (val_setoid nav)) : a + 0 = a := by
+  match Quotient.exists_rep a with
+  | ⟨ra, ha⟩ =>
+    rw [quot_zero, add_quot_eq_quot_add_rep ha rfl, add_zero, ha]
+
+lemma add_quot_comm (a b : Quotient (val_setoid nav)) : a + b = b + a := by
+  match Quotient.exists_rep a, Quotient.exists_rep b with
+  | ⟨ra, ha⟩, ⟨rb, hb⟩ =>
+    rw [add_quot_eq_quot_add_rep ha hb, add_quot_eq_quot_add_rep hb ha, add_comm]
+
+theorem mul_repr_eq_repr_mul (nav : SurjVal p) (a b : R) : ∀ (a' b' : R), ≈p nav a' a → ≈p nav b' b → ≈p nav (a' * b') (a * b) := by
+  intro a' b' ha hb
+  sorry
+
+def mul_quot' (a b : R) : Quotient (val_setoid nav) := ⟦a * b⟧
+
+def mul_quot : Quotient (val_setoid nav) → Quotient (val_setoid nav) → Quotient (val_setoid nav) := by
+  apply Quotient.lift₂ (mul_quot')
+  intro a b a' b' ha hb
+  rw [mul_quot', mul_quot']
+  apply Quotient.sound
+  apply equiv_of_congr nav _ _ (mul_repr_eq_repr_mul nav a' b' a b ha hb)
+
+instance : Mul (Quotient (val_setoid nav)) :=
+{ mul := mul_quot
+}
+
+theorem mul_quot_eq_quot_mul_rep {a b : R} {x y : Quotient (val_setoid nav)} (hx : ⟦a⟧ = x) (hy : ⟦b⟧ = y) : x * y = ⟦a * b⟧ := by
+  rw [←hx, ←hy]
+  rfl
+
+lemma left_distrib_quot (a b c : Quotient (val_setoid nav)) : a * (b + c) = a * b + a * c := by
+  match Quotient.exists_rep a, Quotient.exists_rep b, Quotient.exists_rep c with
+  | ⟨ra, ha⟩, ⟨rb, hb⟩, ⟨rc, hc⟩ =>
+    rw [add_quot_eq_quot_add_rep hb hc, mul_quot_eq_quot_mul_rep ha hb, mul_quot_eq_quot_mul_rep ha hc, mul_quot_eq_quot_mul_rep ha rfl, add_quot_eq_quot_add_rep rfl rfl, left_distrib]
+
+lemma right_distrib_quot (a b c : Quotient (val_setoid nav)) : (a + b) * c = a * c + b * c := by
+  match Quotient.exists_rep a, Quotient.exists_rep b, Quotient.exists_rep c with
+  | ⟨ra, ha⟩, ⟨rb, hb⟩, ⟨rc, hc⟩ =>
+    rw [add_quot_eq_quot_add_rep ha hb, mul_quot_eq_quot_mul_rep ha hc, mul_quot_eq_quot_mul_rep hb hc, mul_quot_eq_quot_mul_rep rfl hc, add_quot_eq_quot_add_rep rfl rfl, right_distrib]
+
+lemma zero_mul_quot (a : Quotient (val_setoid nav)) : 0 * a = 0 := by
+  match Quotient.exists_rep a with
+  | ⟨ra, ha⟩ =>
+    rw [quot_zero, mul_quot_eq_quot_mul_rep rfl ha, zero_mul]
+
+lemma mul_quot_zero (a : Quotient (val_setoid nav)) : a * 0 = 0 := by
+  match Quotient.exists_rep a with
+  | ⟨ra, ha⟩ =>
+    rw [quot_zero, mul_quot_eq_quot_mul_rep ha rfl, mul_zero]
+
+lemma mul_quot_assoc (a b c : Quotient (val_setoid nav)) : a * b * c = a * (b * c) := by
+  match Quotient.exists_rep a, Quotient.exists_rep b, Quotient.exists_rep c with
+  | ⟨ra, ha⟩, ⟨rb, hb⟩, ⟨rc, hc⟩ =>
+    rw [mul_quot_eq_quot_mul_rep ha hb, mul_quot_eq_quot_mul_rep hb hc, mul_quot_eq_quot_mul_rep ha rfl, mul_quot_eq_quot_mul_rep rfl hc, mul_assoc]
+
+instance : One (Quotient (val_setoid nav)) :=
+{ one := ⟦1⟧
+}
+
+lemma quot_one : (1 : Quotient (val_setoid nav)) = ⟦1⟧ := rfl
+
+lemma one_mul_quot (a : Quotient (val_setoid nav)) : 1 * a = a := by
+  match Quotient.exists_rep a with
+  | ⟨ra, ha⟩ =>
+    rw [quot_one, mul_quot_eq_quot_mul_rep rfl ha, one_mul, ha]
+
+lemma mul_quot_one (a : Quotient (val_setoid nav)) : a * 1 = a := by
+  match Quotient.exists_rep a with
+  | ⟨ra, ha⟩ =>
+    rw [quot_one, mul_quot_eq_quot_mul_rep ha rfl, mul_one, ha]
+
+theorem neg_repr_eq_repr_neg (nav : SurjVal p) (a : R) : ∀ (a' : R), ≈p nav a' a → ≈p nav (-a') (-a) := by
+  intro a' ha
+  rw [congruence_p, ←val_neg, sub_eq_add_neg, neg_neg, neg_add, neg_neg, ←sub_eq_add_neg]
+  exact ha
+
+def neg_quot' (a : R) : Quotient (val_setoid nav) := ⟦-a⟧
+
+def neg_quot : Quotient (val_setoid nav) → Quotient (val_setoid nav) := by
+  apply Quotient.lift (neg_quot') _
+  intro a a' ha
+  rw [neg_quot']
+  apply Quotient.sound
+  apply equiv_of_congr nav _ _ (neg_repr_eq_repr_neg nav a' a ha)
+
+instance : Neg (Quotient (val_setoid nav)) :=
+{ neg := neg_quot
+}
+
+theorem neg_quot_eq_quot_neg_rep {a : R} {x : Quotient (val_setoid nav)} (hx : ⟦a⟧ = x) : -x = ⟦-a⟧ := by
+  rw [←hx]
+  rfl
+
+lemma add_left_neg_quot (a : Quotient (val_setoid nav)) : -a + a = 0 := by
+  match Quotient.exists_rep a with
+  | ⟨ra, ha⟩ =>
+    rw [neg_quot_eq_quot_neg_rep ha, ←ha, add_quot_eq_quot_add_rep rfl rfl, add_left_neg]
+    rfl
+
+
+instance res_ring_p (nav : SurjVal p) : Ring (Quotient (val_setoid nav)) :=
+{ add_assoc := add_quot_assoc,
+  zero_add := zero_add_quot,
+  add_zero := add_quot_zero,
+  add_comm := add_quot_comm,
+  left_distrib := left_distrib_quot,
+  right_distrib := right_distrib_quot,
+  zero_mul := zero_mul_quot,
+  mul_zero := mul_quot_zero,
+  mul_assoc := mul_quot_assoc,
+  one_mul := one_mul_quot,
+  mul_one := mul_quot_one,
+  add_left_neg := add_left_neg_quot
+}
 
 end residue
 
 structure ResidueRing {R : Type u} (p : R) [IntegralDomain R] where
   valtn : SurjVal p
-  repr_p : R → Quotient (setoid_of_val valtn) --residue class representatives
+  repr_p : R → Quotient (val_setoid valtn) --residue class representatives
   lift : R → R --lift function
   lift_def : ∀ (a b : R), (equiv_p valtn).Equiv a b → lift a = lift b
   congr_of_repr : ∀ a b : R, congruence_p valtn a b → repr_p a = repr_p b
@@ -843,7 +1002,7 @@ lemma congr_of_repr_Z {p : ℕ} (hp : nat_prime p) : ∀ a b : ℤ, congruence_p
 
 def primeResidue {p : ℕ} (hp : nat_prime p) : ResidueRing (p : ℤ) := {
   valtn := primeVal hp,
-  repr_p := Quotient.mk (setoid_of_val (primeVal hp)),
+  repr_p := Quotient.mk (val_setoid (primeVal hp)),
   lift := mod_Z p,
   lift_def := sorry,
   congr_of_repr := sorry
