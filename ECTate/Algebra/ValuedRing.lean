@@ -176,7 +176,7 @@ instance eqv_congr : Equivalence (congruence_p nav) :=
   trans         := congruence_p_trans
 }
 
-instance equiv_p (nav : SurjVal p) : HasEquiv R :=
+def equiv_p (nav : SurjVal p) : HasEquiv R :=
 { Equiv := congruence_p nav
 }
 --lemma p_congr_zero : congruence_p nav () 0 :=
@@ -186,19 +186,23 @@ def val_setoid (nav : SurjVal p) : Setoid R :=
   iseqv := eqv_congr
 }
 
+lemma val_setoid.r_eq : (val_setoid nav).r = congruence_p nav := rfl
 --#lint
 
 --def x := Quotient.mk (setoid_congr nav) p
 
-notation "≈p" => congruence_p
+-- notation "≈p" => Setoid.r val_setoid
 
-theorem add_repr_eq_repr_add (nav : SurjVal p) (a b : R) : ∀ (a' b' : R), ≈p nav a' a → ≈p nav b' b → ≈p nav (a' + b') (a + b) := by
+theorem add_repr_eq_repr_add (nav : SurjVal p) (a b : R) :
+  ∀ (a' b' : R), (val_setoid nav).r a' a → (val_setoid nav).r b' b → (val_setoid nav).r (a' + b') (a + b) := by
   intro a' b' ha hb
-  rw [congruence_p, sub_add_eq_sub_sub_swap, add_sub_assoc, sub_eq_add_neg, add_assoc, add_comm _ (-a), ←add_assoc, ←sub_eq_add_neg]
+  rw [val_setoid.r_eq] at *
+  rw [congruence_p, sub_add_eq_sub_sub_swap, add_sub_assoc, sub_eq_add_neg,
+    add_assoc, add_comm _ (-a), ←add_assoc, ←sub_eq_add_neg]
   apply lt_of_lt_of_le _ (nav.v_add_ge_min_v _ _)
   apply lt_min ha hb
 
-theorem equiv_of_congr (nav : SurjVal p) (a b : R) : ≈p nav a b → (equiv_p nav).Equiv a b := by
+theorem equiv_of_congr (nav : SurjVal p) (a b : R) : (val_setoid nav).r a b → (equiv_p nav).Equiv a b := by
   intro h
   exact h
 
@@ -245,7 +249,7 @@ lemma add_quot_comm (a b : Quotient (val_setoid nav)) : a + b = b + a := by
   | ⟨ra, ha⟩, ⟨rb, hb⟩ =>
     rw [add_quot_eq_quot_add_rep ha hb, add_quot_eq_quot_add_rep hb ha, add_comm]
 
-theorem mul_repr_eq_repr_mul (nav : SurjVal p) (a b : R) : ∀ (a' b' : R), ≈p nav a' a → ≈p nav b' b → ≈p nav (a' * b') (a * b) := by
+theorem mul_repr_eq_repr_mul (nav : SurjVal p) (a b : R) : ∀ (a' b' : R), (val_setoid nav).r a' a → (val_setoid nav).r b' b → (val_setoid nav).r (a' * b') (a * b) := by
   intro a' b' ha hb
   sorry
 
@@ -307,8 +311,9 @@ lemma mul_quot_one (a : Quotient (val_setoid nav)) : a * 1 = a := by
   | ⟨ra, ha⟩ =>
     rw [quot_one, mul_quot_eq_quot_mul_rep ha rfl, mul_one, ha]
 
-theorem neg_repr_eq_repr_neg (nav : SurjVal p) (a : R) : ∀ (a' : R), ≈p nav a' a → ≈p nav (-a') (-a) := by
+theorem neg_repr_eq_repr_neg (nav : SurjVal p) (a : R) : ∀ (a' : R), (val_setoid nav).r a' a → (val_setoid nav).r (-a') (-a) := by
   intro a' ha
+  rw [val_setoid.r_eq] at *
   rw [congruence_p, ←val_neg, sub_eq_add_neg, neg_neg, neg_add, neg_neg, ←sub_eq_add_neg]
   exact ha
 
@@ -357,7 +362,7 @@ structure ResidueRing {R : Type u} (p : R) [IntegralDomain R] where
   valtn : SurjVal p
   repr_p : R → Quotient (val_setoid valtn) --residue class representatives
   lift : R → R --lift function
-  lift_def : ∀ (a b : R), (equiv_p valtn).Equiv a b → lift a = lift b
+  lift_def : ∀ (a b : R), (val_setoid valtn).r a b → lift a = lift b
   congr_of_repr : ∀ a b : R, congruence_p valtn a b → repr_p a = repr_p b
 
 structure EnatValRing {R : Type u} (p : R) [IntegralDomain R] where

@@ -26,8 +26,8 @@ by
 
 def move_singular_point_to_origin_triple (evr : EnatValRing p) (e : Model R) : R × R × R :=
   match evr.residue_char with
-  | 2 => (Quotient.lift evr.residue.lift sorry (evr.residue.repr_p e.a4), 0, Quotient.lift evr.residue.lift sorry  (evr.residue.repr_p (e.a6 + e.a4 * e.a2)))
-  | 3 => (Quotient.lift evr.residue.lift sorry (evr.residue.repr_p (-e.b6)), 0, Quotient.lift evr.residue.lift sorry (evr.residue.repr_p (e.a3 - e.b6 * e.a1)))
+  | 2 => (Quotient.lift evr.residue.lift evr.residue.lift_def (evr.residue.repr_p e.a4), 0, Quotient.lift evr.residue.lift sorry  (evr.residue.repr_p (e.a6 + e.a4 * e.a2)))
+  | 3 => (Quotient.lift evr.residue.lift evr.residue.lift_def (evr.residue.repr_p (-e.b6)), 0, Quotient.lift evr.residue.lift sorry (evr.residue.repr_p (e.a3 - e.b6 * e.a1)))
   | _ => (0, 0, 0) --need to fill here
 /-evr.residue.lift_def-/
 
