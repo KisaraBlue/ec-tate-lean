@@ -13,6 +13,7 @@ import Mathlib.Tactic.NormCast
 inductive Enat where
   | ofN : ℕ → Enat
   | top : Enat
+deriving Repr
 
 notation "ℕ∪∞" => Enat
 notation "∞" => Enat.top
