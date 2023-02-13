@@ -555,6 +555,7 @@ namespace Int
 def int_val (p : ℕ) (k : ℤ) : ℕ∪∞ :=
   nat_valuation p (natAbs k)
 
+@[simp]
 lemma int_val_uniformizer {p : ℕ} (gt1 : 1 < p) : int_val p p = 1 := by
   simp only [natAbs_cast, int_val]
   match p with
@@ -574,6 +575,9 @@ lemma int_val_uniformizer {p : ℕ} (gt1 : 1 < p) : int_val p p = 1 := by
     assumption
     exact lt_trans (Nat.lt_succ_self 0) gt1
     exact Ne.irrefl
+
+@[simp]
+lemma int_val_zero {p : ℕ} : int_val p 0 = ∞ := by simp [natAbs_cast, int_val]
 
 lemma nat_val_aux'_mul_eq_add (p : ℕ) (prime : Nat.Prime p) (hp : 1 < p := prime.one_lt) (a b : ℕ)
   (ha : 0 < a) (hb : 0 < b) :
@@ -655,7 +659,7 @@ lemma nat_val_mul_eq_add (p : ℕ) (prime : Nat.Prime p) (a b : ℕ) :
 convert nat_val_aux_mul_eq_add p prime prime.one_lt a b <;>
   simp [← nat_valuation_of_one_lt]
 
-lemma int_val_mul_eq_add (p : ℕ) (prime : Nat.Prime p) (a b : ℤ) :
+lemma int_val_mul_eq_add {p : ℕ} (prime : Nat.Prime p) (a b : ℤ) :
   int_val p (a * b) = int_val p a + int_val p b := by
   simp [int_val, natAbs_mul]
   exact nat_val_mul_eq_add p prime (natAbs a) (natAbs b)
@@ -673,14 +677,16 @@ lemma int_val_add_ge_min (p : ℕ) (a b : ℤ) : int_val p (a + b) ≥ min (int_
 lemma int_val_add_eq_min (p : ℕ) (a b : ℤ) (h : int_val p a < int_val p b) :
   int_val p (a + b) = int_val p a := by sorry
 
-lemma int_val_eq_top_iff_zero (p : ℕ) (gt1 : 1 < p) (a : ℤ) : int_val p a = ∞ ↔ a = 0 := by sorry
+@[simp]
+lemma int_val_eq_top_iff_zero {p : ℕ} (gt1 : 1 < p) (a : ℤ) : int_val p a = ∞ ↔ a = 0 :=
+by sorry
 
 def primeVal {p : ℕ} (hp : Nat.Prime p) : SurjVal (p : ℤ) := {
-  v := int_val p,
-  v_uniformizer' := int_val_uniformizer hp.one_lt,
-  v_mul_eq_add_v' := int_val_mul_eq_add p hp,
-  v_add_ge_min_v' := int_val_add_ge_min p,
-  v_eq_top_iff_zero' := int_val_eq_top_iff_zero p hp.one_lt }
+  v := int_val p
+  v_uniformizer' := int_val_uniformizer hp.one_lt
+  v_mul_eq_add_v' := int_val_mul_eq_add hp
+  v_add_ge_min_v' := int_val_add_ge_min p
+  v_eq_top_iff_zero' := int_val_eq_top_iff_zero hp.one_lt }
 
 
 def decr_val_p (p : ℕ) (k : ℤ) : ℤ :=

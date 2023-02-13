@@ -78,8 +78,9 @@ def tate_big_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) :
   Kodaira × ℕ × ℕ × ReductionType × (ℤ × ℤ × ℤ × ℤ) :=
   let evrp := primeEVR hp
   let navp := evrp.valtn
-  let c4 := e.c4
   let n := val_discr_to_nat navp e
+
+  let c4 := e.c4
   let ⟨vpj, k, integralInv⟩ :=
     match 3 * (primeEVR hp).valtn c4 with
     | ∞ => (0, n, true)
@@ -103,8 +104,8 @@ def tate_big_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) :
     (u', r', s', t')
   let k := k % 12
   if !integralInv then
-    let c6 := e.c6 / (↑u ^ 6)
-    let Δ := e.discr / ofNat (u ^ 12)
+    let c6 := e.c6 / ↑(u ^ 6)
+    let Δ := e.discr / ↑(u ^ 12)
     let ν := natAbs vpj
     match k with
       | 0 => let (c, R) := if kronecker (-c6) p = 1 then
@@ -334,19 +335,17 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
     simp only [Model.dweierstrass_dy, mul_zero, add_zero, zero_add] at singular_dy
     apply succ_le_of_lt singular_dy
 
-  /- These two valuations can be proved at this point but are not used explicitely until stronger valuations are obtained
+  /- These two valuations can be proved at this point but are not used explicitly until stronger valuations are obtained
   have h4 : navp e1.a4 ≥ 1 := by
     delta Model.is_local_singular_point at sing_origin
     have singular_dx := And.left (And.right sing_origin)
     simp [Model.dweierstrass_dx, pow_succ, sub_eq_add_neg, val_neg navp] at singular_dx
-    rw [<-succ_ofN]
     apply succ_le_of_lt singular_dx
 
   have h6 : navp e1.a6 ≥ 1 := by
     delta Model.is_local_singular_point at sing_origin
     have singular := And.left sing_origin
     simp [Model.weierstrass, pow_succ, sub_eq_add_neg, val_neg navp] at singular
-    rw [<-succ_ofN]
     apply succ_le_of_lt singular
   -/
 
