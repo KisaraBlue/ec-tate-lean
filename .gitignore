@@ -5,3 +5,4 @@ ir/
 !/build/doc
 /prelude/build
 /lake-packages
+*.orig
