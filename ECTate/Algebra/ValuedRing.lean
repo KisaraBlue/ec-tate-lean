@@ -190,6 +190,8 @@ structure EnatValRing {R : Type u} (p : R) [CommRing R] [IsDomain R] where
   norm_repr_spec : ∀ r, valtn (r - norm_repr r) > 0
   inv_mod : R → R
   inv_mod_spec : ∀ r, valtn r = 0 → valtn (r * inv_mod r - 1) > 0
+  pth_root : R → R
+  pth_root_spec : ∀ r, valtn (pth_root r ^ residue_char - r) > 0
   quad_roots_in_residue_field : R → R → R → Bool
 
 namespace EnatValRing
@@ -861,6 +863,15 @@ def primeEVR {p : ℕ} (hp : Nat.Prime p) : EnatValRing (p : ℤ) := {
     rw [Int.emod_emod]
     rw [Int.emod_emod] -- TODO why doesn't simp do this?
     sorry
+
+  pth_root := id
+  pth_root_spec := by
+    intro r
+    simp [inv_mod, pos_iff_ne_zero, Int.sub_emod]
+    rw [Int.emod_emod]
+    rw [Int.emod_emod] -- TODO why doesn't simp do this?
+    rw [←Int.sub_emod]
+    sorry -- needs fermat's little theorem
 
   quad_roots_in_residue_field := fun a b c => Int.quad_root_in_ZpZ a b c p }
 

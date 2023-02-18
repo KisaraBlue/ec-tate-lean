@@ -27,6 +27,15 @@ lemma singular_of_val_discr (valp : SurjVal p) (e : Model R) (h : valp e.discr >
 by
   sorry
 
+def singular_point_on_special [DecidableEq R] (evr : EnatValRing p) (e : Model R) : R × R :=
+  if e.c4 = 0 then
+    match evr.residue_char with
+    | 2 => (evr.pth_root e.a4, evr.pth_root (e.a2 * e.a4 + e.a6))
+    | 3 => (evr.pth_root (-(e.a3 ^ 2) - e.a6), e.a1 * evr.pth_root (-(e.a3 ^ 2) - e.a6) + e.a3)
+    | _ => (-e.b2 * evr.inv_mod 12, -(-e.a1 * e.b2 * evr.inv_mod 12 + e.a3) * evr.inv_mod 2)
+  else
+    ((18 * e.b6 - e.b2 * e.b4) * evr.inv_mod e.c4, (e.b2 * e.b5 + 3 * e.b7) * evr.inv_mod e.c4)
+
 def move_singular_point_to_origin_triple (evr : EnatValRing p) (e : Model R) : R × R × R :=
   match evr.residue_char with
   | 2 => (evr.norm_repr e.a4, 0, evr.norm_repr (e.a6 + e.a4 * e.a2))
