@@ -1,8 +1,9 @@
 import Mathlib.Algebra.Group.Defs
 import Mathlib.Algebra.Order.Monoid.Lemmas
-import Mathlib.Algebra.Order.Monoid.Defs
+import Mathlib.Algebra.Order.Monoid.Canonical.Defs
 import Mathlib.Algebra.Ring.Basic
 import Mathlib.Data.Nat.Basic
+import Mathlib.Data.Nat.Order.Basic
 import Mathlib.Init.Algebra.Order
 import Mathlib.Algebra.Ring.Basic
 import Mathlib.Init.Data.Nat.Lemmas
@@ -23,6 +24,9 @@ namespace Enat
 def succ : ℕ∪∞ → ℕ∪∞
   | ofN a => ofN (Nat.succ a)
   | ∞ => ∞
+
+@[simp]
+lemma succ_top : succ ∞ = ∞ := rfl
 
 protected def add : ℕ∪∞ → ℕ∪∞ → ℕ∪∞
   | _, ∞ => ∞
@@ -159,13 +163,13 @@ induction a with
 
 theorem lt_top (n : ℕ) : n < ∞ := And.intro Enat.noConfusion le.below_top
 
-theorem succ_pos (n : ℕ∪∞) : 0 < (succ n) := by
+theorem succ_pos (n : ℕ∪∞) : 0 < succ n := by
   cases n with
   | ofN n =>
     exact And.intro (Enat.noConfusion) (by rw [succ_ofN n]; exact le.in_nat (Nat.succ_le_succ (Nat.zero_le n)))
   | top => exact lt_top 0
 
-theorem zero_le (n : ℕ∪∞) : (ofN 0) ≤ n := by
+protected theorem zero_le (n : ℕ∪∞) : 0 ≤ n := by
   cases n with
   | ofN n => exact le.in_nat (Nat.zero_le n)
   | top => exact le.below_top
@@ -179,7 +183,7 @@ protected theorem le_trans {n m k : ℕ∪∞} : n ≤ m → m ≤ k → n ≤ k
   | le.in_nat h, le.in_nat h' => le.in_nat (Nat.le_trans h h')
   | _, le.below_top                 => le.below_top
 
-theorem le_succ (n : ℕ∪∞) : n ≤ (succ n) := by
+theorem le_succ (n : ℕ∪∞) : n ≤ succ n := by
   cases n with
   | ofN n => exact le.in_nat (Nat.le_succ n)
   | top     => exact le.below_top
@@ -251,6 +255,13 @@ theorem le_add_right (n k : ℕ∪∞) : n ≤ n + k := by cases n with
     | top   => rw [add_top]; exact le.below_top
     | ofN k => exact le.in_nat (Nat.le_add_right n k)
 
+@[simp]
+theorem succ_eq_add_one (a : Enat) : succ a = a + 1 :=
+by
+  cases a
+  . simp
+  . simp
+
 theorem le_add_left (n k : ℕ∪∞) : n ≤ k + n := by
   rw [add_comm]
   exact le_add_right n k
@@ -276,6 +287,10 @@ theorem eq_top_of_top_le (a : ℕ∪∞) (h : ∞ ≤ a) : a = ∞ := by
   cases h with
   | below_top => rfl
 
+@[simp]
+theorem top_le_iff_eq_top (a : ℕ∪∞) : ∞ ≤ a ↔ a = ∞ :=
+Iff.intro (eq_top_of_top_le _) (fun h => by simp [h])
+
 theorem eq_top_of_add_eq_top (a : ℕ∪∞) (n : ℕ) (h : a + n = ∞) : a = ∞ := by
   cases a with
   | top => rfl
@@ -285,8 +300,8 @@ protected theorem le_of_add_le_add_left {a : ℕ} {b c : ℕ∪∞} (h : a + b �
 by
   cases b with
   | top =>
-    simp [add_comm] at h
-    rw [eq_top_of_add_eq_top c a (eq_top_of_top_le _ h)]
+    simp only [add_comm, top_add, top_le_iff_eq_top] at h
+    rw [eq_top_of_add_eq_top c a h]
   | ofN b => cases c with
     | top => exact le.below_top
     | ofN c =>
@@ -317,21 +332,22 @@ protected theorem le_total (m n : ℕ∪∞) : m ≤ n ∨ n ≤ m :=
   | Or.inl h => Or.inl (le_of_lt h)
   | Or.inr h => Or.inr h
 
-lemma le_ofN (m n : Nat) : m ≤ n ↔ (m : Enat) ≤ n := by
+@[simp]
+lemma le_ofN (m n : Nat) : (m : Enat) ≤ n ↔ m ≤ n := by
   apply Iff.intro
-  intro h
-  exact le.in_nat h
-  intro h
-  cases h
-  assumption
+  . intro h
+    cases h
+    assumption
+  .  exact le.in_nat
 
-theorem lt_ofN (m n : ℕ) : m < n ↔ (m : Enat) < n := by
+@[simp]
+theorem lt_ofN (m n : ℕ) : (m : Enat) < n ↔ m < n := by
   apply Iff.intro
-  intro h
-  exact And.intro (Enat.noConfusion) (le.in_nat h)
-  intro h
-  cases h.right
-  assumption
+  . intro h
+    cases h.right
+    assumption
+  . intro h
+    exact And.intro (Enat.noConfusion) (le.in_nat h)
 
 lemma eq_ofN (m n : Nat) : m = n ↔ (m : Enat) = n := by
   apply Iff.intro
@@ -343,7 +359,7 @@ lemma eq_ofN (m n : Nat) : m = n ↔ (m : Enat) = n := by
 instance : DecidableRel ((. ≤ . ) : ℕ∪∞ → ℕ∪∞ → Prop) := fun n m =>
 match n, m with
   | ofN b, ofN c =>
-  decidable_of_decidable_of_iff (le_ofN b c)
+  decidable_of_decidable_of_iff (le_ofN b c).symm
   | _, ∞         => isTrue le.below_top
   | ∞, ofN a     => isFalse (fun h => by cases h)
 
@@ -355,21 +371,22 @@ match n, m with
   | ∞, ofN a     => isFalse (fun h => by cases h)
   | ofN a, ∞     => isFalse (fun h => by cases h)
 
-theorem eq_zero_or_pos : ∀ (n : ℕ∪∞), n = 0 ∨ n > 0
+protected theorem eq_zero_or_pos : ∀ (n : ℕ∪∞), n = 0 ∨ n > 0
   | ofN 0   => Or.inl rfl
   | ofN (Nat.succ n) => by rw [←succ_ofN n]; exact Or.inr (succ_pos _)
   | ∞ => Or.inr (lt_top 0)
 
-lemma pos_of_ne_zero {n : ℕ∪∞} : n ≠ 0 → 0 < n :=
-Or.resolve_left (eq_zero_or_pos n)
+protected lemma pos_of_ne_zero {n : ℕ∪∞} : n ≠ 0 → 0 < n :=
+Or.resolve_left (Enat.eq_zero_or_pos n)
 
-theorem pos_iff_ne_zero (n : ℕ∪∞) : n ≠ 0 ↔ 0 < n :=
-Iff.intro pos_of_ne_zero ne_of_gt
+protected theorem pos_iff_ne_zero (n : ℕ∪∞) : 0 < n ↔ n ≠ 0 :=
+Iff.intro ne_of_gt Enat.pos_of_ne_zero
 
-lemma lt_add_right (a b c : ℕ∪∞) : a < b -> a < b + c :=
+-- TODO  what is the right typeclass that does this?
+protected lemma lt_add_right (a b c : ℕ∪∞) : a < b -> a < b + c :=
   fun h => lt_of_lt_of_le h (le_add_right _ _)
 
--- TODO if these are left as underscores this becomes noncomputable, another code generator bug?
+-- TODO if min max are left as underscores this becomes noncomputable, another code generator bug?
 instance : LinearOrder ℕ∪∞ :=
 { Enat.instPreorderEnat with
   min := fun a b => if a ≤ b then a else b,
@@ -419,8 +436,28 @@ lemma ofN_to_nat_eq_self {a : ℕ∪∞} (h : a ≠ ∞) : to_nat h = a := by
   | top => exact False.elim (h (Eq.refl ∞))
   | ofN n => rfl
 
-instance : OrderedAddCommMonoid ℕ∪∞ :=
+instance : CanonicallyOrderedAddMonoid ℕ∪∞ :=
 { Enat.instLinearOrderEnat with
+  bot := 0
+  bot_le := Enat.zero_le
+  le_self_add := Enat.le_add_right
+  exists_add_of_le := by
+    intro a b h
+    cases b
+    case ofN b =>
+      cases a
+      case ofN a =>
+        simp at h
+        obtain ⟨c, hc⟩ := exists_add_of_le h
+        use c
+        simp
+        exact_mod_cast hc
+      case top =>
+        simp at h
+        contradiction
+    case top =>
+      use ∞
+      simp
   add_le_add_left := fun _ _ h c => Enat.add_le_add_left h c }
 
 protected def mul : ℕ∪∞ → ℕ∪∞ → ℕ∪∞

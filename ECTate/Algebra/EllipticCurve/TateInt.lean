@@ -160,7 +160,7 @@ def kodaira_type_Is (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 r0 s0 
   else
   have hdr : has_double_root 1 a3q (-a6q2) hp := by
     apply And.intro (val_of_one surjvalp) _
-    apply pos_of_ne_zero
+    apply Enat.pos_of_ne_zero
     rw [mul_one, ←neg_mul_eq_mul_neg, sub_eq_add_neg, neg_neg]
     exact discr_1
   let a := double_root 1 a3q (-a6q2) p
@@ -216,7 +216,7 @@ def kodaira_type_Is (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 r0 s0 
       rw [←rw_a2', val_sub_val_eq evrp e1.a2 1 h2']
       simp
     apply And.intro v_a2p _
-    apply pos_of_ne_zero
+    apply Enat.pos_of_ne_zero
     assumption
   let a' := double_root a2p a4pq a6pq2 p
   have rw_a' : double_root a2p a4pq a6pq2 p = a' := rfl
@@ -231,7 +231,7 @@ def kodaira_type_Is (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 r0 s0 
     apply val_mul_ge_of_right_ge surjvalp
     apply val_mul_ge_of_right_ge surjvalp
     rw [Nat.cast_pow, val_of_pow_uniformizer surjvalp]
-    rw [lt_ofN 1 q] at hq
+    rw [← lt_ofN 1 q] at hq
     exact succ_le_of_lt hq
   have h3'' : surjvalp e2.a3 ≥ (q + 1) := by
     rw [r_of_a3]
@@ -251,7 +251,7 @@ def kodaira_type_Is (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 r0 s0 
     . rw [pow_two, factorize3 a' p q, ←pow_add]
       apply val_mul_ge_of_left_ge surjvalp _
       rw [val_of_pow_uniformizer]
-      exact (le_ofN _ _).1 (Nat.add_le_add (le_of_eq rfl) (Nat.succ_le_of_lt hq))
+      exact (le_ofN _ _).2 (Nat.add_le_add (le_of_eq rfl) (Nat.succ_le_of_lt hq))
   have h6'' : surjvalp e2.a6 ≥ ↑(2 * (q + 1)) := by
     rw [r_of_a6, Nat.cast_pow]
     apply le_trans (le_min _ _) (surjvalp.v_add_ge_min_v _ _)
@@ -269,7 +269,7 @@ def kodaira_type_Is (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 r0 s0 
     . rw [mul_pow a' _ 3, ←pow_mul, mul_add, mul_one, Nat.mul_succ] -- TODO why did this break
       apply val_mul_ge_of_right_ge surjvalp
       rw [val_of_pow_uniformizer, mul_comm q]
-      exact (le_ofN _ _).1 (Nat.add_le_add (le_of_eq rfl) (Nat.succ_le_of_lt hq))
+      exact (le_ofN _ _).2 (Nat.add_le_add (le_of_eq rfl) (Nat.succ_le_of_lt hq))
   let r := r + u0 ^ 2 + a' * (p ^ q : ℕ) -- TODO check these
   let t := t + u0 ^ 2 * s0 * a' * (p ^ q : ℕ)
   kodaira_type_Is p hp e2 u0 r s0 t (m + 2) (q + 1) (Nat.lt_succ_of_lt hq) h1'' h2'' h3'' h4'' h6''
@@ -278,7 +278,7 @@ termination_by _ =>
 decreasing_by
   simp_wf
   apply Nat.sub_lt_sub_left _ _
-  . rw [lt_ofN, ofN_val_discr_to_nat]
+  . rw [← lt_ofN, ofN_val_discr_to_nat]
     exact lt_of_succ_le (v_discr_of_v_ai surjvalp e hq h1 h2 h3 h4 h6)
   . exact Nat.add_lt_add_right (Nat.mul_lt_mul_of_pos_left q.lt_succ_self (Nat.zero_lt_succ 1)) 2
 
@@ -302,7 +302,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
   let n := val_discr_to_nat navp e
   if testΔ : n = 0 then (I 0, 0, 1, .Good, (u, r, s, t)) else -- TODO check
   have hΔ : navp e.discr ≥ 1 := by
-    rw [show ¬n = 0 ↔ 0 < n by simp [Nat.pos_iff_ne_zero], lt_ofN, ofN_val_discr_to_nat] at testΔ
+    rw [show ¬n = 0 ↔ 0 < n by simp [Nat.pos_iff_ne_zero], ← lt_ofN, ofN_val_discr_to_nat] at testΔ
     exact succ_le_of_lt testΔ
 
   if test_b2 : navp e.b2 < 1 then
@@ -453,7 +453,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
   -- dbg_trace (model_to_cubic evrp e2)
   if test_δcubic : navp (δmultiplicity (model_to_cubic evrp e2)) = 0 then
     have e2_cubic_has_double_root : cubic_has_double_root evrp e2 :=
-      And.intro (pos_of_ne_zero test_Δcubic) test_δcubic
+      And.intro (Enat.pos_of_ne_zero test_Δcubic) test_δcubic
 
     --let r1 := p * (modulo (if p = 2 then a4p2 else a2p * a4p2) p)
     let e3 := move_cubic_double_root_to_origin_iso evrp e2
@@ -509,7 +509,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
   else
 
   have e2_cubic_has_triple_root : cubic_has_triple_root evrp e2 :=
-    And.intro (pos_of_ne_zero test_Δcubic) (pos_of_ne_zero test_δcubic)
+    And.intro (Enat.pos_of_ne_zero test_Δcubic) (Enat.pos_of_ne_zero test_δcubic)
 
   let e3 := move_cubic_triple_root_to_origin_iso evrp e2
   --let r1 := p * (modulo (if p = 2 then -a2p else -a6p3) p)
@@ -558,7 +558,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
 
   have h_b6p4 : has_double_root 1 a3p2 (-a6p4) hp := by
     apply And.intro (val_of_one navp) _
-    apply pos_of_ne_zero
+    apply Enat.pos_of_ne_zero
     rw [mul_one, ←neg_mul_eq_mul_neg, sub_eq_add_neg, neg_neg]
     exact discr_b6p4
 
@@ -608,7 +608,7 @@ decreasing_by
     rw [iso_rst_val_discr_to_nat]
   rw [discr_eq]
   apply Nat.sub_lt_of_pos_le _ _ (Nat.zero_lt_succ 11)
-  rw [le_ofN, ←discr_eq, ofN_val_discr_to_nat, show Nat.succ 11 = 12 by rfl]
+  rw [←le_ofN, ←discr_eq, ofN_val_discr_to_nat, show Nat.succ 11 = 12 by rfl]
 
   exact Model.val_discr_of_val_ai (primeEVR hp) e4.toModel h1 h2 h3 h4 h6
 

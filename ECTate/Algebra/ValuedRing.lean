@@ -9,6 +9,7 @@ import Mathlib.Tactic.LibrarySearch
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Convert
 import Mathlib.Data.Nat.Prime
+import Mathlib.Data.Int.GCD
 
 --class ValueMonoid (A : Type u) extends AddCommMonoid A, LinearOrder A
 
@@ -132,12 +133,12 @@ lemma val_of_add_one {p : R} (nav : SurjVal p) (h : nav x ≥ 1): nav (x + 1) = 
 -/
 
 lemma val_of_minus_one {p : R} (nav : SurjVal p) : nav (-1) = 0 := by
-  cases eq_zero_or_pos (nav (-1)) with
+  cases Enat.eq_zero_or_pos (nav (-1)) with
   | inl h => exact h
   | inr h =>
     have contradiction : nav 1 > 0 := by
       rw [←neg_neg 1, ←one_mul 1, neg_mul_eq_neg_mul, neg_mul_eq_mul_neg, nav.v_mul_eq_add_v]
-      apply lt_add_right _ _ _ h
+      apply Enat.lt_add_right _ _ _ h
     rw [val_of_one] at contradiction
     exact False.elim ((lt_irrefl 0) contradiction)
 
@@ -186,6 +187,9 @@ structure EnatValRing {R : Type u} (p : R) [CommRing R] [IsDomain R] where
   pos_valtn_decr {x : R} (h : valtn x > 0) : x = p * decr_val x
   residue_char : ℕ -- ToDo delete
   norm_repr : R → R --generalization of modulo
+  norm_repr_spec : ∀ r, valtn (r - norm_repr r) > 0
+  inv_mod : R → R
+  inv_mod_spec : ∀ r, valtn r = 0 → valtn (r * inv_mod r - 1) > 0
   quad_roots_in_residue_field : R → R → R → Bool
 
 namespace EnatValRing
@@ -210,7 +214,7 @@ lemma decr_val_zero {p : R} (evr : EnatValRing p) : evr.decr_val 0 = 0 := by
 
 @[simp]
 lemma decr_val_neg {p : R} (evr : EnatValRing p) (x : R) : evr.decr_val (-x) = -evr.decr_val x := by
-  cases eq_zero_or_pos (evr.valtn x) with
+  cases @eq_zero_or_pos _ _ (evr.valtn x) with
   | inl h =>
     have hm : evr.valtn (-x) = 0 := by simp [h]
     rw [evr.zero_valtn_decr h, evr.zero_valtn_decr hm]
@@ -224,7 +228,8 @@ lemma decr_val_p_mul {p : R} (evr : EnatValRing p) (x : R) : evr.decr_val (p * x
   have h : (p * x) = p * decr_val evr (p * x) := by
     apply evr.pos_valtn_decr
     rw [evr.valtn.v_mul_eq_add_v, evr.valtn.v_uniformizer]
-    apply lt_of_lt_of_le ((Enat.lt_ofN 0 1).1 (Nat.lt_succ_self 0)) (le_add_right 1 _)
+    rw [add_comm, ← Enat.succ_eq_add_one]
+    apply Enat.succ_pos
   apply nzero_mul_left_cancel p _ _ (p_non_zero evr.valtn)
   exact h.symm
 
@@ -292,9 +297,9 @@ lemma val_sub_val_le {p : R} (evr : EnatValRing p) (x : R) {m : ℕ} (n : ℕ) (
       intro a ha
       have h'' := val_sub_val_eq evr x n ha
       rw [h'']
-      apply (le_ofN (m - n) (a - n)).1
+      apply (le_ofN (m - n) (a - n)).2
       rw [ha] at h
-      apply Nat.sub_le_sub_right ((le_ofN m a).2 h)
+      apply Nat.sub_le_sub_right ((le_ofN m a).1 h)
     exact Exists.elim h' H
 
 lemma factor_p_of_le_val {p : R} (evr : EnatValRing p) {x : R} {n : ℕ} (h : evr.valtn x ≥ n) :
@@ -327,7 +332,7 @@ lemma sub_val_neg {p : R} (evr : EnatValRing p) {x : R} {n : ℕ} : sub_val evr 
   induction n with
   | zero => simp [sub_val_x_zero]
   | succ n ih =>
-    cases eq_zero_or_pos (evr.valtn x) with
+    cases @eq_zero_or_pos _ _ (evr.valtn x) with
     | inl h' =>
       have h'm : evr.valtn (-x) = 0 := by simp [h']
       rw [sub_val_val_zero evr _ _ h', sub_val_val_zero evr _ _ h'm]
@@ -398,7 +403,7 @@ lemma sub_val_sub_val {p : R} (evr : EnatValRing p) {x : R} {m n : ℕ} :
     | zero => simp [sub_val_x_zero]
     | succ m ih =>
       intro y
-      cases eq_zero_or_pos (evr.valtn y) with
+      cases @eq_zero_or_pos _ _ (evr.valtn y) with
       | inl h' => simp [sub_val_val_zero evr y _ h']
       | inr h' =>
         rw [sub_val_val_pos_succ evr y m, Nat.succ_add, sub_val_val_pos_succ evr y _]
@@ -407,6 +412,18 @@ lemma sub_val_sub_val {p : R} (evr : EnatValRing p) {x : R} {m n : ℕ} :
 
 def has_double_root {p : R} (evr : EnatValRing p) (a b c : R) :=
   evr.valtn a = 0 ∧ evr.valtn (b ^ 2 - 4 * a * c) > 0
+
+def double_root {p : R} (evr : EnatValRing p) (a b c : R) :=
+  if evr.residue_char = 2 then
+    evr.norm_repr c
+  else
+    evr.norm_repr (-b * evr.inv_mod (2 * a))
+
+lemma val_poly_of_double_root {p : R} (evr : EnatValRing p) (a b c : R)
+  (H : has_double_root evr a b c) :
+  evr.valtn (a * (double_root evr a b c)^2 + b * (double_root evr a b c) + c) > 0 ∧
+  evr.valtn (2*a*(double_root evr a b c) + b) > 0 := by sorry
+
 
 end EnatValRing
 
@@ -468,6 +485,7 @@ decreasing_by
   simp [WellFoundedRelation.rel, measure, invImage, InvImage, Nat.lt_wfRel]
   exact Nat.div_lt_self hm hq
 
+-- TODO unusedVariable linter fails
 lemma nat_valuation_aux''_of_dvd_induction : ∀ (M m : ℕ) (hM : m ≤ M) (hm : 0 < m) (n : ℕ)
   (hmq : m % q = 0), ↑(nat_valuation_aux'' q hq m hm n) = succ ↑(nat_valuation_aux'' q hq (m / q)
     (Nat.div_pos_of_mod hm hq hmq) n) := by
@@ -476,8 +494,7 @@ lemma nat_valuation_aux''_of_dvd_induction : ∀ (M m : ℕ) (hM : m ≤ M) (hm 
   | zero =>
     intro m mle0 hm n hmq
     rw [Nat.le_zero] at mle0
-    apply False.elim
-    exact (ne_of_gt hm) mle0
+    exact ((ne_of_gt hm) mle0).elim
   | succ M IH =>
     intro m m_le_sM hm n hmq
     cases LE.le.lt_or_eq m_le_sM with
@@ -541,6 +558,7 @@ by
 def nat_valuation_aux (q : ℕ) (hq : 1 < q) : ℕ → ℕ∪∞ :=
   λ m => if hm : m = 0 then ∞ else nat_valuation_aux' q hq m (Nat.pos_of_ne_zero hm)
 
+@[simp]
 lemma nat_val_aux_zero (p : ℕ) (hp) : nat_valuation_aux p hp 0 = ∞ := by
   simp [nat_valuation_aux]
 
@@ -785,57 +803,66 @@ def decr_val_p (p : ℕ) (k : ℤ) : ℤ :=
 def sub_val_p (p : ℕ) (val : ℤ → ℕ∪∞) (n : ℕ) (k : ℤ) : ℤ :=
   k / (p ^ ((min (n : ℕ∪∞) (val k)).to_nat sorry) : ℕ)
 
-
 @[simp]
 lemma nat_valuation_eq_zero_iff {p : ℕ} (hp : 1 < p) {k : ℕ} : nat_valuation p k = 0 ↔ k % p ≠ 0 :=
 by
-  simp [nat_valuation]
-  -- aesop
-  sorry
+  have := nat_val_aux_succ
+  simp only [nat_valuation, ne_eq]
+  aesop
+  -- change (Enat.succ _ = 0) at a -- TODO doesn't work
 
 @[simp]
 lemma int_valuation_eq_zero_iff {p : ℕ} {k : ℤ} (hp : 1 < p) : int_val p k = 0 ↔ k % p ≠ 0 :=
 by
   simp [int_val]
-  rw [nat_valuation_eq_zero_iff]
-  cases k
-  . aesop
-    . apply a_1
-      rw [← Int.ofNat_emod] at *
-      simpa [- Int.ofNat_emod, -coe_nat_mod] using a_2
-    . apply a_1
-      rw [← Int.ofNat_emod] at *
-      simpa [- Int.ofNat_emod, -coe_nat_mod] using a_2
-  sorry
+  rw [nat_valuation_eq_zero_iff hp]
+  rw [not_iff_not]
+  aesop
+  . cases k
+    . aesop
+      exact eq_zero_of_natAbs_eq_zero a
+    . aesop
+      rw [← Int.natAbs_eq_zero]
+      sorry
   sorry
 
 @[simp]
-lemma primeVal_eq_zero_iff {p : ℕ} {k : ℤ} (hp : Nat.Prime p) : (primeVal hp) k = 0 ↔ k % p ≠ 0 :=
--- by rw [primeVal, int_valuation_eq_zero_iff hp.one_lt]
-sorry
+lemma primeVal_eq_zero_iff {p : ℕ} {k : ℤ} (hp : Nat.Prime p) : primeVal hp k = 0 ↔ k % p ≠ 0 :=
+by rw [primeVal, int_valuation_eq_zero_iff hp.one_lt]
 
-lemma zero_valtn_decr_p {p : ℕ} {k : ℤ} (hp : Nat.Prime p) (h : (primeVal hp) k = 0) :
+lemma zero_valtn_decr_p {p : ℕ} {k : ℤ} {hp : Nat.Prime p} (h : primeVal hp k = 0) :
   decr_val_p p k = k :=
 by
   simp [decr_val_p] at *
   aesop
 
-def norm_repr_p (p : ℕ) (x : ℤ) : ℤ := (x % (p : ℤ) + p) % (p : ℤ)
+def norm_repr_p (p : ℕ) (x : ℤ) : ℤ := x % (p : ℤ)
+
+def modulo (x : ℤ) (p : ℕ) := x % (p:ℤ)
+
+def inv_mod (x : ℤ) (p : ℕ) := gcdA x p
 
 def primeEVR {p : ℕ} (hp : Nat.Prime p) : EnatValRing (p : ℤ) := {
   valtn := primeVal hp
   decr_val := decr_val_p p
   -- sub_val := sub_val_p p (primeVal hp).v
   -- sub_val_eq := sorry
-  zero_valtn_decr := zero_valtn_decr_p hp
+  zero_valtn_decr := zero_valtn_decr_p
   pos_valtn_decr := sorry
   residue_char := p
-  norm_repr := norm_repr_p p
+  norm_repr := (. % p)
+  norm_repr_spec := by
+    intro r
+    simp [pos_iff_ne_zero, Int.sub_emod]
+  inv_mod := (inv_mod . p)
+  inv_mod_spec := by
+    intro r h
+    simp [inv_mod, pos_iff_ne_zero, Int.sub_emod]
+    rw [Int.emod_emod]
+    rw [Int.emod_emod] -- TODO why doesn't simp do this?
+    sorry
+
   quad_roots_in_residue_field := fun a b c => Int.quad_root_in_ZpZ a b c p }
-
-def modulo (x : ℤ) (p : ℕ) := (x % (p:ℤ) + p) % (p:ℤ)
-
-def inv_mod (x : ℤ) (p : ℕ) := modulo (x ^ (p - 2)) p
 
 def has_double_root (a b c : ℤ) {p : ℕ} (hp : Nat.Prime p) :=
   let v_p := (primeEVR hp).valtn.v

@@ -35,10 +35,11 @@ def tate_algorithm {R : Type u} [CommRing R] [IsDomain R] {pi : R} (evr : EnatVa
 
   -- let Δ := e.discr
   let n := val_discr_to_nat evr.valtn e
+  -- TODO copy these Step markrs to tateint
   -- Step 1
   if testΔ : n = 0 then (I 0, 0, 1, (u, r, s, t)) else
   have hΔ : evr.valtn e.discr ≥ 1 := by
-    rw [(show ¬n = 0 ↔ 0 < n by simp [Nat.pos_iff_ne_zero]), lt_ofN, ofN_val_discr_to_nat] at testΔ
+    rw [(show ¬n = 0 ↔ 0 < n by simp [Nat.pos_iff_ne_zero]), ← lt_ofN, ofN_val_discr_to_nat] at testΔ
     exact succ_le_of_lt testΔ
 
   -- Step 2
@@ -91,12 +92,15 @@ def tate_algorithm {R : Type u} [CommRing R] [IsDomain R] {pi : R} (evr : EnatVa
 
   --have hb2 : evr.valtn e.b2 ≥ 1 := sorry --adapt test_b2 after change of coordinates
 
+  -- Step 3
   if test_a6 : evr.valtn e'.a6 < 2 then (II, n, 1, (u, r, s, t)) else
   have h6 : evr.valtn e'.a6 ≥ 2 := le_of_not_lt test_a6
 
+  -- Step 4
   if test_b8 : evr.valtn e'.b8 < 3 then (III, n-1, 2, (u, r, s, t)) else
   have hb8 : evr.valtn e'.b8 ≥ 3 := le_of_not_lt test_b8
 
+  -- Step 5
   if test_b6 : evr.valtn e'.b6 < 3 then
     let (a3p, a6p2) := (evr.sub_val 1 e'.a3, evr.sub_val 2 e'.a6)
     let c := if evr.quad_roots_in_residue_field 1 a3p (-a6p2) then 3 else 1
@@ -123,43 +127,49 @@ def tate_algorithm {R : Type u} [CommRing R] [IsDomain R] {pi : R} (evr : EnatVa
     apply lt_of_succ_le
     rw [mul_one, ←neg_mul_eq_mul_neg, sub_eq_add_neg, neg_neg, pow_succ, pow_one]
     simp only [Model.b6] at hb6
-    rw [evr.factor_p_of_le_val h3, evr.factor_p_of_le_val h6, factorize5, evr.valtn.v_mul_eq_add_v, val_of_pow_uniformizer, (show 3 = 2 + 1 by rfl), ←add_ofN] at hb6
+    rw [evr.factor_p_of_le_val h3, evr.factor_p_of_le_val h6, factorize5,
+        evr.valtn.v_mul_eq_add_v,
+        val_of_pow_uniformizer, show (3 : ℕ∪∞) = 2 + 1 by rfl] at hb6
     exact Enat.le_of_add_le_add_left hb6
 
-  let s1 := double_root 1 e'.a1 (-e'.a2) p
-  let t1 := double_root 1 e'.a3 (-e'.a6) p
+  let s1 := evr.double_root 1 e'.a1 (-e'.a2)
+  let t1 := evr.double_root 1 a3p (-a6p2)
 
-  let e'' := rst_iso 0 s1 (p * t1) e'
+  let e'' := rst_iso 0 s1 (pi * t1) e'
 
   let t := t + t1 * u ^ 3
 
   have h1 : evr.valtn e''.a1 ≥ 1 := by
     rw [st_of_a1, add_comm e'.a1, ←mul_one 2]
-    exact succ_le_of_lt (val_poly_of_double_root hp 1 e'.a1 (-e'.a2) hdr_b2).2
+    exact succ_le_of_lt (evr.val_poly_of_double_root 1 e'.a1 (-e'.a2) hdr_b2).2
 
   have h2 : evr.valtn e''.a2 ≥ 1 := by
-    rw [←val_neg, st_of_a2, sub_eq_add_neg, sub_eq_add_neg, neg_add, neg_add, neg_neg, neg_neg, Int.add_comm _ (s1 ^ 2), Int.add_comm (-e'.a2), ←Int.add_assoc, ←succ_ofN, ←one_mul (s1 ^ 2), mul_comm s1]
-    exact succ_le_of_lt (val_poly_of_double_root hp 1 e'.a1 (-e'.a2) hdr_b2).1
+    rw [←val_neg, st_of_a2, sub_eq_add_neg, sub_eq_add_neg, neg_add, neg_add, neg_neg,
+      neg_neg, add_comm _ (s1 ^ 2), add_comm (-e'.a2), ←add_assoc,
+      ← one_mul (s1 ^ 2), mul_comm s1]
+    exact succ_le_of_lt (evr.val_poly_of_double_root 1 e'.a1 (-e'.a2) hdr_b2).1
 
   have h3 : evr.valtn e''.a3 ≥ 2 := by
     -- rw [st_of_a1, add_comm e'.a1, ←succ_ofN, ←mul_one 2]
     -- exact succ_le_of_lt (val_poly_of_double_root hp 1 e'.a1 (-e'.a2) hdr_b2).2
     -- sorry -- = d/dt (t - pi*beta)²
     rw [st_of_a3, ←mul_assoc, mul_comm 2, add_comm e'.a3, ←mul_one 2,
-      factor_p_of_le_val evrp h3, pow_one, mul_assoc, ←mul_add, navp.v_mul_eq_add_v,
+      evr.factor_p_of_le_val h3, pow_one, mul_assoc, ←mul_add, evr.valtn.v_mul_eq_add_v,
       show (2 : Enat) = 1 + 1 by norm_num]
-    apply add_le_add (le_of_eq navp.v_uniformizer.symm)
-    exact succ_le_of_lt (val_poly_of_double_root hp 1 a3p (-a6p2) hdr_b6).2
+    apply add_le_add (le_of_eq evr.valtn.v_uniformizer.symm)
+    convert succ_le_of_lt (evr.val_poly_of_double_root 1 a3p (-a6p2) hdr_b6).2
   have h4 : evr.valtn e''.a4 ≥ 2 := sorry -- using pi³|b_8
   have h6 : evr.valtn e''.a6 ≥ 3 := sorry -- = -(t - pi*beta)²
 
-  let (a2p, a4p2, a6p3) := (evrp.sub_val 1 e.a2, evrp.sub_val 2 e.a4, evrp.sub_val 3 e.a6)
+  let (a2p, a4p2, a6p3) := (evr.sub_val 1 e.a2, evr.sub_val 2 e.a4, evr.sub_val 3 e.a6)
   -- 18bcd – 4b³d + b²c² – 4c³ – 27d²
   let Δcube := -4 * a2p^3 * a6p3 + a2p^2 * a4p2^2 - 4 * a4p2^3 - 27 * a6p3^2
+  -- Step 6
   if evr.valtn Δcube = 0 then
     let c := 1 + count_roots_cubic 1 a2p a4p2 a6p3 p
     (Is 0, n - 4, c, (u, r, s, t))
   else
+  -- Step 7
   if evr.valtn (3 * a4p2 - a2p ^ 2) = 0 then
     let r1 := p * (evr.norm_repr (if p = 2 then a4p2 else a2p * a4p2) p)
     let e := rst_iso r1 0 0 e
@@ -170,6 +180,7 @@ def tate_algorithm {R : Type u} [CommRing R] [IsDomain R] {pi : R} (evr : EnatVa
     have h3 : evr.valtn e.a3 ≥ 2 := sorry -- preserved
     have h4 : evr.valtn e.a4 ≥ 3 := sorry -- T=0 double root => a_4,2 = 0
     have h6 : evr.valtn e.a6 ≥ 4 := sorry -- T=0 double root => a_6,3 = 0
+    -- Step 7 (subprocedure)
     let (m, c, (r, t)) := kodaira_type_Is p hp e u r s t 1 2 (Nat.lt_succ_self 1) h1 h2 h3 h4 h6
     (Is m, n - m - 4, c, (u, r, s, t))
   else
@@ -184,6 +195,7 @@ def tate_algorithm {R : Type u} [CommRing R] [IsDomain R] {pi : R} (evr : EnatVa
   have h6 : evr.valtn e.a6 ≥ 4 := sorry -- T=0 triple root => a_6,3 = 0
 
   let (a3p2, a6p4) := (evrp.sub_val 2 e.a3, evrp.sub_val 4 e.a6)
+  -- Step 8
   if evr.valtn (a3p2 ^ 2 + 4 * a6p4) = 0 then
     let c := if quad_root_in_ZpZ 1 a3p2 (-a6p4) p then 3 else 1
     (IVs, n - 6, c, (u, r, s, t))
@@ -195,13 +207,15 @@ def tate_algorithm {R : Type u} [CommRing R] [IsDomain R] {pi : R} (evr : EnatVa
   have h3 : evr.valtn e.a3 ≥ 3 := sorry --change of coord using root
   --have h6 : evr.valtn e.a6 ≥ 5 := sorry
 
+  -- Step 9
   if test_a4 : evr.valtn e.a4 < 4 then (IIIs, n - 7, 2, (u, r, s, t)) else
   have h4 : evr.valtn e.a4 ≥ 4 := le_of_not_lt test_a4
 
+  -- Step 10
   if test_a6 : evr.valtn e.a6 < 6 then (IIs, n - 8, 1, (u, r, s, t)) else
   have h6 : evr.valtn e.a6 ≥ 6 := le_of_not_lt test_a6
 
   have h1 : evr.valtn e.a1 ≥ 1 := sorry --preserved
   have h2 : evr.valtn e.a2 ≥ 2 := sorry --preserved
-  -- tate_small_prime p hp (u_iso (p : ℤ) e) (p * u) r s t
-  sorry
+  -- Step 11
+  tate_algorithm p hp (u_iso (p : ℤ) e) (p * u) r s t
