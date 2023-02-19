@@ -321,16 +321,19 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 : ℤ
   let (r, s) := (r + r1s1t1.fst * u ^ 2, s + u * r1s1t1.snd.fst)
   let t := t + r1s1t1.snd.snd * u ^ 3 + s * r1s1t1.fst * u ^ 2
 
-  have sing_origin : Model.is_local_singular_point navp e1.toModel (0, 0) := by
-    apply Model.move_singular_point_to_origin
+  have sing_origin : Model.is_local_singular_point evrp e1.toModel (0, 0) := by
+    apply Model.move_singular_point_to_origin evrp e.toModel (lt_of_succ_le hb2)
     apply Model.singular_of_val_discr
+    apply quot_pos_val
     apply lt_of_succ_le hΔ
 
   have h3 : navp.v e1.a3 ≥ 1 := by
     delta Model.is_local_singular_point at sing_origin
     have singular_dy := And.right (And.right sing_origin)
-    simp only [Model.dweierstrass_dy, mul_zero, add_zero, zero_add] at singular_dy
-    apply succ_le_of_lt singular_dy
+    simp only [Model.dweierstrass_dy, mul_zero, add_zero, zero_add, ResidueRing.repr_p] at singular_dy
+    apply @succ_le_of_lt 0
+    apply pos_val_of_quot_zero singular_dy
+
 
   /- These two valuations can be proved at this point but are not used explicitely until stronger valuations are obtained
   have h4 : navp.v e1.a4 ≥ 1 := by
@@ -632,6 +635,6 @@ def tate_algorithm (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) :
 
 def test_model : ValidModel ℤ := ⟨⟨1, -1, 1, -23130, -1322503⟩, by simp⟩
 
-#eval tate_algorithm 2 sorry test_model
+#eval tate_algorithm 2 prime_2 test_model
 
 end Int
