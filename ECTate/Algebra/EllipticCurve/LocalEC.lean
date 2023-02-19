@@ -17,13 +17,13 @@ namespace Model
 variable {p : R}
 
 def is_local_singular_point (evr : EnatValRing p) (e : Model R) (P : R × R) : Prop :=
-evr.residue.repr_p (weierstrass e P) = ⟦0⟧ ∧ evr.residue.repr_p (dweierstrass_dx e P) = ⟦0⟧ ∧ evr.residue.repr_p (dweierstrass_dy e P) = ⟦0⟧
+⟦weierstrass e P⟧.(evr.valtn) = ⟦0⟧ ∧ ⟦dweierstrass_dx e P⟧.(evr.valtn) = ⟦0⟧ ∧ ⟦dweierstrass_dy e P⟧.(evr.valtn) = ⟦0⟧
 
-lemma singular_of_val_discr (evr : EnatValRing p) (e : Model R) (h : Quotient.mk (val_setoid evr.valtn) e.discr = ⟦0⟧) :
+lemma singular_of_val_discr (evr : EnatValRing p) (e : Model R) (h : ⟦e.discr⟧.(evr.valtn) = ⟦0⟧) :
   ∃ P, is_local_singular_point evr e P := by
   sorry
 
-lemma val_discr_of_singular (evr : EnatValRing p) (e : Model R) (h : ∃ P, is_local_singular_point evr e P) : Quotient.mk (val_setoid evr.valtn) e.discr = ⟦0⟧ := by
+lemma val_discr_of_singular (evr : EnatValRing p) (e : Model R) (h : ∃ P, is_local_singular_point evr e P) : ⟦e.discr⟧.(evr.valtn) = ⟦0⟧ := by
   sorry
 
 def move_singular_point_to_origin_triple (evr : EnatValRing p) (e : Model R) : R × R × R :=
@@ -41,17 +41,17 @@ section char2
 
 lemma ring_two_is_char (evr : EnatValRing p) (hc : evr.residue.char = 2) : 2 = (evr.residue.char : R) := by rw [hc]; rfl
 
-lemma neg_quot_char2 (evr : EnatValRing p) (hc : evr.residue.char = 2) (x : R) :  -Quotient.mk (val_setoid evr.valtn) x = ⟦x⟧ := by
+lemma neg_quot_char2 (evr : EnatValRing p) (hc : evr.residue.char = 2) (x : R) :  -⟦x⟧.(evr.valtn) = ⟦x⟧ := by
   rw [neg_quot_eq_quot_neg, (show -x = x + 2 * -x by ring), add_quot_eq_quot_add, ring_two_is_char evr hc, evr.residue.quot_char_mul, ←quot_zero, add_zero]
 
 
-lemma b2_equiv_a1_of_char2 (evr : EnatValRing p) (hc : evr.residue.char = 2) (e : Model R) : Quotient.mk (val_setoid evr.valtn) e.b2 = ⟦e.a1⟧ := by
+lemma b2_equiv_a1_of_char2 (evr : EnatValRing p) (hc : evr.residue.char = 2) (e : Model R) : ⟦e.b2⟧.(evr.valtn) = ⟦e.a1⟧ := by
   rw [b2, add_quot_eq_quot_add, (show 4 = 2 * 2 by norm_num), mul_assoc]
   have h := evr.residue.quot_char_mul (2 * e.a2)
   rw [hc, (show ((2 : ℕ) : R) = 2 by rfl)] at h
   rw [h, ←pow_two, ←hc, evr.residue.quot_pow_char, ←add_quot_eq_quot_add, add_zero]
 
-lemma discr_equiv_a3_of_char2 (evr : EnatValRing p) (hc : evr.residue.char = 2) (e : Model R) (hb2 : evr.valtn.v e.b2 > 0) : Quotient.mk (val_setoid evr.valtn) e.discr = ⟦e.a3⟧ := by
+lemma discr_equiv_a3_of_char2 (evr : EnatValRing p) (hc : evr.residue.char = 2) (e : Model R) (hb2 : evr.valtn.v e.b2 > 0) : ⟦e.discr⟧.(evr.valtn) = ⟦e.a3⟧ := by
   rw [discr, sub_eq_add_neg, sub_eq_add_neg, add_quot_eq_quot_add,  add_quot_eq_quot_add,  add_quot_eq_quot_add,  mul_comm _ e.b2, mul_assoc, quot_pos_val_mul hb2, (show -(8 * b4 e ^ 3) = 2 * (-4 * e.b4 ^ 3) by ring)]
   rw [mul_comm 9, mul_assoc e.b2, mul_assoc e.b2, quot_pos_val_mul hb2, (show -(27 * b6 e * b6 e) = b6 e * b6 e + 2 * (-14 * b6 e * b6 e) by ring), add_quot_eq_quot_add, ring_two_is_char evr hc, quot_pos_val_mul evr.residue.val_char, quot_pos_val_mul evr.residue.val_char, ←pow_two, ←hc, evr.residue.quot_pow_char, b6, add_quot_eq_quot_add, (show 4 * e.a6 = 2 * (2 * e.a6) by ring), ring_two_is_char evr hc, quot_pos_val_mul evr.residue.val_char, ←quot_zero, zero_add, zero_add, add_zero, add_zero, add_zero, ←pow_two, ←hc, evr.residue.quot_pow_char]
 
@@ -60,13 +60,13 @@ lemma move_singular_point_to_origin_char2 (evr : EnatValRing p) (e : Model R) (h
 (∃ P, is_local_singular_point evr e P) →
   is_local_singular_point evr (move_singular_point_to_origin_iso evr e) (0, 0) := by
     intro h_sing
-    simp [is_local_singular_point, ResidueRing.repr_p, move_singular_point_to_origin_iso, move_singular_point_to_origin_triple, rst_triple, hc, rst_iso]
+    simp [is_local_singular_point, move_singular_point_to_origin_iso, move_singular_point_to_origin_triple, rst_triple, hc, rst_iso]
     apply And.intro
     . simp [weierstrass,sub_eq_add_neg, add_quot_eq_quot_add, mul_quot_eq_quot_mul, evr.quot_lift, ←neg_quot_eq_quot_neg]
       rw [←b2_equiv_a1_of_char2 evr hc e, ←discr_equiv_a3_of_char2 evr hc e hb2, val_discr_of_singular evr e h_sing, quot_pos_val hb2, ←quot_zero, zero_add, mul_zero, add_zero,←pow_two, ←mul_quot_eq_quot_mul, ←add_quot_eq_quot_add, quot_pow_eq_quot_of_pow]
       simp [←@mul_quot_eq_quot_mul _ _ _ _ _ e.a4, ←pow_two e.a4, ←hc, evr.residue.quot_pow_char]
       rw [←mul_quot_eq_quot_mul, add_quot_eq_quot_add]
-      conv in -Quotient.mk (val_setoid evr.valtn) e.a4 + -Quotient.mk (val_setoid evr.valtn) e.a6 => rw [neg_quot_char2 evr hc]
+      conv in -⟦e.a4⟧.(evr.valtn) + -⟦e.a6⟧.(evr.valtn) => rw [neg_quot_char2 evr hc]
       rw [add_comm (-⟦e.a4⟧), add_comm (⟦e.a4⟧), add_assoc _ _ (-⟦e.a4⟧), add_assoc _ _ (-⟦e.a4⟧), add_neg_self, add_zero, ←neg_add, ←add_quot_eq_quot_add, ←add_quot_eq_quot_add, add_comm e.a6, add_neg_self]
     apply And.intro
     . simp [dweierstrass_dx,sub_eq_add_neg, add_quot_eq_quot_add, mul_quot_eq_quot_mul, evr.quot_lift, ←neg_quot_eq_quot_neg]
@@ -83,16 +83,16 @@ section char3
 
 lemma ring_three_is_char (evr : EnatValRing p) (hc : evr.residue.char = 3) : 3 = (evr.residue.char : R) := by rw [hc]; rfl
 
-lemma neg_eq_two_mul (evr : EnatValRing p) (hc : evr.residue.char = 3) (x : R) : Quotient.mk (val_setoid evr.valtn) (-x) = ⟦2 * x⟧ := by
+lemma neg_eq_two_mul (evr : EnatValRing p) (hc : evr.residue.char = 3) (x : R) : ⟦-x⟧.(evr.valtn) = ⟦2 * x⟧ := by
   rw [(show -x = 2 * x + 3 * -x by ring), add_quot_eq_quot_add, (show 3 = ((3 : ℕ) : R) by rfl), ←hc, evr.residue.quot_char_mul, ←quot_zero, add_zero]
 
-lemma b2_equiv_of_char3 (evr : EnatValRing p) (hc : evr.residue.char = 3) (e : Model R) : Quotient.mk (val_setoid evr.valtn) e.b2 = ⟦e.a1 * e.a1 + e.a2⟧ := by
+lemma b2_equiv_of_char3 (evr : EnatValRing p) (hc : evr.residue.char = 3) (e : Model R) : ⟦e.b2⟧.(evr.valtn) = ⟦e.a1 * e.a1 + e.a2⟧ := by
   rw [b2, add_quot_eq_quot_add, (show 4 = 3 + 1 by norm_num), add_mul]
   have h := evr.residue.quot_char_mul e.a2
   rw [hc, (show ((3 : ℕ) : R) = 3 by rfl)] at h
   rw [add_quot_eq_quot_add, h, one_mul, ←quot_zero, zero_add, ←add_quot_eq_quot_add]
 
-lemma discr_equiv_of_char3 (evr : EnatValRing p) (hc : evr.residue.char = 3) (e : Model R) (hb2 : evr.valtn.v e.b2 > 0) : Quotient.mk (val_setoid evr.valtn) e.discr = ⟦e.a1 * e.a3 + 2 * e.a4⟧ := by
+lemma discr_equiv_of_char3 (evr : EnatValRing p) (hc : evr.residue.char = 3) (e : Model R) (hb2 : evr.valtn.v e.b2 > 0) : ⟦e.discr⟧.(evr.valtn) = ⟦e.a1 * e.a3 + 2 * e.a4⟧ := by
   rw [discr, sub_eq_add_neg, sub_eq_add_neg, add_quot_eq_quot_add,  add_quot_eq_quot_add,  add_quot_eq_quot_add,  mul_comm _ e.b2, mul_assoc, quot_pos_val_mul hb2, (show -(8 * b4 e ^ 3) = b4 e ^ 3 + 3 * (-3 * b4 e ^ 3) by ring), (show -(27 * b6 e * b6 e) = 3 * (-9 * b6 e ^ 2) by ring), (show 9 * b2 e * b4 e * b6 e = 3 * (3 * b2 e * b4 e * b6 e) by ring), ring_three_is_char evr hc, evr.residue.quot_char_mul, evr.residue.quot_char_mul, add_quot_eq_quot_add, evr.residue.quot_char_mul, ←quot_zero]
   simp
   rw [←hc, evr.residue.quot_pow_char, b4]
@@ -102,7 +102,7 @@ lemma move_singular_point_to_origin_char3 (evr : EnatValRing p) (e : Model R) (h
 (∃ P, is_local_singular_point evr e P) →
   is_local_singular_point evr (move_singular_point_to_origin_iso evr e) (0, 0) := by
     intro h_sing
-    simp [is_local_singular_point, ResidueRing.repr_p, move_singular_point_to_origin_iso, move_singular_point_to_origin_triple, rst_triple, hc, rst_iso]
+    simp [is_local_singular_point, move_singular_point_to_origin_iso, move_singular_point_to_origin_triple, rst_triple, hc, rst_iso]
     apply And.intro
     . simp [weierstrass,sub_eq_add_neg, add_quot_eq_quot_add, mul_quot_eq_quot_mul, evr.quot_lift, ←neg_quot_eq_quot_neg]
       simp [neg_quot_eq_quot_neg, ←add_quot_eq_quot_add, ←mul_quot_eq_quot_mul]
@@ -110,9 +110,9 @@ lemma move_singular_point_to_origin_char3 (evr : EnatValRing p) (e : Model R) (h
       rw [(show (e.a3 + -b6 e * e.a1) * (e.a3 + (e.a3 + -b6 e * e.a1) + -b6 e * e.a1) + (b6 e * b6 e * b6 e + (-b6 e * -b6 e * -e.a2 + (-b6 e * -e.a4 + -e.a6))) = (-e.b6 * -e.b6) * (2 * (e.a1 * e.a1) + -e.a2) + (2 * (e.a3 * e.a3) + -e.a6) + -e.b6 * (4 * e.a1 * e.a3 + -e.a4) + e.b6 ^ 3 by ring)]
       simp [add_quot_eq_quot_add]
       rw [mul_quot_eq_quot_mul]
-      conv in Quotient.mk (val_setoid evr.valtn) (2 * (e.a1 * e.a1) + -e.a2) => rw [add_quot_eq_quot_add, ←neg_eq_two_mul evr hc, ←neg_quot_eq_quot_neg, ←neg_quot_eq_quot_neg, ←neg_add, ←add_quot_eq_quot_add, ←b2_equiv_of_char3 evr hc, quot_pos_val hb2]
-      conv in Quotient.mk (val_setoid evr.valtn) (2 * (e.a3 * e.a3)) + Quotient.mk (val_setoid evr.valtn) (-e.a6) => rw [←neg_eq_two_mul evr hc, ←neg_neg e.a6, neg_eq_two_mul evr hc (- -e.a6), ←neg_mul_right, neg_eq_two_mul evr hc (2 * _), ←neg_mul_right, ←neg_mul_right, ←add_quot_eq_quot_add, ←neg_add, (show 2 * (2 * e.a6) = 4 * e.a6 by ring), ←neg_quot_eq_quot_neg, ←b6]
-      conv in Quotient.mk (val_setoid evr.valtn) (-(b6 e * (4 * e.a1 * e.a3 + -e.a4))) => rw [←neg_quot_eq_quot_neg, mul_quot_eq_quot_mul, add_quot_eq_quot_add, neg_eq_two_mul evr hc, (show 4 * e.a1 * e.a3 = 2 * (2 *( e.a1 * e.a3)) by ring), ←neg_eq_two_mul evr hc, neg_mul_right 2, ←neg_eq_two_mul evr hc, neg_neg, ←add_quot_eq_quot_add, ←discr_equiv_of_char3 evr hc e hb2, val_discr_of_singular evr e h_sing]
+      conv in ⟦2 * (e.a1 * e.a1) + -e.a2⟧.(evr.valtn) => rw [add_quot_eq_quot_add, ←neg_eq_two_mul evr hc, ←neg_quot_eq_quot_neg, ←neg_quot_eq_quot_neg, ←neg_add, ←add_quot_eq_quot_add, ←b2_equiv_of_char3 evr hc, quot_pos_val hb2]
+      conv in ⟦2 * (e.a3 * e.a3)⟧.(evr.valtn) + ⟦-e.a6⟧.(evr.valtn) => rw [←neg_eq_two_mul evr hc, ←neg_neg e.a6, neg_eq_two_mul evr hc (- -e.a6), ←neg_mul_right, neg_eq_two_mul evr hc (2 * _), ←neg_mul_right, ←neg_mul_right, ←add_quot_eq_quot_add, ←neg_add, (show 2 * (2 * e.a6) = 4 * e.a6 by ring), ←neg_quot_eq_quot_neg, ←b6]
+      conv in ⟦-(b6 e * (4 * e.a1 * e.a3 + -e.a4))⟧.(evr.valtn) => rw [←neg_quot_eq_quot_neg, mul_quot_eq_quot_mul, add_quot_eq_quot_add, neg_eq_two_mul evr hc, (show 4 * e.a1 * e.a3 = 2 * (2 *( e.a1 * e.a3)) by ring), ←neg_eq_two_mul evr hc, neg_mul_right 2, ←neg_eq_two_mul evr hc, neg_neg, ←add_quot_eq_quot_add, ←discr_equiv_of_char3 evr hc e hb2, val_discr_of_singular evr e h_sing]
       rw [←hc, evr.residue.quot_pow_char, ←quot_zero]
       simp
     apply And.intro
@@ -121,7 +121,7 @@ lemma move_singular_point_to_origin_char3 (evr : EnatValRing p) (e : Model R) (h
       simp [neg_quot_eq_quot_neg, ←add_quot_eq_quot_add, ←mul_quot_eq_quot_mul]
       rw [(show (e.a3 + -(b6 e * e.a1)) * e.a1 + (2 * b6 e * e.a2 + -e.a4) = e.b6 * (-(e.a1 * e.a1) + 2 * e.a2) + (e.a1 * e.a3 + -e.a4) by ring)]
       simp [add_quot_eq_quot_add]
-      conv in Quotient.mk (val_setoid evr.valtn) (b6 e * (-(e.a1 * e.a1) + 2 * e.a2)) => rw [mul_quot_eq_quot_mul, add_quot_eq_quot_add, ←neg_quot_eq_quot_neg, ←neg_eq_two_mul evr hc, ←neg_quot_eq_quot_neg, ←neg_add, ←add_quot_eq_quot_add, ←b2_equiv_of_char3 evr hc, quot_pos_val hb2]
+      conv in ⟦b6 e * (-(e.a1 * e.a1) + 2 * e.a2)⟧.(evr.valtn) => rw [mul_quot_eq_quot_mul, add_quot_eq_quot_add, ←neg_quot_eq_quot_neg, ←neg_eq_two_mul evr hc, ←neg_quot_eq_quot_neg, ←neg_add, ←add_quot_eq_quot_add, ←b2_equiv_of_char3 evr hc, quot_pos_val hb2]
       rw [neg_eq_two_mul evr hc, ←add_quot_eq_quot_add, ←discr_equiv_of_char3 evr hc e hb2, val_discr_of_singular evr e h_sing, ←quot_zero]
       simp
     . simp [dweierstrass_dy,sub_eq_add_neg, add_quot_eq_quot_add, mul_quot_eq_quot_mul, evr.quot_lift, ←neg_quot_eq_quot_neg]
