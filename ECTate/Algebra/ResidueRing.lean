@@ -1,4 +1,6 @@
 import ECTate.Algebra.ValuedRing
+import ECTate.FieldTheory.PerfectClosure
+import Mathlib.RingTheory.Congruence
 
 open Enat
 
@@ -47,7 +49,7 @@ lemma SurjVal.s.r_eq : nav.s.r = congruence_p nav := rfl
 notation "⟦" arg1:60 "⟧." arg2:120 => Quotient.mk (SurjVal.s arg2) arg1
 
 theorem add_repr_eq_repr_add (nav : SurjVal p) (a b : R)
-  (a' b' : R) ( ha : nav.s.r a' a) (hb : nav.s.r b' b) : nav.s.r (a' + b') (a + b) := by
+  (a' b' : R) (ha : nav.s.r a' a) (hb : nav.s.r b' b) : nav.s.r (a' + b') (a + b) := by
   rw [SurjVal.s.r_eq] at *
   rw [congruence_p, add_sub_assoc, sub_eq_add_neg, neg_add, ←add_assoc b', add_comm _ (-a),
     ←add_assoc, ←add_assoc, add_assoc, ←sub_eq_add_neg, ←sub_eq_add_neg]
@@ -279,3 +281,57 @@ lemma quot_mul_char (rr : ResidueRing valtn) (x : R) : (⟦x * (rr.char : R)⟧ 
 -- lemma quot_pow_char (rr : ResidueRing valtn) (x : R) : (⟦x ^ rr.char⟧ : Quotient valtn.s) = ⟦x⟧ := by sorry
 
 end ResidueRing
+
+
+lemma RingCon.exists_rep (RC : RingCon R) : ∀ a : RC.Quotient, ∃ A : R, A = a :=
+Quotient.exists_rep
+
+namespace EnatValRing
+variable {R : Type u} [CommRing R] [IsDomain R] {p : R} (evr : EnatValRing p)
+
+def RingCon : RingCon R :=
+{ evr.valtn.s with
+  add' := add_repr_eq_repr_add evr.valtn _ _ _ _
+  mul' := mul_repr_eq_repr_mul evr.valtn _ _ _ _ }
+
+instance : Nontrivial evr.RingCon.Quotient :=
+{ exists_pair_ne := by
+    refine ⟨(0 : R), (1 : R), ?_⟩
+    rw [Ne.def, RingCon.eq, RingCon.rel_mk, SurjVal.s.r_eq, congruence_p]
+    simp }
+
+instance : NoZeroDivisors evr.RingCon.Quotient :=
+{ eq_zero_or_eq_zero_of_mul_eq_zero := by
+    intro a b h
+    obtain ⟨A, rfl⟩ := evr.RingCon.exists_rep a
+    obtain ⟨B, rfl⟩ := evr.RingCon.exists_rep b
+    rw [← RingCon.coe_zero] at *
+    rw [← RingCon.coe_mul] at *
+    rw [RingCon.eq, RingCon.rel_mk, SurjVal.s.r_eq, congruence_p] at *
+    rw [RingCon.eq, RingCon.rel_mk, SurjVal.s.r_eq, congruence_p] at *
+    aesop }
+
+instance : Field evr.RingCon.Quotient :=
+{ inv := fun x => (Quotient.lift evr.inv_mod) sorry x
+  mul_inv_cancel := sorry
+  inv_zero := sorry }
+
+instance : IsDomain evr.RingCon.Quotient := {}
+
+lemma key : ring_char evr.RingCon.Quotient = evr.residue_char := sorry
+instance : PerfectRing evr.RingCon.Quotient :=
+{ pth_power_bijective := by
+    rw [or_iff_not_imp_left]
+    intro h
+    rw [Function.Bijective]
+    apply And.intro
+    . exact pow_ring_char_injective h
+    . intro x
+      obtain ⟨B, rfl⟩ := evr.RingCon.exists_rep x
+      use evr.pth_root B
+      rw [key]
+      simp only
+      rw [← RingCon.coe_pow]
+      rw [RingCon.eq, RingCon.rel_mk, SurjVal.s.r_eq, congruence_p]
+      apply evr.pth_root_spec }
+end EnatValRing

@@ -32,9 +32,34 @@ by
     rotate_right 1 -- swap -- TODO unknown swap
     exists m
     generalize_proofs hh
-    have := Nat.find_spec hh
+    have good := Nat.find_spec hh
+    have bd : Nat.find _ ≤ Nat.gcd (Nat.find hh) m := Nat.find_min' hh ?_
     rw [Nat.gcd_eq_left_iff_dvd]
+    simp at good
+    simp at bd
+    sorry
     sorry
 
 lemma ring_char_is_zero_or_prime (R : Type _) [CommRing R] [IsDomain R] :
   ring_char R = 0 ∨ Nat.Prime (ring_char R) := sorry
+
+lemma add_pow_ring_char {R : Type _} [CommRing R] [IsDomain R] (h : ring_char R ≠ 0) :
+  (a + b) ^ ring_char R =
+  a ^ ring_char R +
+  b ^ ring_char R := by sorry
+
+
+lemma sub_pow_ring_char {R : Type _} (a b : R) [CommRing R] [IsDomain R] (h : ring_char R ≠ 0) :
+  (a - b) ^ ring_char R =
+  a ^ ring_char R -
+  b ^ ring_char R := by sorry
+
+
+lemma pow_ring_char_injective {R : Type _} [CommRing R] [IsDomain R]
+  (hn : ring_char R ≠ 0) : Function.Injective (. ^ ring_char R : R → R) := by
+  intros x y h
+  rw [←sub_eq_zero] at *
+  rw [←sub_eq_zero] at *
+  simp only [sub_zero] at *
+  rw [← sub_pow_ring_char _ _ hn] at h
+  exact pow_eq_zero h

@@ -8,6 +8,7 @@ import Mathlib.Tactic.NormNum
 import Mathlib.Tactic.Contrapose
 import Aesop
 import Mathlib.Tactic.Linarith
+import ECTate.Algebra.ResidueRing
 -- import Mathlib.Algebra.Order.Field.Defs
 
 open Enat
@@ -21,6 +22,20 @@ variable {p : R}
 
 def is_local_singular_point (valp : SurjVal p) (e : Model R) (P : R × R) : Prop :=
 valp (weierstrass e P) > 0 ∧ valp (dweierstrass_dx e P) > 0 ∧ valp (dweierstrass_dy e P) > 0
+
+lemma mk'_apply [NonAssocRing R] (x : R) (c : RingCon R) : c.mk' x = x := rfl
+lemma is_local_singular_point_iff (evr : EnatValRing p) (e : Model R) (P : R × R) :
+  is_local_singular_point evr.valtn e P ↔ is_singular_point (e.map evr.RingCon.mk') (P.map evr.RingCon.mk' evr.RingCon.mk')
+  := by
+  rw [is_singular_point]
+  rw [weierstrass_map, dweierstrass_dx_map, dweierstrass_dy_map]
+  simp [mk'_apply]
+  rw [← RingCon.coe_zero]
+  rw [RingCon.eq, RingCon.rel_mk, SurjVal.s.r_eq, congruence_p]
+  rw [RingCon.eq, RingCon.rel_mk, SurjVal.s.r_eq, congruence_p]
+  rw [RingCon.eq, RingCon.rel_mk, SurjVal.s.r_eq, congruence_p]
+  simp
+  rfl
 
 lemma singular_of_val_discr (valp : SurjVal p) (e : Model R) (h : valp e.discr > 0) :
   ∃ P, is_local_singular_point valp e P :=
@@ -53,11 +68,20 @@ def move_singular_point_to_origin_iso [DecidableEq R] (evr : EnatValRing p) (e :
 rst_triple e (move_singular_point_to_origin_triple evr e)
 
 lemma move_singular_point_to_origin [DecidableEq R] (evr : EnatValRing p) (e : Model R) :
-(∃ P, is_local_singular_point valp e P) →
-  is_local_singular_point valp (move_singular_point_to_origin_iso evr e) (0, 0) :=
+(∃ P, is_local_singular_point evr.valtn e P) →
+  is_local_singular_point evr.valtn (move_singular_point_to_origin_iso evr e) (0, 0) :=
 by
-  -- convert Model.Field.move_singular_point_to_origin'
-  sorry
+  rintro ⟨P, h⟩
+  have  := Model.Field.move_singular_point_to_origin' (e.map evr.RingCon.mk') ⟨P.map evr.RingCon.mk' evr.RingCon.mk', ?_⟩
+  . rw [is_local_singular_point_iff]
+    simp
+    convert this
+    simp [move_singular_point_to_origin_iso, Field.move_singular_point_to_origin_iso,
+          move_singular_point_to_origin_triple, Field.move_singular_point_to_origin_triple]
+    sorry
+  . rwa [is_local_singular_point_iff] at h
+
+
 
 def pi_scaling (evr : EnatValRing p) (e : Model R) : Model R := {
   a1 := evr.sub_val 1 e.a1,

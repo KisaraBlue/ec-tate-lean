@@ -14,64 +14,12 @@ import Mathlib.Util.WhatsNew
 
 --#print AddCommGroup.toDivisionCommMonoid -- TODO a way to tell if this works
 
-section ring_with_neg
-namespace ring_neg
-variable {R : Type _} [Ring R]
-lemma sub_add_comm' {x y z : R} : (x - y) + z = x + z - y :=
-by rw [sub_eq_add_neg, sub_eq_add_neg, add_assoc, add_assoc, add_comm z]
-lemma neg_mul_neg {y z : R} : -y * -z = y * z :=
-by simp [← neg_mul_eq_neg_mul, ← neg_mul_eq_mul_neg, neg_neg]
-lemma neg_pow_three {y : R} : (- y)^3 = - (y ^ 3) :=
-by simp [pow_succ, mul_assoc]
-lemma sub_sub' {x y z : R} : (x - (y - z)) = x + z - y :=
-by simp [sub_eq_add_neg, neg_add, add_assoc, add_comm z]
--- lemma add_sub {x y z : R} : (x + (y - z)) = x + y - z :=
--- by simp [sub_eq_add_neg, add_assoc]
--- lemma neg_pow_four {y : R} : (- y)^4 = (y ^ 4) :=
--- by simp [pow_succ]; asso simp [neg_mul_neg]
--- lemma neg_add_eq_sub {y z : R} : - y + z = z - y :=
--- by rw [sub_eq_add_neg, add_comm z]
-lemma sub_add_cancel {y z : R} : y - z + z = y :=
-by rw [sub_eq_add_neg, add_assoc]; simp
-lemma add_sub_cancel {y z : R} : y + z - z = y :=
-by rw [sub_eq_add_neg, add_assoc]; simp
-lemma sub_neg {y z : R} : y - -z = y + z :=
-by simp [sub_eq_add_neg]
-
-
--- lemma sub_eq_iff_eq_add {x y z : R} : y - z = x ↔ y = x + z :=
--- by
---   constructor
---   . intro h
---     rw [← h]
---     simp [sub_add_cancel]
---   . intro h
---     rw [h]
---     simp [add_sub_cancel]
-
--- lemma eq_sub_iff_add_eq {x y z : R} : x = y - z ↔ x + z = y :=
--- by
---   constructor
---   . intro h
---     rw [h]
---     simp [sub_add_cancel]
---   . intro h
---     rw [← h]
---     simp [add_sub_cancel]
-
-lemma neg_eq_neg_iff {y z : R} : -z = -y ↔ y = z :=
-by rw [← zero_add (-z), ← sub_eq_add_neg,
-       ← zero_add (-y), ← sub_eq_add_neg,
-       sub_eq_iff_eq_add, sub_add_comm, add_zero, eq_sub_iff_add_eq, zero_add]
-
-end ring_neg
-end ring_with_neg
 
 
 /-- A model of a (possibly singular) elliptic curve is given
 by `a` invariants $$a₁, a₂, a₃, a₄, a₆$$ which represent the curve
 $$
-y^2 + a₁ xy + a₃ y =  x^ 3 + a₂ x ^ 2 + a₄ x + a₆
+y^2 + a₁ xy + a₃ y = x^ 3 + a₂ x ^ 2 + a₄ x + a₆
 $$
 -/
 structure Model (R : Type u) [CommRing R] where
@@ -153,6 +101,27 @@ by
   rw [b8_identity]
   ring
 
+section Map
+
+variable {R S : Type u} [CommRing R] [CommRing S] (f : R →+* S)
+
+@[simps]
+def map : Model R → Model S := fun e => ⟨f e.a1, f e.a2, f e.a3, f e.a4, f e.a6⟩
+
+@[simp] lemma map_b2 : (map f e).b2 = f e.b2 := by simp [Model.b2]; sorry
+@[simp] lemma map_b4 : (map f e).b4 = f e.b4 := sorry
+@[simp] lemma map_b5 : (map f e).b5 = f e.b5 := sorry
+@[simp] lemma map_b6 : (map f e).b6 = f e.b6 := sorry
+@[simp] lemma map_b7 : (map f e).b7 = f e.b7 := sorry
+@[simp] lemma map_b8 : (map f e).b8 = f e.b8 := sorry
+
+@[simp] lemma map_c4 : (map f e).c4 = f e.c4 := sorry
+@[simp] lemma map_c6 : (map f e).c6 = f e.c6 := sorry
+
+@[simp] lemma map_discr : (map f e).discr = f e.discr := sorry
+
+end Map
+
 def weierstrass (e : Model R) (P : R × R) : R :=
   P.2 ^ 2 + e.a1 * P.1 * P.2 + e.a3 * P.2 - (P.1 ^ 3 + e.a2 * P.1 ^ 2 + e.a4 * P.1 + e.a6)
 
@@ -164,6 +133,25 @@ def dweierstrass_dx (e : Model R) (P : R × R) : R :=
 def dweierstrass_dy (e : Model R) (P : R × R) : R :=
   2 * P.2 + e.a1 * P.1 + e.a3
 
+section map
+variable {R S : Type u} [CommRing R] [CommRing S] (f : R →+* S)
+@[simp]
+lemma weierstrass_map (e : Model R) (P : R × R) : weierstrass (e.map f) (P.map f f) =
+  f (weierstrass e P) :=
+by simp [weierstrass]
+
+@[simp]
+lemma dweierstrass_dx_map (e : Model R) (P : R × R) : dweierstrass_dx (e.map f) (P.map f f) =
+  f (dweierstrass_dx e P) :=
+by simp [dweierstrass_dx]; sorry
+
+@[simp]
+lemma dweierstrass_dy_map (e : Model R) (P : R × R) : dweierstrass_dy (e.map f) (P.map f f) =
+  f (dweierstrass_dy e P) :=
+by simp [dweierstrass_dy]; sorry
+
+
+end map
 
 /--
 

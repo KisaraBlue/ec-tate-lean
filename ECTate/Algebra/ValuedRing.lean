@@ -184,12 +184,14 @@ structure EnatValRing {R : Type u} (p : R) [CommRing R] [IsDomain R] where
   sub_val : ℕ → R → R := Nat.iterate decr_val
   sub_val_eq : sub_val = Nat.iterate decr_val := by rfl
   zero_valtn_decr {x : R} (h : valtn x = 0) : decr_val x = x
-  pos_valtn_decr {x : R} (h : valtn x > 0) : x = p * decr_val x
+  pos_valtn_decr {x : R} (h : valtn x > 0) : x = p * decr_val x -- TODO remove
   residue_char : ℕ -- ToDo delete
   norm_repr : R → R --generalization of modulo
   norm_repr_spec : ∀ r, valtn (r - norm_repr r) > 0
   inv_mod : R → R
   inv_mod_spec : ∀ r, valtn r = 0 → valtn (r * inv_mod r - 1) > 0
+  inv_mod_spec' : ∀ r, valtn r > 0 → valtn (inv_mod r) > 0
+  inv_mod_spec'' : ∀ r s, valtn (r - s) > 0 → inv_mod r = inv_mod s
   pth_root : R → R
   pth_root_spec : ∀ r, valtn (pth_root r ^ residue_char - r) > 0
   count_roots_cubic : (a b c d : R) → Nat
@@ -872,6 +874,8 @@ def primeEVR {p : ℕ} (hp : Nat.Prime p) : EnatValRing (p : ℤ) := {
     rw [Int.emod_emod]
     rw [Int.emod_emod] -- TODO why doesn't simp do this?
     sorry
+  inv_mod_spec' := sorry
+  inv_mod_spec'' := sorry
 
   pth_root := id
   pth_root_spec := by
