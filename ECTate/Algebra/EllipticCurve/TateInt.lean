@@ -527,10 +527,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
   else
 
   have h_b6p4 : has_double_root 1 a3p2 (-a6p4) hp := by
-    apply And.intro (val_of_one navp) _
-    apply Enat.pos_of_ne_zero
-    rw [mul_one, ←neg_mul_eq_mul_neg, sub_eq_add_neg, neg_neg]
-    exact discr_b6p4
+    refine And.intro (val_of_one navp) (Enat.pos_of_ne_zero (by simpa))
 
   let a := double_root 1 a3p2 (-a6p4) p
   have Ha : double_root 1 (sub_val evrp 2 e3.a3) (-sub_val evrp 4 e3.a6) p = a := by rfl

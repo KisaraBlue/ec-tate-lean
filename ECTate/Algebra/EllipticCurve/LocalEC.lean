@@ -72,7 +72,7 @@ lemma move_singular_point_to_origin [DecidableEq R] (evr : EnatValRing p) (e : M
   is_local_singular_point evr.valtn (move_singular_point_to_origin_iso evr e) (0, 0) :=
 by
   rintro ⟨P, h⟩
-  have  := Model.Field.move_singular_point_to_origin' (e.map evr.RingCon.mk') ⟨P.map evr.RingCon.mk' evr.RingCon.mk', ?_⟩
+  have := Model.Field.move_singular_point_to_origin' (e.map evr.RingCon.mk') ⟨P.map evr.RingCon.mk' evr.RingCon.mk', ?_⟩
   . rw [is_local_singular_point_iff]
     simp
     convert this

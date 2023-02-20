@@ -41,6 +41,7 @@ by
   exact rfl
   exact rfl
 
+-- TODO clean up these examples like last
 lemma Mordell_KodairaTypeII (p) (hp : Nat.Prime p) (hn23 : p ≠ 2 ∧ p ≠ 3) :
   (tate_algorithm p hp ⟨⟨0, 0, 0, 0, p⟩, by simp [hp.ne_zero]⟩).1 = .II := -- TODO maybe expand this to say more about conductor exponent etc
 by
@@ -88,15 +89,7 @@ lemma Mordell_KodairaTypeIVs (p) (hp : Nat.Prime p) (hn23 : p ≠ 2 ∧ p ≠ 3)
 by
   rw [tate_algorithm, if_neg hn23.1, if_neg hn23.2, tate_big_prime]
   generalize h : (⟨⟨0,0,0,0,(p : ℤ)^4⟩, _⟩ : ValidModel ℤ) = e
-  have valc4 : 3 * (primeEVR hp).valtn e.c4 = ∞ := by
-    simp [← h, c4_mordell]
-  have valdisc : val_discr_to_nat (primeEVR hp).valtn e = 8 := by
-    rw [← h, val_discr_mordell _ _ hn23, nat_of_val]
-    simp
-  have valdisc' : val_discr_to_nat (primeEVR hp).valtn e % 12 = 8 := by
-    simp [valdisc]
+  have valc4 : 3 * (primeEVR hp).valtn e.c4 = ∞; simp [← h, c4_mordell]
+  have valdisc' : val_discr_to_nat (primeEVR hp).valtn e % 12 = 8
+  . simp [← h, val_discr_mordell _ _ hn23, nat_of_val, c4_mordell]
   simp [valc4, valdisc']
-
--- lemma aa :
---   (tate_big_prime 5 sorry ⟨⟨0, 0, 0, 0, 5⟩, sorry⟩).1 = .II := by
---   dsimp [tate_big_prime]
