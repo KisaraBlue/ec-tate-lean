@@ -1,3 +1,4 @@
+import ECTate.Algebra.EllipticCurve.AuxRingLemmas
 import ECTate.Algebra.EllipticCurve.Kronecker
 import ECTate.Algebra.EllipticCurve.Model
 import ECTate.Algebra.ValuedRing
@@ -11,33 +12,11 @@ import Mathlib.Data.Int.Basic
 open ValidModel
 open Enat
 open Kodaira
-section ring_lemmas
-
-variable {R : Type u} [CommRing R] [IsDomain R]
-
-lemma factorize1 (root b p : R) (q : ℕ) : root * p ^ q * (p ^ q * b) + root * p ^ q * (root * p ^ q) = p ^ q * p ^ q * ((root + b) * root) := by ring
-
-lemma factorize2 (root a p : R) (q : ℕ) : 2 * (root * p ^ q) * (p ^ 1 * a) = p ^ q  * p ^ 1  * (2 * a * root) := by ring
-
-lemma factorize3 (root p : R) (q : ℕ) : 3 * (root * p ^ q * (root * p ^ q)) = p ^ q * p ^ q * (3 * root * root) := by ring
-
-lemma factorize4 (root a b c p : R) (q : ℕ) : p ^ (2 * q + 1) * c + root * p ^ q * (p ^ (q + 1) * b) + (root * p ^ q) ^ 2 * (p ^ 1 * a) = p ^ q * p ^ q * p ^ 1 * (a * root ^ 2) + p ^ q * p ^ (q + 1) * (b * root) + p ^ (2 * q + 1) * c := by ring
-
-lemma factorize5 (b c p : R) : p ^ 1 * b * (p ^ 1 * b) + 4 * (p ^ 2 * c) = p ^ 2 * (b * b + 4 * c) := by ring
-
-lemma factorize6 (p x b c : R) : p ^ 2 * x ^ 2 + p * x * (p ^ 1 * b) + p ^ 2 * -c = p ^ 2 * (1 * x ^ 2 + b * x + -c) := by ring
-
-lemma factorize7 (a b r p : R) : p ^ 2 * a + 2 * (p * r) * (p ^ 1 * b) + 3 * (p * r) ^ 2 = p ^ 2 * (a + 2 * r * b + 3 * r ^ 2) := by ring
-
-lemma factorize8 (a b c r p : R) : (p ^ 3 * a) + (p * r) * (p ^ 2 * b) + (p * r) ^ 2 * (p ^ 1 * c) + (p * r) ^ 3 = p ^ 3 * (a + r * b + r ^ 2 * c + r ^ 3) := by ring
-
-lemma factorize9 (a1 a2 a3 a4 a6 b8 p : R) : p ^ 1 * a1 * (p ^ 1 * a1) * (p ^ 3 * a6) + p ^ 1 * a1 * (p ^ 2 * a3) * -a4 + 4 * a2 * (p ^ 3 * a6) + a2 * (p ^ 2 * a3) * (p ^ 2 * a3) + p ^ 3 * -b8 = p ^ 3 * (p ^ 1 * a1 * (p ^ 1 * a1) * a6 + a1 * a3 * -a4 + 4 * a2 * a6 + a2 * a3 * (p ^ 1 * a3) + -b8) := by ring
-
-end ring_lemmas
 
 -- TODO re-add ReductionType
-def tate_algorithm {R : Type u} [CommRing R] [IsDomain R] {pi : R} (evr : EnatValRing pi)
-  (e : ValidModel R) (u0 r0 s0 t0 : R) : Kodaira × ℕ × ℕ × (R × R × R × R) :=
+def tate_algorithm {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {pi : R}
+  (evr : EnatValRing pi) (e : ValidModel R) (u0 r0 s0 t0 : R) :
+  Kodaira × ℕ × ℕ × (R × R × R × R) :=
   let (u, r, s, t) := (u0, r0, s0, t0)
 
   -- let Δ := e.discr
@@ -142,7 +121,7 @@ def tate_algorithm {R : Type u} [CommRing R] [IsDomain R] {pi : R} (evr : EnatVa
   let s1 := evr.double_root 1 e'.a1 (-e'.a2)
   let t1 := evr.double_root 1 a3p (-a6p2)
 
-  let e'' := rst_iso 0 s1 (pi * t1) e'
+  let e'' := rst_iso 0 s1 (pi * t1) e' -- TODO change to move blah
 
   let t := t + t1 * u ^ 3
 
@@ -205,7 +184,7 @@ def tate_algorithm {R : Type u} [CommRing R] [IsDomain R] {pi : R} (evr : EnatVa
   let Δcube := -4 * a2p^3 * a6p3 + a2p^2 * a4p2^2 - 4 * a4p2^3 - 27 * a6p3^2
   -- Step 6
   if test_Δcubic : evr.valtn (Δcubic (model_to_cubic evr e'')) = 0 then -- TODO don't recompute a2p,a4pw above
-    let c := 1 + count_roots_cubic 1 a2p a4p2 a6p3 p
+    let c := 1 + evr.count_roots_cubic 1 a2p a4p2 a6p3
     (Is 0, n - 4, c, (u, r, s, t))
   else
   -- Step 7
@@ -283,7 +262,7 @@ def tate_algorithm {R : Type u} [CommRing R] [IsDomain R] {pi : R} (evr : EnatVa
   let (a3p2, a6p4) := (evr.sub_val 2 e'''.a3, evr.sub_val 4 e'''.a6)
   -- Step 8
   if evr.valtn (a3p2 ^ 2 + 4 * a6p4) = 0 then
-    let c := if quad_root_in_ZpZ 1 a3p2 (-a6p4) p then 3 else 1
+    let c := if evr.quad_roots_in_residue_field 1 a3p2 (-a6p4) then 3 else 1
     (IVs, n - 6, c, (u, r, s, t))
   else
   let a := if evr.residue_char = 2 then evr.norm_repr a6p4 else evr.norm_repr (2 * a3p2)

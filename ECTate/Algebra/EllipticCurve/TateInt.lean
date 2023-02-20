@@ -1,3 +1,4 @@
+import ECTate.Algebra.EllipticCurve.AuxRingLemmas
 import ECTate.Algebra.EllipticCurve.Kronecker
 import ECTate.Algebra.EllipticCurve.Model
 import ECTate.Algebra.ValuedRing
@@ -36,43 +37,11 @@ open EnatValRing
 open Kodaira
 
 
-section ring_lemmas
-
-variable {R : Type u} [CommRing R]
-
-lemma factorize1 (root b p : R) (q : ℕ) : root * p ^ q * (p ^ q * b) + root * p ^ q * (root * p ^ q) = p ^ q * p ^ q * ((root + b) * root) := by ring
-
-lemma factorize2 (root a p : R) (q : ℕ) : 2 * (root * p ^ q) * (p ^ 1 * a) = p ^ q  * p ^ 1  * (2 * a * root) := by ring
-
-lemma factorize3 (root p : R) (q : ℕ) : 3 * (root * p ^ q * (root * p ^ q)) = p ^ q * p ^ q * (3 * root * root) := by ring
-
-lemma factorize4 (root a b c p : R) (q : ℕ) : p ^ (2 * q + 1) * c + root * p ^ q * (p ^ (q + 1) * b) + (root * p ^ q) ^ 2 * (p ^ 1 * a) = p ^ q * p ^ q * p ^ 1 * (a * root ^ 2) + p ^ q * p ^ (q + 1) * (b * root) + p ^ (2 * q + 1) * c := by ring
-
-lemma factorize5 (b c p : R) : p ^ 1 * b * (p ^ 1 * b) + 4 * (p ^ 2 * c) = p ^ 2 * (b * b + 4 * c) := by ring
-
-lemma factorize6 (p x b c : R) : p ^ 2 * x ^ 2 + p * x * (p ^ 1 * b) + p ^ 2 * -c = p ^ 2 * (1 * x ^ 2 + b * x + -c) := by ring
-
-lemma factorize7 (a b r p : R) : p ^ 2 * a + 2 * (p * r) * (p ^ 1 * b) + 3 * (p * r) ^ 2 = p ^ 2 * (a + 2 * r * b + 3 * r ^ 2) := by ring
-
-lemma factorize8 (a b c r p : R) : (p ^ 3 * a) + (p * r) * (p ^ 2 * b) + (p * r) ^ 2 * (p ^ 1 * c) + (p * r) ^ 3 = p ^ 3 * (a + r * b + r ^ 2 * c + r ^ 3) := by ring
-
-lemma factorize9 (a1 a2 a3 a4 a6 b8 p : R) : p ^ 1 * a1 * (p ^ 1 * a1) * (p ^ 3 * a6) + p ^ 1 * a1 * (p ^ 2 * a3) * -a4 + 4 * a2 * (p ^ 3 * a6) + a2 * (p ^ 2 * a3) * (p ^ 2 * a3) + p ^ 3 * -b8 = p ^ 3 * (p ^ 1 * a1 * (p ^ 1 * a1) * a6 + a1 * a3 * -a4 + 4 * a2 * a6 + a2 * a3 * (p ^ 1 * a3) + -b8) := by ring
-
-end ring_lemmas
-
 
 open ValidModel
 
 
 namespace Int
-
-def count_roots_cubic_aux (a b c d : ℤ) (p : ℕ) (x : ℕ) : ℕ := match x with
-  | Nat.zero => if d = 0 then 1 else 0
-  | Nat.succ x' => (if (a * (x^3 : ℕ) + b * (x^2 : ℕ) + c * x + d) % (p : ℤ) = 0 then 1 else 0) + count_roots_cubic_aux a b c d p x'
-
-def count_roots_cubic (a b c d : ℤ) (p : ℕ) : ℕ :=
-  count_roots_cubic_aux (modulo a p) (modulo b p) (modulo c p) (modulo d p) p (p - 1)
-
 
 def tate_big_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) :
   Kodaira × ℕ × ℕ × ReductionType × (ℤ × ℤ × ℤ × ℤ) :=
@@ -130,7 +99,7 @@ def tate_big_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) :
                .Additive,
                (u, r, s, t))
       | 6  => (Is 0, 2,
-               1 + count_roots_cubic 4 0 (-3*c4 / (p*p)) (-c6 / (p*p*p)) p,
+               1 + Int.count_roots_cubic 4 0 (-3*c4 / (p*p)) (-c6 / (p*p*p)) p,
                .Additive,
                (u, r, s, t))
       | 8  => (IVs,  2,
@@ -283,6 +252,7 @@ decreasing_by
   . exact Nat.add_lt_add_right (Nat.mul_lt_mul_of_pos_left q.lt_succ_self (Nat.zero_lt_succ 1)) 2
 
 
+set_option maxHeartbeats 400000 in
 def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ := 1) (r0 : ℤ := 0) (s0 : ℤ := 0) (t0 : ℤ := 0) :
   Kodaira × ℕ × ℕ × ReductionType × (ℤ × ℤ × ℤ × ℤ) :=
   --this function shouldn't be called with large primes (yet)
@@ -446,7 +416,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
   -- 18bcd – 4b³d + b²c² – 4c³ – 27d²
 
   if test_Δcubic : navp (Δcubic (model_to_cubic evrp e2)) = 0 then -- TODO don't recompute a2p,a4pw above
-    let c := 1 + count_roots_cubic 1 a2p a4p2 a6p3 p
+    let c := 1 + Int.count_roots_cubic 1 a2p a4p2 a6p3 p
     (Is 0, n - 4, c, .Additive, (u, r, s, t))
   else
   -- dbg_trace (_root_.repr e2)

@@ -192,6 +192,8 @@ structure EnatValRing {R : Type u} (p : R) [CommRing R] [IsDomain R] where
   inv_mod_spec : ∀ r, valtn r = 0 → valtn (r * inv_mod r - 1) > 0
   pth_root : R → R
   pth_root_spec : ∀ r, valtn (pth_root r ^ residue_char - r) > 0
+  count_roots_cubic : (a b c d : R) → Nat
+  -- count_roots_cubic_spec : ∀ (a b c d : R), exists a smallest finset of elts solving
   quad_roots_in_residue_field : R → R → R → Bool
 
 namespace EnatValRing
@@ -844,12 +846,19 @@ def modulo (x : ℤ) (p : ℕ) := x % (p:ℤ)
 
 def inv_mod (x : ℤ) (p : ℕ) := gcdA x p
 
+def count_roots_cubic_aux (a b c d : ℤ) (p : ℕ) (x : ℕ) : ℕ := match x with
+  | Nat.zero => if d = 0 then 1 else 0
+  | Nat.succ x' => (if (a * (x^3 : ℕ) + b * (x^2 : ℕ) + c * x + d) % (p : ℤ) = 0 then 1 else 0) + count_roots_cubic_aux a b c d p x'
+
+def count_roots_cubic (a b c d : ℤ) (p : ℕ) : ℕ :=
+  count_roots_cubic_aux (modulo a p) (modulo b p) (modulo c p) (modulo d p) p (p - 1)
+
 def primeEVR {p : ℕ} (hp : Nat.Prime p) : EnatValRing (p : ℤ) := {
   valtn := primeVal hp
   decr_val := decr_val_p p
   -- sub_val := sub_val_p p (primeVal hp).v
   -- sub_val_eq := sorry
-  zero_valtn_decr := zero_valtn_decr_p
+  zero_valtn_decr := zero_valtn_decr_p -- todo we really shouldn't need this!
   pos_valtn_decr := sorry
   residue_char := p
   norm_repr := (. % p)
@@ -873,7 +882,21 @@ def primeEVR {p : ℕ} (hp : Nat.Prime p) : EnatValRing (p : ℤ) := {
     rw [←Int.sub_emod]
     sorry -- needs fermat's little theorem
 
+  count_roots_cubic :=
+    -- TODO fix this, should we way quicker to count roots, probably in cohen
+    (Int.count_roots_cubic . . . . p)
+  -- count_roots_cubic_spec := sorry
+
   quad_roots_in_residue_field := fun a b c => Int.quad_root_in_ZpZ a b c p }
+
+#eval (primeEVR (sorry : Nat.Prime 2)).valtn 4
+#eval (primeEVR (sorry : Nat.Prime 2)).norm_repr 4
+#eval (primeEVR (sorry : Nat.Prime 2)).decr_val 4
+#eval (primeEVR (sorry : Nat.Prime 3)).inv_mod 2
+#eval (primeEVR (sorry : Nat.Prime 3)).pth_root 2
+#eval (primeEVR (sorry : Nat.Prime 3)).count_roots_cubic 1 0 2 0
+#eval (primeEVR (sorry : Nat.Prime 3)).quad_roots_in_residue_field 1 0 1
+
 
 def has_double_root (a b c : ℤ) {p : ℕ} (hp : Nat.Prime p) :=
   let v_p := (primeEVR hp).valtn.v

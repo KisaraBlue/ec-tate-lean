@@ -666,7 +666,11 @@ by
 
 lemma move_singular_point_to_origin' [PerfectRing K] (e : Model K) :
   (∃ P, is_singular_point e P) →
-    is_singular_point (move_singular_point_to_origin_iso e) (0, 0) := by sorry
+    is_singular_point (move_singular_point_to_origin_iso e) (0, 0) :=
+by
+  rintro ⟨P, hP⟩
+  have hd := discr_eq_zero_of_singular e hP
+  exact move_singular_point_to_origin e hd
 
 end Field
 

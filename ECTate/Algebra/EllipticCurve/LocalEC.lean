@@ -36,18 +36,28 @@ def singular_point_on_special [DecidableEq R] (evr : EnatValRing p) (e : Model R
   else
     ((18 * e.b6 - e.b2 * e.b4) * evr.inv_mod e.c4, (e.b2 * e.b5 + 3 * e.b7) * evr.inv_mod e.c4)
 
-def move_singular_point_to_origin_triple (evr : EnatValRing p) (e : Model R) : R × R × R :=
-  match evr.residue_char with
-  | 2 => (evr.norm_repr e.a4, 0, evr.norm_repr (e.a6 + e.a4 * e.a2))
-  | 3 => (evr.norm_repr (-e.b6), 0, evr.norm_repr (e.a3 - e.b6 * e.a1))
-  | _ => (0, 0, 0) --need to fill here
+def move_singular_point_to_origin_triple [DecidableEq R] (evr : EnatValRing p) (e : Model R) : R × R × R :=
+⟨(singular_point_on_special evr e).1, 0, (singular_point_on_special evr e).2⟩
 
-def move_singular_point_to_origin_iso (evr : EnatValRing p) (e : Model R) : Model R :=
+-- def move_singular_point_to_origin_iso [DecidableEq R] (evr : EnatValRing p) (e : Model R) : R × R × R :=
+--   match evr.residue_char with
+--   | 2 => (evr.norm_repr e.a4, 0, evr.norm_repr (e.a6 + e.a4 * e.a2))
+--   | 3 => (evr.norm_repr (-e.b6), 0, evr.norm_repr (e.a3 - e.b6 * e.a1))
+--   | _ => (0, 0, 0) --need to fill here
+
+-- def move_singular_point_to_origin_iso [DecidableEq R] (evr : EnatValRing p) (e : Model R) : R × R × R :=
+-- rst_triple e (move_singular_point_to_origin_triple e)
+
+def move_singular_point_to_origin_iso [DecidableEq R] (evr : EnatValRing p) (e : Model R) :
+  Model R :=
 rst_triple e (move_singular_point_to_origin_triple evr e)
 
-lemma move_singular_point_to_origin (evr : EnatValRing p) (e : Model R) :
+lemma move_singular_point_to_origin [DecidableEq R] (evr : EnatValRing p) (e : Model R) :
 (∃ P, is_local_singular_point valp e P) →
-  is_local_singular_point valp (move_singular_point_to_origin_iso evr e) (0, 0) := by sorry
+  is_local_singular_point valp (move_singular_point_to_origin_iso evr e) (0, 0) :=
+by
+  -- convert Model.Field.move_singular_point_to_origin'
+  sorry
 
 def pi_scaling (evr : EnatValRing p) (e : Model R) : Model R := {
   a1 := evr.sub_val 1 e.a1,
