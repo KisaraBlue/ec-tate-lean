@@ -100,15 +100,14 @@ lemma add_quot_comm (a b : Quotient nav.s) : a + b = b + a := by
 
 theorem mul_repr_eq_repr_mul (nav : SurjVal p) (a b : R) (a' b' : R) (ha : nav.s.r a' a) (hb : nav.s.r b' b) :
   nav.s.r (a' * b') (a * b) := by
-  rw [SurjVal.s.r_eq] at *
-  rw [congruence_p] at *
-  sorry
-  -- have h₁ : nav.v b' + nav.v (a' - a) > nav.v b' + 0
-  -- . apply add_lt_add_left ha
-  -- simp at h₁
-  -- rw [congruence_p, mul_sub_assoc, sub_eq_mul_neg, neg_mul, ←mul_assoc b', mul_comm _ (-a),
-  --   ←add_assoc, ←add_assoc, add_assoc, ←sub_eq_add_neg, ←sub_eq_add_neg]
-  -- exact lt_of_lt_of_le (lt_min ha hb) (SurjVal.v_add_ge_min_v nav (a' - a) (b' - b))
+  erw [SurjVal.s.r_eq, congruence_p, gt_iff_lt, lt_iff_succ_le,
+       Nat.zero_eq, Nat.cast_zero, succ_eq_add_one, zero_add] at *
+  -- todo can we avoid this step with some sort of succ/discrete order gives contra add > from contra add ≥
+  rw [show a' * b' - a * b = a' * (b' - b) + b * (a' - a) by ring]
+  apply le_trans (le_min _ _) (nav.v_add_ge_min_v _ _) <;>
+    rw [SurjVal.v_mul_eq_add_v] <;>
+    apply le_trans le_add_self (add_le_add_left _ _) <;>
+    assumption
 
 def mul_quot' (a b : R) : Quotient nav.s := ⟦a * b⟧
 

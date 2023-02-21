@@ -415,7 +415,10 @@ theorem add_left_inj_ofN (a : ℕ) {b c : ℕ∪∞} : b + a = c + a ↔ b = c :
 ⟨add_right_cancel_ofN a b c, λ h => h ▸ rfl⟩
 
 theorem lt_of_succ_le {n : ℕ} {m : ℕ∪∞} (h : succ n ≤ m) : n < m :=
-And.intro (Enat.noConfusion) h
+And.intro Enat.noConfusion h
+
+theorem lt_iff_succ_le {n : ℕ} {m : ℕ∪∞} : n < m ↔ succ n ≤ m :=
+Iff.intro succ_le_of_lt lt_of_succ_le
 
 theorem enat_disjunction (a : ℕ∪∞) : a = ∞ ∨ ∃ n : ℕ, a = n :=
   match a with
