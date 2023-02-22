@@ -11,6 +11,12 @@ open Enat
 
 variable {R : Type u} [inst : IntegralDomain R]
 
+lemma characteristic_disj {p : R} (evr : EnatValRing p) : evr.residue.char = 2 ∨ evr.residue.char = 3 ∨ (evr.residue.char ≠ 2 ∧ evr.residue.char ≠ 3) := by
+  cases em (evr.residue.char = 2) with
+  | inl h => exact Or.intro_left _ h
+  | inr h => cases em (evr.residue.char = 3) with
+    | inl h' => exact Or.intro_right _ (Or.intro_left _ h')
+    | inr h' => exact Or.intro_right _ (Or.intro_right _ (And.intro h h'))
 
 namespace Model
 
@@ -138,13 +144,6 @@ lemma move_singular_point_to_origin_bigchar (evr : EnatValRing p) (e : Model R) 
     intro h_sing
     --simp [is_local_singular_point, ResidueRing.repr_p, move_singular_point_to_origin_iso, move_singular_point_to_origin_triple, rst_triple, hc, rst_iso]
     sorry
-
-lemma characteristic_disj (evr : EnatValRing p) : evr.residue.char = 2 ∨ evr.residue.char = 3 ∨ (evr.residue.char ≠ 2 ∧ evr.residue.char ≠ 3) := by
-  cases em (evr.residue.char = 2) with
-  | inl h => exact Or.intro_left _ h
-  | inr h => cases em (evr.residue.char = 3) with
-    | inl h' => exact Or.intro_right _ (Or.intro_left _ h')
-    | inr h' => exact Or.intro_right _ (Or.intro_right _ (And.intro h h'))
 
 lemma move_singular_point_to_origin (evr : EnatValRing p) (e : Model R) (hb2 : evr.valtn.v e.b2 > 0) :
 (∃ P, is_local_singular_point evr e P) →
@@ -527,8 +526,21 @@ def cubic_double_root_is_zero {p : R} (evr : EnatValRing p) (e : ValidModel R) :
   let (a2p, a4p2, a6p3) := model_to_cubic evr e
   evr.valtn.v a2p = 0 ∧ evr.valtn.v a4p2 > 0 ∧ evr.valtn.v a6p3 > 0
 
-lemma move_cubic_double_root_to_origin {p : R} (evr : EnatValRing p) (e : ValidModel R) :
+lemma move_cubic_double_root_to_origin_char2 {p : R} (evr : EnatValRing p) (e : ValidModel R) (hc : evr.residue.char = 2) :
+  cubic_has_double_root evr e → cubic_double_root_is_zero evr (move_cubic_double_root_to_origin_iso evr e) := by
+  intro ⟨hΔcubic, hδmul⟩
+  --simp [model_to_cubic, Δcubic] at hΔcubic
+  simp [cubic_double_root_is_zero, move_cubic_double_root_to_origin_iso, if_pos hc, rst_iso]
+  sorry
+
+lemma move_cubic_double_root_to_origin_not_char2 {p : R} (evr : EnatValRing p) (e : ValidModel R) (hc : evr.residue.char ≠ 2) :
   cubic_has_double_root evr e → cubic_double_root_is_zero evr (move_cubic_double_root_to_origin_iso evr e) := sorry
+
+lemma move_cubic_double_root_to_origin {p : R} (evr : EnatValRing p) (e : ValidModel R) :
+  cubic_has_double_root evr e → cubic_double_root_is_zero evr (move_cubic_double_root_to_origin_iso evr e) := by
+  cases em (evr.residue.char = 2) with
+  | inl h => exact move_cubic_double_root_to_origin_char2 evr e h
+  | inr h => exact move_cubic_double_root_to_origin_not_char2 evr e h
 
 def move_cubic_triple_root_to_origin_iso {p : R} (evr : EnatValRing p) (e : ValidModel R) : ValidModel R :=
   let (a2p, _, a6p3) := model_to_cubic evr e
@@ -538,8 +550,18 @@ def cubic_triple_root_is_zero {p : R} (evr : EnatValRing p) (e : ValidModel R) :
   let (a2p, a4p2, a6p3) := model_to_cubic evr e
   evr.valtn.v a2p > 0 ∧ evr.valtn.v a4p2 > 0 ∧ evr.valtn.v a6p3 > 0
 
+lemma move_cubic_triple_root_to_origin_char2 {p : R} (evr : EnatValRing p) (e : ValidModel R) (hc : evr.residue.char = 2) :
+  cubic_has_triple_root evr e → cubic_triple_root_is_zero evr (move_cubic_triple_root_to_origin_iso evr e) := by
+  sorry
+
+lemma move_cubic_triple_root_to_origin_not_char2 {p : R} (evr : EnatValRing p) (e : ValidModel R) (hc : evr.residue.char ≠ 2) :
+  cubic_has_triple_root evr e → cubic_triple_root_is_zero evr (move_cubic_triple_root_to_origin_iso evr e) := sorry
+
 lemma move_cubic_triple_root_to_origin {p : R} (evr : EnatValRing p) (e : ValidModel R) :
-cubic_has_triple_root evr e → cubic_triple_root_is_zero evr (move_cubic_triple_root_to_origin_iso evr e) := sorry
+cubic_has_triple_root evr e → cubic_triple_root_is_zero evr (move_cubic_triple_root_to_origin_iso evr e) := by
+  cases em (evr.residue.char = 2) with
+  | inl h => exact move_cubic_triple_root_to_origin_char2 evr e h
+  | inr h => exact move_cubic_triple_root_to_origin_not_char2 evr e h
 
 end cubic
 

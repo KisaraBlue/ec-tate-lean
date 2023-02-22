@@ -330,7 +330,7 @@ def tate_small_prime (p : ℕ) (hp : nat_prime p) (e : ValidModel ℤ) (u0 : ℤ
   have h3 : navp.v e1.a3 ≥ 1 := by
     delta Model.is_local_singular_point at sing_origin
     have singular_dy := And.right (And.right sing_origin)
-    simp only [Model.dweierstrass_dy, mul_zero, add_zero, zero_add, ResidueRing.repr_p] at singular_dy
+    simp only [Model.dweierstrass_dy, mul_zero, add_zero, zero_add] at singular_dy
     apply @succ_le_of_lt 0
     apply pos_val_of_quot_zero singular_dy
 
