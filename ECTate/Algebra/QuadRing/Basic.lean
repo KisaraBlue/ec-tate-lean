@@ -188,8 +188,7 @@ instance : CommSemiring (QuadRing F a b) :=
   mul_zero := by sorry
   zero_mul := by sorry
   right_distrib := by sorry
-  left_distrib := by sorry
-  }
+  left_distrib := by sorry }
 
 instance : CommRing (QuadRing F a b) :=
 { instAddCommGroupWithOneQuadRing F a b,

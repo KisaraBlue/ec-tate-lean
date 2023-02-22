@@ -14,8 +14,8 @@ open Enat
 open Kodaira
 
 -- TODO re-add ReductionType
-def tate_algorithm {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {pi : R}
-  (evr : EnatValRing pi) (e : ValidModel R) (u0 r0 s0 t0 : R) :
+def tate_algorithm {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {π : R}
+  (evr : EnatValRing π) (e : ValidModel R) (u0 r0 s0 t0 : R) :
   Kodaira × ℕ × ℕ × (R × R × R × R) :=
   let (u, r, s, t) := (u0, r0, s0, t0)
 
@@ -96,6 +96,7 @@ def tate_algorithm {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {pi : 
 
   have hb2 : evr.valtn e1.b2 ≥ 1 := by
     rw [(show e1 = rst_iso r1s1t1.fst r1s1t1.snd.fst r1s1t1.snd.snd e by rfl)]
+    simp [rst_of_b2]
     apply v_rst_b2_of_small_char evr.valtn e r1s1t1.fst r1s1t1.snd.fst r1s1t1.snd.snd hb2
     exact small_char_div_12 sorry evr.valtn
 
@@ -121,7 +122,7 @@ def tate_algorithm {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {pi : 
   let s1 := evr.double_root 1 e1.a1 (-e1.a2)
   let t1 := evr.double_root 1 a3p (-a6p2)
 
-  let e2 := rst_iso 0 s1 (pi * t1) e1 -- TODO change to move blah
+  let e2 := rst_iso 0 s1 (π * t1) e1 -- TODO change to move blah
 
   let t := t + t1 * u ^ 3
 
@@ -190,7 +191,7 @@ def tate_algorithm {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {pi : 
   -- Step 7
   if test_δcubic : evr.valtn (δmultiplicity (model_to_cubic evr e2)) = 0 then
   -- if evr.valtn (3 * a4p2 - a2p ^ 2) = 0 then
-    let r1 := pi * (evr.norm_repr (if evr.residue_char = 2 then a4p2 else a2p * a4p2))
+    let r1 := π * (evr.norm_repr (if evr.residue_char = 2 then a4p2 else a2p * a4p2))
     have e2_cubic_has_double_root : cubic_has_double_root evr e2 :=
       And.intro (Enat.pos_of_ne_zero test_Δcubic) test_δcubic
     let e3 := move_cubic_double_root_to_origin_iso evr e2
@@ -241,7 +242,7 @@ def tate_algorithm {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {pi : 
       . exact succ_le_of_lt (move_cubic_double_root_to_origin evr e2 e2_cubic_has_double_root).2.2
 
     -- Step 7 (subprocedure)
-    let (m, c, (r, t)) := kodaira_type_Is p hp e u r s t 1 2 (Nat.lt_succ_self 1) h1 h2 h3 h4 h6
+    let (m, c, (r, t)) := (0,0,0,0) --sorry--kodaira_type_Is p hp e u r s t 1 2 (Nat.lt_succ_self 1) h1 h2 h3 h4 h6
     (Is m, n - m - 4, c, (u, r, s, t))
   else
 
@@ -249,7 +250,7 @@ def tate_algorithm {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {pi : 
     And.intro (Enat.pos_of_ne_zero test_Δcubic) (Enat.pos_of_ne_zero test_δcubic)
 
   let e3 := move_cubic_triple_root_to_origin_iso evr e2
-  -- let r1 := pi * (evr.norm_repr (if evr.residue_char == 2 then -a2p else -a6p3))
+  -- let r1 := π * (evr.norm_repr (if evr.residue_char == 2 then -a2p else -a6p3))
   -- let e := rst_iso r1 0 0 e
   -- let r := r + u ^ 2 * r1
   -- let t := t + u ^ 2 * s * r1
@@ -271,7 +272,7 @@ def tate_algorithm {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {pi : 
     rw [r_of_a3, evr.factor_p_of_le_val h1, pow_one]
     apply val_add_ge_of_ge evr.valtn
     . exact h3'
-    . rw [←mul_assoc, mul_comm _ (p:R), ←mul_assoc, ←pow_two, mul_assoc]
+    . rw [←mul_assoc, mul_comm _ (pi:R), ←mul_assoc, ←pow_two, mul_assoc]
       apply val_mul_ge_of_left_ge evr.valtn (le_of_eq (val_of_pow_uniformizer evr.valtn).symm)
 
   have h6 : evr.valtn e3.a6 ≥ 4 := by-- T=0 triple root => a_6,3 = 0
@@ -291,7 +292,8 @@ def tate_algorithm {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {pi : 
   -- --have h4 : evr.valtn e.a4 ≥ 3 := sorry
   -- have h6 : evr.valtn e3.a6 ≥ 4 := sorry
 
-  let (a3p2, a6p4) := (evr.sub_val 2 e3.a3, evr.sub_val 4 e3.a6)
+  let a3p2 := evr.sub_val 2 e3.a3
+  let a6p4 := evr.sub_val 4 e3.a6
   -- Step 8
   if discr_b6p4 : evr.valtn (a3p2 ^ 2 + 4 * a6p4) = 0 then
     let c := if evr.quad_roots_in_residue_field 1 a3p2 (-a6p4) then 3 else 1
@@ -303,11 +305,10 @@ def tate_algorithm {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {pi : 
 
   -- let a := if evr.residue_char = 2 then evr.norm_repr a6p4 else evr.norm_repr (2 * a3p2)
   let a := evr.double_root 1 a3p2 (-a6p4)
-  have Ha : evr.double_root 1 (evr.sub_val 2 e3.a3) (-evr.sub_val 4 e3.a6) = a := by
-    show _ = EnatValRing.double_root evr 1 a3p2 (-a6p4)
-    congr
-  let k := a * (pi ^ 2 : R)
+  have Ha : evr.double_root 1 (evr.sub_val 2 e3.a3) (-evr.sub_val 4 e3.a6) = a := by rfl
+  let k := a * (π ^ 2 : R)
   let e4 := rst_iso 0 0 k e3
+  have He4 : rst_iso 0 0 (a * (pi:R) ^ 2) e3 = e4 := by rfl
   let t := t + k * u ^ 3
   --have h6 : evr.valtn e.a6 ≥ 5 := sorry
   have h3 : evr.valtn e4.a3 ≥ 3 := by
@@ -338,7 +339,7 @@ def tate_algorithm {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {pi : 
     exact h2'
 
   -- Step 11
-  tate_algorithm evr (ValidModel.pi_scaling evr e4 h1 h2 h3 h4 h6) (pi * u) r s t
+  tate_algorithm evr (ValidModel.pi_scaling evr e4 h1 h2 h3 h4 h6) (π * u) r s t
 termination_by _ =>
   val_discr_to_nat evr.valtn e
 decreasing_by
@@ -356,4 +357,8 @@ decreasing_by
   apply Nat.sub_lt_of_pos_le _ _ (Nat.zero_lt_succ 11)
   rw [←le_ofN, ←discr_eq, ofN_val_discr_to_nat, show Nat.succ 11 = 12 by rfl]
 
-  exact Model.val_discr_of_val_ai (primeEVR hp) e4.toModel h1 h2 h3 h4 h6
+  exact Model.val_discr_of_val_ai evr e4.toModel h1 h2 h3 h4 h6
+
+def test_model : ValidModel ℤ := ⟨⟨1, -1, 1, -23130, -1322503⟩, by simp⟩
+
+#eval tate_algorithm (Int.primeEVR (sorry : Nat.Prime 2)) test_model 1 0 0 0

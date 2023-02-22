@@ -64,11 +64,11 @@ by
   rw [b8_identity]
   ring
 
-def rst_iso (r s t : R) (e : Model R) : Model R := {
-  a1 := e.a1 + 2*s,
-  a2 := e.a2 - s*e.a1 + 3*r - s*s,
-  a3 := e.a3 + r*e.a1 + 2*t,
-  a4 := e.a4 - s*e.a3 + 2*r*e.a2 - (t+r*s)*e.a1 + 3*r*r - 2*s*t,
+def rst_iso (r s t : R) (e : Model R) : Model R :=
+{ a1 := e.a1 + 2*s
+  a2 := e.a2 - s*e.a1 + 3*r - s*s
+  a3 := e.a3 + r*e.a1 + 2*t
+  a4 := e.a4 - s*e.a3 + 2*r*e.a2 - (t+r*s)*e.a1 + 3*r*r - 2*s*t
   a6 := e.a6 + r*e.a4 + r*r*e.a2 + r*r*r - t*(e.a3 + t + r*e.a1) }
 
 lemma rst_b2 (r s t : R) (e : Model R) : (rst_iso r s t e).b2 = e.b2 + 12*r := by
@@ -93,6 +93,20 @@ by
   simp only [rst_iso, b2, b4, b6, b8]
   ring
 
+@[simp]
+lemma rst_c4 (r s t : R) (e : Model R) :
+  (rst_iso r s t e).c4 = e.c4 :=
+by
+  simp only [rst_iso, b2, b4, b6, b8, c4]
+  ring
+
+@[simp]
+lemma rst_c6 (r s t : R) (e : Model R) :
+  (rst_iso r s t e).c6 = e.c6 :=
+by
+  simp only [rst_iso, b2, b4, b6, b8, c6]
+  ring
+
 lemma rst_discr (r s t : R) (e : Model R) : (rst_iso r s t e).discr = e.discr :=
 by
   simp only [discr, rst_b2, rst_b4, rst_b6, rst_b8]
@@ -108,17 +122,17 @@ variable {R S : Type u} [CommRing R] [CommRing S] (f : R →+* S)
 @[simps]
 def map : Model R → Model S := fun e => ⟨f e.a1, f e.a2, f e.a3, f e.a4, f e.a6⟩
 
-@[simp] lemma map_b2 : (map f e).b2 = f e.b2 := by simp [Model.b2]; sorry
-@[simp] lemma map_b4 : (map f e).b4 = f e.b4 := sorry
-@[simp] lemma map_b5 : (map f e).b5 = f e.b5 := sorry
-@[simp] lemma map_b6 : (map f e).b6 = f e.b6 := sorry
-@[simp] lemma map_b7 : (map f e).b7 = f e.b7 := sorry
-@[simp] lemma map_b8 : (map f e).b8 = f e.b8 := sorry
+@[simp] lemma map_b2 : (map f e).b2 = f e.b2 := by simp [Model.b2, (by norm_num : (4 : R) = 1 + 1 + 1 + 1)]; norm_num
+@[simp] lemma map_b4 : (map f e).b4 = f e.b4 := by simp [Model.b4, (by norm_num : (2 : R) = 1 + 1)]; norm_num
+@[simp] lemma map_b5 : (map f e).b5 = f e.b5 := by simp [Model.b5, (by norm_num : (2 : R) = 1 + 1)]; norm_num
+@[simp] lemma map_b6 : (map f e).b6 = f e.b6 := by simp [Model.b6, (by norm_num : (4 : R) = 1 + 1 + 1 + 1)]; norm_num
+@[simp] lemma map_b7 : (map f e).b7 = f e.b7 := by simp [Model.b7, (by norm_num : (8 : R) = 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1), (by norm_num : (12 : R) = 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1)]; norm_num
+@[simp] lemma map_b8 : (map f e).b8 = f e.b8 := by simp [Model.b8, (by norm_num : (4 : R) = 1 + 1 + 1 + 1)]; norm_num
 
-@[simp] lemma map_c4 : (map f e).c4 = f e.c4 := sorry
-@[simp] lemma map_c6 : (map f e).c6 = f e.c6 := sorry
+@[simp] lemma map_c4 : (map f e).c4 = f e.c4 := by simp [Model.c4, (by norm_num : (36 : R) = (1 + 1) ^ 2 * (1 + 1 + 1)^2), (by norm_num : (24 : R) = (1 + 1) ^ 3 * (1 + 1 + 1))]; norm_num
+@[simp] lemma map_c6 : (map f e).c6 = f e.c6 := by simp [Model.c6, (by norm_num : (36 : R) = (1 + 1) ^ 2 * (1 + 1 + 1)^2), (by norm_num : (216 : R) = (1 + 1) ^ 3 * (1 + 1 + 1)^3)]; norm_num
 
-@[simp] lemma map_discr : (map f e).discr = f e.discr := sorry
+@[simp] lemma map_discr : (map f e).discr = f e.discr := by simp [Model.discr, (by norm_num : (8 : R) = (1 + 1) ^ 3), (by norm_num : (9 : R) = (1 + 1 + 1) ^ 2), (by norm_num : (27 : R) = (1 + 1 + 1) ^ 3)]; norm_num
 
 end Map
 
@@ -143,13 +157,12 @@ by simp [weierstrass]
 @[simp]
 lemma dweierstrass_dx_map (e : Model R) (P : R × R) : dweierstrass_dx (e.map f) (P.map f f) =
   f (dweierstrass_dx e P) :=
-by simp [dweierstrass_dx]; sorry
+by simp [dweierstrass_dx, (by norm_num : (3 : R) = 1 + 1 + 1), (by norm_num : (2 : R) = 1 + 1)]; norm_num
 
 @[simp]
 lemma dweierstrass_dy_map (e : Model R) (P : R × R) : dweierstrass_dy (e.map f) (P.map f f) =
   f (dweierstrass_dy e P) :=
-by simp [dweierstrass_dy]; sorry
-
+by simp [dweierstrass_dy, (by norm_num : (2 : R) = 1 + 1)]; norm_num
 
 end map
 
@@ -258,6 +271,7 @@ namespace ValidModel
 variable {R : Type u} [CommRing R]
 instance [Repr R] : Repr (ValidModel R) := ⟨ λ (e : ValidModel R) _ => repr e.toModel⟩
 
+@[simps]
 def rst_iso (r s t : R) (e : ValidModel R) : ValidModel R := {
   toModel := Model.rst_iso r s t e.toModel,
   discr_not_zero := by

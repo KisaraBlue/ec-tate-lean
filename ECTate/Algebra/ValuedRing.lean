@@ -185,7 +185,7 @@ structure EnatValRing {R : Type u} (p : R) [CommRing R] [IsDomain R] where
   sub_val_eq : sub_val = Nat.iterate decr_val := by rfl
   zero_valtn_decr {x : R} (h : valtn x = 0) : decr_val x = x
   pos_valtn_decr {x : R} (h : valtn x > 0) : x = p * decr_val x -- TODO remove
-  residue_char : ℕ -- ToDo delete
+  residue_char : ℕ
   norm_repr : R → R --generalization of modulo
   norm_repr_spec : ∀ r, valtn (r - norm_repr r) > 0
   inv_mod : R → R
