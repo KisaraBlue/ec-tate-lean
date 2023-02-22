@@ -373,6 +373,9 @@ Iff.intro pos_of_ne_zero ne_of_gt
 lemma lt_add_right (a b c : ℕ∪∞) : a < b -> a < b + c :=
   fun h => lt_of_lt_of_le h (le_add_right _ _)
 
+lemma lt_add_left (a b c : ℕ∪∞) : a < c -> a < b + c :=
+  fun h => lt_of_lt_of_le h (le_add_left _ _)
+
 -- TODO if these are left as underscores this becomes noncomputable, another code generator bug?
 instance : LinearOrder ℕ∪∞ :=
 { Enat.instPreorderEnat with
