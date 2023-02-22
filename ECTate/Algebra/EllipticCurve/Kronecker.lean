@@ -5,21 +5,32 @@ import Mathlib.Logic.Basic
 import Mathlib.Init.Algebra.Order
 import Mathlib.Tactic.LibrarySearch
 
+import Mathlib.Data.Nat.Order.Lemmas
+import Mathlib.Data.Nat.ModEq
 
 open Nat
 
 section Obvious
 
 
-lemma div_succ_le_succ_div (m n : ℕ) : succ m / succ n ≤ succ (m / succ n) := by sorry
-lemma div2_succ_succ_eq_succ_div2 (n : ℕ) : succ (succ n) / 2 = succ (n / 2) := by sorry
+lemma div_succ_le_succ_div (m n : ℕ) : succ m / succ n ≤ succ (m / succ n) := by
+  rw [succ_div]
+  split
+  . rw [succ_eq_add_one]
+  . rw [add_zero]
+    exact le_succ (m / succ n)
+
+lemma div2_succ_succ_eq_succ_div2 (n : ℕ) : succ (succ n) / 2 = succ (n / 2) := by
+  rw [succ_eq_add_one, succ_eq_add_one, add_assoc, add_div_eq_of_add_mod_lt, Nat.div_self (zero_lt_succ 1)]
+  rw [mod_self, add_zero]
+  exact mod_lt n (zero_lt_succ 1)
 
 end Obvious
 
 namespace Int
 
 lemma div2_lt_self {x : ℕ} (h : 0 < x) : x / 2 < x :=
-  div_lt_self h (lt_succ_self 1)
+  Nat.div_lt_self h (Nat.lt_succ_self 1) -- todo why nat needed
 lemma div2_succ_le_self (x : ℕ) : Nat.succ x / 2 ≤ x := by
   cases x with
   | zero => simp
@@ -59,7 +70,7 @@ lemma odd_part_le_self_nat (x : ℕ) : (val_bin_nat x).2 ≤ x := by
       intro y h
       rw [le_zero_eq] at h
       rw [h]
-      exact zero_le 0
+      exact Nat.zero_le 0
     | succ x ih =>
       intro y y_le_sx
       cases y_le_sx with
@@ -103,7 +114,7 @@ lemma odd_part_succ_pos (x : ℕ) : 0 < (val_bin_nat (Nat.succ x)).2 := by
       intro y y_le_x
       rw [le_zero_eq] at y_le_x
       rw [y_le_x]
-      exact lt_succ_self 0
+      exact Nat.lt_succ_self 0 -- TODO why does current namespace take precedence?
     | succ x ih =>
       intro y y_le_sx
       cases y_le_sx with
