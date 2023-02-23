@@ -96,7 +96,7 @@ def tate_algorithm {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {π : 
 
   have hb2 : evr.valtn e1.b2 ≥ 1 := by
     rw [(show e1 = rst_iso r1s1t1.fst r1s1t1.snd.fst r1s1t1.snd.snd e by rfl)]
-    simp [rst_of_b2]
+    simp [Model.rst_b2]
     apply v_rst_b2_of_small_char evr.valtn e r1s1t1.fst r1s1t1.snd.fst r1s1t1.snd.snd hb2
     exact small_char_div_12 sorry evr.valtn
 
@@ -272,7 +272,7 @@ def tate_algorithm {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {π : 
     rw [r_of_a3, evr.factor_p_of_le_val h1, pow_one]
     apply val_add_ge_of_ge evr.valtn
     . exact h3'
-    . rw [←mul_assoc, mul_comm _ (pi:R), ←mul_assoc, ←pow_two, mul_assoc]
+    . rw [←mul_assoc, mul_comm _ (π:R), ←mul_assoc, ←pow_two, mul_assoc]
       apply val_mul_ge_of_left_ge evr.valtn (le_of_eq (val_of_pow_uniformizer evr.valtn).symm)
 
   have h6 : evr.valtn e3.a6 ≥ 4 := by-- T=0 triple root => a_6,3 = 0
@@ -308,7 +308,7 @@ def tate_algorithm {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {π : 
   have Ha : evr.double_root 1 (evr.sub_val 2 e3.a3) (-evr.sub_val 4 e3.a6) = a := by rfl
   let k := a * (π ^ 2 : R)
   let e4 := rst_iso 0 0 k e3
-  have He4 : rst_iso 0 0 (a * (pi:R) ^ 2) e3 = e4 := by rfl
+  have He4 : rst_iso 0 0 (a * (π:R) ^ 2) e3 = e4 := by rfl
   let t := t + k * u ^ 3
   --have h6 : evr.valtn e.a6 ≥ 5 := sorry
   have h3 : evr.valtn e4.a3 ≥ 3 := by
@@ -361,4 +361,4 @@ decreasing_by
 
 def test_model : ValidModel ℤ := ⟨⟨1, -1, 1, -23130, -1322503⟩, by simp⟩
 
-#eval tate_algorithm (Int.primeEVR (sorry : Nat.Prime 2)) test_model 1 0 0 0
+#eval tate_algorithm (Int.primeEVR ((by norm_num) : Nat.Prime 2)) test_model 1 0 0 0
