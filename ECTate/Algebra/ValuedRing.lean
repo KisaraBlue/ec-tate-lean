@@ -1087,6 +1087,8 @@ def decr_val_p (p : ℕ) (val : ℤ → ℕ∪∞) (k : ℤ) : ℤ :=
 lemma zero_valtn_decr_p {p: ℕ} {k : ℤ} (val : ℤ → ℕ∪∞) (h : val k = 0) : decr_val_p p val k = k :=
 by rw [decr_val_p, h]
 
+lemma pos_valtn_decr_p : ∀ {x : ℤ}, SurjVal.v (primeVal hp) x > 0 → x = ↑p * decr_val_p p (primeVal hp).v x := sorry
+
 def mod_Z (p : ℕ) (x : ℤ) : ℤ := (x % (p : ℤ) + p) % (p : ℤ)
 /-
 lemma congr_of_repr_Z {p : ℕ} (hp : nat_prime p) : ∀ a b : ℤ, congruence_p (primeVal hp) a b → emod a p = emod b p := by
@@ -1094,14 +1096,21 @@ lemma congr_of_repr_Z {p : ℕ} (hp : nat_prime p) : ∀ a b : ℤ, congruence_p
   sorry
 -/
 
-theorem lift_def_p : ∀ (a b : ℤ), Setoid.r a b → mod_Z p a = mod_Z p b := sorry
+theorem lift_def_p (hp : nat_prime p) : ∀ (a b : ℤ), (primeVal hp).s.r a b → mod_Z p a = mod_Z p b := by
+  intro a b
+  rw [SurjVal.s.r_eq, congruence_p]
+  delta SurjVal.v
+  simp [primeVal, int_val, mod_Z, nat_valuation]
+  sorry
 
 
 def primeResidue {p : ℕ} (hp : nat_prime p) : ResidueRing (primeVal hp) := {
   lift' := mod_Z p,
-  lift_def := sorry,
+  lift_def := lift_def_p hp,
   char := p,
-  val_char := sorry,
+  val_char := by
+    rw [SurjVal.v_uniformizer]
+    exact Enat.succ_pos 0,
   char_min := sorry
 }
 
@@ -1110,7 +1119,7 @@ def primeEVR {p : ℕ} (hp : nat_prime p) : EnatValRing (p : ℤ) := {
   valtn := primeVal hp,
   decr_val := decr_val_p p (primeVal hp).v,
   zero_valtn_decr := zero_valtn_decr_p (primeVal hp).v,
-  pos_valtn_decr := sorry,
+  pos_valtn_decr := pos_valtn_decr_p,
   residue := primeResidue hp,
   quad_roots_in_residue_field := fun a b c => Int.quad_root_in_ZpZ a b c p
 }
