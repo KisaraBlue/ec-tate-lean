@@ -600,7 +600,12 @@ def tate_algorithm (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) :
 
 
 def test_model : ValidModel ℤ := ⟨⟨1, -1, 1, -23130, -1322503⟩, by simp⟩
+def model_40a3twist7 : ValidModel ℤ := ⟨⟨0, 0, 0, -2*7^2, 7^3⟩, by simp⟩
 
-#eval tate_algorithm 2 sorry test_model
+#eval tate_algorithm 2 (by norm_num) test_model
+#eval tate_algorithm 2 (by norm_num) model_40a3twist7
+#eval tate_algorithm 3 (by norm_num) model_40a3twist7
+#eval tate_algorithm 5 (by norm_num) model_40a3twist7
+#eval tate_algorithm 7 (by simp only [Nat.prime_def_lt']) model_40a3twist7
 
 end Int
