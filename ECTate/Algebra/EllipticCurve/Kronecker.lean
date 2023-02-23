@@ -7,9 +7,6 @@ import Mathlib.Tactic.LibrarySearch
 import Mathlib.Data.Nat.Order.Lemmas
 import Mathlib.Data.Nat.ModEq
 
-import Mathlib.Data.Nat.Order.Lemmas
-import Mathlib.Data.Nat.ModEq
-
 open Nat
 
 section Obvious
