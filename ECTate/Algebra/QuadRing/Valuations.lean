@@ -59,7 +59,15 @@ def primeEVR {p : ℕ} (hp : Nat.Prime p) (hpi  : p % 4 = 1) : EnatValRing (p : 
   pos_valtn_decr := sorry
   residue_char := p
   norm_repr := norm_repr_p p
-  quad_roots_in_residue_field := sorry }
+  norm_repr_spec := sorry
+  quad_roots_in_residue_field := sorry
+  inv_mod := sorry
+  inv_mod_spec := sorry
+  inv_mod_spec' := sorry
+  inv_mod_spec'' := sorry
+  pth_root := (. ^ p)
+  pth_root_spec := sorry
+  count_roots_cubic := sorry }
 
 
 #eval (primeEVR (by norm_num : Nat.Prime 5) (by norm_num)).valtn ⟨1,5⟩

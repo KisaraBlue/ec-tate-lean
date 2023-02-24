@@ -25,6 +25,8 @@ by
     pow_succ, pow_zero, mul_one,  b6, zero_add, zero_sub, neg_mul, neg_inj]
   ring
 
+open SurjVal
+
 -- TODO how does unnecessary simpa work
 lemma val_discr_mordell (p : ℕ) (hp : Nat.Prime p) (hn23 : p ≠ 2 ∧ p ≠ 3) (h) :
   val_discr_to_nat (primeEVR hp).valtn ⟨⟨0,0,0,0, b⟩, h⟩ = 2 * (nat_of_val (primeEVR hp).valtn (λ hb => by simp [hb] at h : b ≠ 0)) :=

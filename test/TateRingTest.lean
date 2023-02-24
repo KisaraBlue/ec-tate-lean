@@ -1,4 +1,4 @@
-import ECTate.Algebra.EllipticCurve.TateInt
+import ECTate.Algebra.EllipticCurve.TateRing
 import ECTate.Algebra.EllipticCurve.Model
 import Mathlib.Data.Array.Defs
 import Lean.Data.Parsec
@@ -9,7 +9,7 @@ open IO
 open FS
 
 
-def test (N : ℕ) : IO Unit := do
+def testr (N : ℕ) : IO Unit := do
   -- lines of the csv (which is ampersand separated) are
   -- model, p, conductor exponent f, disc exp, denom j exponent, kodaira type k, tamagawa c, reduction type]
   -- generated from the lmfdb with
@@ -29,14 +29,15 @@ def test (N : ℕ) : IO Unit := do
   -- for str in l.zip (Array.range N) do
     let ⟨m, p, ok, of, oc, or⟩ : Model ℤ × ℕ × Kodaira × ℕ × ℕ × ℤ := parsefunc str
     -- if Δnz : m.discr ≠ 0 then
-    match Int.tate_algorithm p sorry ⟨m, sorry⟩ with
-    | (k, f, c, r, _, _, _, _) =>
-      if (k, f, c) ≠ (ok, of, oc) ∨ or ≠ r.to_lmfdb then
+    match tate_algorithm (Int.primeEVR (sorry : Nat.Prime p)) ⟨m, sorry⟩ 1 0 0 0 with
+    | (k, f, c, _, _, _, _) =>
+      if (k, f, c) ≠ (ok, of, oc) then
         println str
-        println (repr (k, f, c, r))
+        println (repr (k, f, c))
+        println (repr (ok, of, oc))
     n := n + 1
   println s!"{n}/{N} lines tested"
 
-def main (N : List String) : IO Unit := test N[0]!.toNat!
+def main (N : List String) : IO Unit := testr N[0]!.toNat!
 
-#eval test 30
+#eval testr 30

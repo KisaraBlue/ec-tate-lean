@@ -42,8 +42,9 @@ lemma singular_of_val_discr (valp : SurjVal p) (e : Model R) (h : valp e.discr >
 by
   sorry
 
+--TODO norm_reprs here?
 def singular_point_on_special [DecidableEq R] (evr : EnatValRing p) (e : Model R) : R × R :=
-  if e.c4 = 0 then
+  if 0 < evr.valtn e.c4 then
     match evr.residue_char with
     | 2 => (evr.pth_root e.a4, evr.pth_root (e.a2 * e.a4 + e.a6))
     | 3 => (evr.pth_root (-(e.a3 ^ 2) - e.a6), e.a1 * evr.pth_root (-(e.a3 ^ 2) - e.a6) + e.a3)
@@ -81,7 +82,9 @@ by
     sorry
   . rwa [is_local_singular_point_iff] at h
 
-
+lemma a6_of_is_local_singular_point_zero_zero [DecidableEq R] (evr : EnatValRing p) (e : Model R)
+  (h : is_local_singular_point evr.valtn e (0, 0)) : 0 < evr.valtn e.a6 :=
+by simpa [is_local_singular_point, weierstrass] using h.1
 
 def pi_scaling (evr : EnatValRing p) (e : Model R) : Model R :=
 { a1 := evr.sub_val 1 e.a1
@@ -89,6 +92,8 @@ def pi_scaling (evr : EnatValRing p) (e : Model R) : Model R :=
   a3 := evr.sub_val 3 e.a3
   a4 := evr.sub_val 4 e.a4
   a6 := evr.sub_val 6 e.a6 }
+
+open SurjVal
 
 lemma pi_scaling_of_b2 (evr : EnatValRing p) (e : Model R) (h1 : evr.valtn e.a1 ≥ 1)
   (h2 : evr.valtn e.a2 ≥ 2) :
@@ -325,6 +330,8 @@ def pi_scaling (evr : EnatValRing p) (e : ValidModel R) (h1 : evr.valtn e.a1 ≥
     rw [←evr.factor_p_of_le_val (Model.val_discr_of_val_ai evr e.toModel h1 h2 h3 h4 h6)] at H'
     apply e.discr_not_zero H' }
 
+open SurjVal
+
 def val_discr_to_nat {p : R} (valp : SurjVal p) (e : ValidModel R) : ℕ :=
 nat_of_val valp e.discr_not_zero
 
@@ -357,41 +364,64 @@ lemma v_b2_of_v_a1_a2 {p : R} (valp : SurjVal p) (e : ValidModel R) (h1 : valp e
   val_add_ge_of_ge valp (val_mul_ge_of_left_ge valp h1) (val_mul_ge_of_right_ge valp (le_of_eq h2.symm))
 
 lemma v_b4_of_v_a1_a3_a4 {p : R} (valp : SurjVal p) (e : ValidModel R) (h1 : valp e.a1 ≥ 1)
-  (h3 : valp e.a3 ≥ q) (h4 : valp e.a4 ≥ (q + 1)) : valp e.b4 ≥ (q + 1) := by
+  (h3 : valp e.a3 ≥ q) (h4 : valp e.a4 ≥ q + 1) : valp e.b4 ≥ q + 1 := by
   apply val_add_ge_of_ge valp
   . rw [add_comm]
     exact (val_mul_ge_of_both_ge valp h1 h3)
   . exact (val_mul_ge_of_right_ge valp h4)
 
 lemma v_b6_of_v_a3_a6 {p : R} {q : ℕ} (valp : SurjVal p) (e : ValidModel R) (h3 : valp e.a3 ≥ q)
-  (h6 : valp e.a6 ≥ ↑(2 * q)) : valp e.b6 ≥ ↑(2 * q) := by
+  (h6 : valp e.a6 ≥ 2 * q) : valp e.b6 ≥ 2 * q := by
   apply val_add_ge_of_ge valp
-  . rw [←add_self_eq_mul_two q]
-    exact (val_mul_ge_of_both_ge valp h3 h3)
+  . simp -- TOOD use powers in defs of bis not mul...
+    rw [(show 2 * (q : Enat) = q + q by ring)]
+    exact add_le_add h3 h3
   . exact (val_mul_ge_of_right_ge valp h6)
 
 lemma v_b8_of_v_ai {p : R} {q : ℕ} (valp : SurjVal p) (e : ValidModel R) (h1 : valp e.a1 ≥ 1)
-  (h2 : valp e.a2 = 1) (h3 : valp e.a3 ≥ q) (h4 : valp e.a4 ≥ (q + 1))
-  (h6 : valp e.a6 ≥ ↑(2 * q)) : valp e.b8 ≥ ↑(2 * q + 1) := by
+  (h2 : valp e.a2 = 1) (h3 : valp e.a3 ≥ q) (h4 : valp e.a4 ≥ q + 1)
+  (h6 : valp e.a6 ≥ 2 * q) : valp e.b8 ≥ 2 * q + 1 := by
   simp only [Model.b8]
   rw [sub_eq_add_neg, sub_eq_add_neg]
   repeat apply val_add_ge_of_ge valp
-  . rw [mul_assoc, Nat.add_comm]
-    exact val_mul_ge_of_right_ge valp (val_mul_ge_of_both_ge valp h1 h6)
-  . rw [val_neg, mul_assoc, ←add_self_eq_mul_two q, Nat.add_assoc]
-    exact val_mul_ge_of_right_ge valp (val_mul_ge_of_both_ge valp h3 h4)
-  . rw [mul_assoc, Nat.add_comm]
-    exact val_mul_ge_of_right_ge valp (val_mul_ge_of_both_ge valp (le_of_eq h2.symm) h6)
-  . rw [mul_assoc, ←add_self_eq_mul_two q, Nat.add_comm]
-    exact val_mul_ge_of_both_ge valp (le_of_eq h2.symm) (val_mul_ge_of_both_ge valp h3 h3)
-  . rw [val_neg, ←add_self_eq_mul_two q, Nat.add_assoc]
-    exact val_mul_ge_of_both_ge valp (le_trans (le_succ (ofN q)) h4) h4
+  . simp
+    rw [(show 2 * (q : Enat) + 1 = 0 + 1 + 2 * q by ring)]
+    repeat' apply add_le_add
+    exact zero_le _
+    assumption
+    assumption
+  . simp
+    rw [(show 2 * (q : Enat) + 1 = 0 + q + (q + 1) by ring)]
+    repeat' apply add_le_add
+    exact zero_le _
+    assumption
+    assumption
+  . simp
+    rw [(show 2 * (q : Enat) + 1 = 0 + 1 + (2 * q) by ring)]
+    repeat' apply add_le_add
+    exact zero_le _
+    apply le_of_eq
+    exact h2.symm
+    assumption
+  . simp at *
+    rw [(show 2 * (q : Enat) + 1 = 1 + q + q by ring)]
+    repeat' apply add_le_add
+    apply le_of_eq
+    exact h2.symm
+    assumption
+    assumption
+  . simp
+    rw [(show 2 * (q : Enat) + 1 = q + 1 + q by ring)]
+    apply add_le_add
+    assumption
+    exact le_of_succ_le h4
+
 
 
 lemma v_discr_of_v_ai {p : R} {q : ℕ} (valp : SurjVal p) (e : ValidModel R) (hq : q > 1)
   (h1 : valp e.a1 ≥ 1) (h2 : valp e.a2 = 1) (h3 : valp e.a3 ≥ q)
-  (h4 : valp e.a4 ≥ (q + 1)) (h6 : valp e.a6 ≥ ↑(2 * q)) :
-  valp e.discr ≥ ↑(2 * q + 3) := by
+  (h4 : valp e.a4 ≥ q + 1) (h6 : valp e.a6 ≥ 2 * q) :
+  valp e.discr ≥ 2 * q + 3 := by
   have h2' := v_b2_of_v_a1_a2 valp e h1 h2
   have h4' := v_b4_of_v_a1_a3_a4 valp e h1 h3 h4
   have h6' := v_b6_of_v_a3_a6 valp e h3 h6
@@ -399,21 +429,27 @@ lemma v_discr_of_v_ai {p : R} {q : ℕ} (valp : SurjVal p) (e : ValidModel R) (h
   simp only [Model.discr]
   rw [sub_eq_add_neg, sub_eq_add_neg]
   repeat' apply val_add_ge_of_ge valp
-  . rw [←neg_mul_eq_neg_mul, ←neg_mul_eq_neg_mul, val_neg, (show 3 = 1 + 1 + 1 by rfl), ←Nat.add_assoc,
-      ←Nat.add_assoc, Nat.add_assoc, mul_comm]
-    exact val_mul_ge_of_both_ge valp h8' (val_mul_ge_of_both_ge valp h2' h2')
+  . rw [←neg_mul_eq_neg_mul, ←neg_mul_eq_neg_mul, val_neg]
+    simp at *
+    rw [(show 2 * (q : Enat) + 3 = 1 + 1 + (2 * q + 1) by ring)]
+    repeat' apply add_le_add
+    all_goals assumption
   . rw [val_neg, pow_succ', pow_succ', pow_one, ←add_self_eq_mul_two,
-      (show q + q + 3 = q + 1 + (q + 1) + 1 by ring)]
+      (show (q : Enat) + q + 3 = q + 1 + (q + 1) + 1 by ring)]
     exact val_mul_ge_of_right_ge valp (val_mul_ge_of_both_ge valp
       (val_mul_ge_of_both_ge valp h4' h4') (le_trans ((le_ofN _ _).2 (Nat.le_add_left 1 q)) h4'))
-  . rw [val_neg, mul_assoc, (show 3 = 2 + 1 by rfl)]
-    apply val_mul_ge_of_right_ge valp (val_mul_ge_of_both_ge valp h6' (le_trans ((le_ofN _ _).2 _) h6'))
-    rw [←add_self_eq_mul_two q]
-    exact Nat.add_le_add (Nat.succ_le_of_lt hq) (Nat.le_of_lt hq)
-  . rw [(show 3 = 1 + (1 + 1) by rfl), mul_comm, mul_assoc 9]
-    exact val_mul_ge_of_both_ge valp h6' (val_mul_ge_of_right_ge valp
-      (val_mul_ge_of_both_ge valp h2' (le_trans ((le_ofN _ _).2
-      (Nat.add_le_add (Nat.le_of_lt hq) (le_of_eq rfl))) h4')))
+  . simp at *
+    sorry
+    -- rw [(show 2 * (q : Enat) + 3 = 0 + 1 + (2 * q + 1) by ring)]
+    -- rw [val_neg, mul_assoc, (show 3 = 2 + 1 by rfl)]
+    -- apply val_mul_ge_of_right_ge valp (val_mul_ge_of_both_ge valp h6' (le_trans ((le_ofN _ _).2 _) h6'))
+    -- rw [←add_self_eq_mul_two q]
+    -- exact Nat.add_le_add (Nat.succ_le_of_lt hq) (Nat.le_of_lt hq)
+  .  sorry
+    -- rw [(show 3 = 1 + (1 + 1) by rfl), mul_comm, mul_assoc 9]
+    -- exact val_mul_ge_of_both_ge valp h6' (val_mul_ge_of_right_ge valp
+    --   (val_mul_ge_of_both_ge valp h2' (le_trans ((le_ofN _ _).2
+    --   (Nat.add_le_add (Nat.le_of_lt hq) (le_of_eq rfl))) h4')))
 
 lemma small_char_div_12 {p : R} (hp : p = 2 ∨ p = 3) (valp : SurjVal p) : valp 12 ≥ 1 := by
   cases hp with

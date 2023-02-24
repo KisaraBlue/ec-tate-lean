@@ -110,11 +110,12 @@ def tate_big_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) :
       | 10 => (IIs,  2, 1, .Additive, (u, r, s, t))
       | _  => unreachable!
 
+open SurjVal
 
 def kodaira_type_Is (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 r0 s0 t0 : ℤ) (m q : ℕ)
   (hq : 1 < q) (h1 : (primeEVR hp).valtn e.a1 ≥ 1) (h2 : (primeEVR hp).valtn e.a2 = 1)
   (h3 : (primeEVR hp).valtn e.a3 ≥ q) (h4 : (primeEVR hp).valtn e.a4 ≥ q + 1)
-  (h6 : (primeEVR hp).valtn e.a6 ≥ ↑(2 * q)) :
+  (h6 : (primeEVR hp).valtn e.a6 ≥ 2 * q) :
   ℕ × ℕ × ℤ × ℤ :=
   let evrp := primeEVR hp
   let surjvalp := evrp.valtn
@@ -156,7 +157,7 @@ def kodaira_type_Is (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 r0 s0 
     rw [add_comm]
     apply add_le_add (le_of_eq rfl)
     exact le_trans h1 (le_add_right (surjvalp e.a1) _)
-  have h6' : (primeEVR hp).valtn e1.a6 ≥ ↑(2 * q + 1) := by
+  have h6' : (primeEVR hp).valtn e1.a6 ≥ 2 * q + 1 := by
     rw [t_of_a6, factor_p_of_le_val evrp h6, factor_p_of_le_val evrp h3, rw_a6, ←val_neg,
       sub_eq_add_neg, sub_eq_add_neg, neg_add, neg_add, neg_neg, neg_neg,
       Nat.cast_pow, pow_two]
@@ -202,13 +203,13 @@ def kodaira_type_Is (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 r0 s0 
     rw [Nat.cast_pow, val_of_pow_uniformizer surjvalp]
     rw [← lt_ofN 1 q] at hq
     exact succ_le_of_lt hq
-  have h3'' : surjvalp e2.a3 ≥ (q + 1) := by
+  have h3'' : surjvalp e2.a3 ≥ q + 1 := by
     rw [r_of_a3]
     apply le_trans _ (surjvalp.v_add_ge_min_v _ _)
     apply le_min h3'
     rw [mul_comm a', mul_assoc, surjvalp.v_mul_eq_add_v, Nat.cast_pow, val_of_pow_uniformizer]
     exact add_le_add (le_of_eq rfl) (val_mul_ge_of_right_ge surjvalp h1')
-  have h4'' : surjvalp e2.a4 ≥ (q + 2) := by
+  have h4'' : surjvalp e2.a4 ≥ q + 2 := by
     rw [r_of_a4, factor_p_of_le_val evrp h4', rw_a4', factor_p_of_le_val evrp (le_of_eq h2'.symm),
       rw_a2', Nat.cast_pow, factorize2 a' a2p (↑p) q, ←pow_add, ←mul_add, add_comm a4pq]
     apply le_trans (le_min _ _) (surjvalp.v_add_ge_min_v _ _)
@@ -221,13 +222,13 @@ def kodaira_type_Is (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 r0 s0 
       apply val_mul_ge_of_left_ge surjvalp _
       rw [val_of_pow_uniformizer]
       exact (le_ofN _ _).2 (Nat.add_le_add (le_of_eq rfl) (Nat.succ_le_of_lt hq))
-  have h6'' : surjvalp e2.a6 ≥ ↑(2 * (q + 1)) := by
+  have h6'' : surjvalp e2.a6 ≥ 2 * (q + 1) := by
     rw [r_of_a6, Nat.cast_pow]
     apply le_trans (le_min _ _) (surjvalp.v_add_ge_min_v _ _)
     . rw [factor_p_of_le_val evrp h6', rw_a6', factor_p_of_le_val evrp h4', rw_a4',
         factor_p_of_eq_val evrp h2', rw_a2', factorize4 a' a2p a4pq a6pq2 p q, ←pow_add, ←pow_add,
-        ←pow_add, ←Nat.add_assoc, add_self_eq_mul_two q, ←mul_add, ←mul_add, Nat.mul_add,
-        ←add_self_eq_mul_two 1, ←Nat.add_assoc, surjvalp.v_mul_eq_add_v, val_of_pow_uniformizer]
+        ←pow_add, ←Nat.add_assoc, add_self_eq_mul_two q, ←mul_add, ←mul_add, mul_add,
+        ←add_self_eq_mul_two 1, ←add_assoc, surjvalp.v_mul_eq_add_v, val_of_pow_uniformizer]
       push_cast
       apply add_le_add (le_of_eq rfl)
       rw [show 1 = Enat.succ 0 by rfl]

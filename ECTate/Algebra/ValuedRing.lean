@@ -54,13 +54,14 @@ theorem v_uniformizer : v p = 1 := v.v_uniformizer'
 @[simp]
 theorem v_mul_eq_add_v (a b : R) : v (a * b) = v a + v b := v.v_mul_eq_add_v' a b
 theorem v_add_ge_min_v (a b : R) : v (a + b) ≥ min (v a) (v b) := v.v_add_ge_min_v' a b
+
 @[simp]
 theorem v_eq_top_iff_zero (a : R) : v a = ∞ ↔ a = 0 := v.v_eq_top_iff_zero' a
 end SurjVal
 
 variable {R : Type u} [CommRing R] [IsDomain R]
 
-section SurjVal
+namespace SurjVal
 
 -- TODO namespace these
 lemma p_non_zero {p : R} (nav : SurjVal p) : ¬p = 0 := by
@@ -88,7 +89,7 @@ le_trans hb (val_mul_ge_right nav a b)
 lemma val_mul_ge_of_both_ge {p : R} (nav : SurjVal p) {a b : R} (ha : nav a ≥ m) (hb : nav b ≥ n) :
   nav (a * b) ≥ m + n := by
   rw [nav.v_mul_eq_add_v]
-  apply add_le_add ha hb
+  exact add_le_add ha hb
 
 @[simp]
 lemma val_of_one {p : R} (nav : SurjVal p) : nav 1 = 0 := by
@@ -146,6 +147,11 @@ lemma val_of_minus_one {p : R} (nav : SurjVal p) : nav (-1) = 0 := by
 lemma val_neg {p : R} (nav : SurjVal p) : nav (-x) = nav x := by
   rw [←one_mul x, neg_mul_eq_neg_mul, nav.v_mul_eq_add_v, val_of_minus_one, one_mul, zero_add]
 
+theorem v_sub_ge_min_v (nav : SurjVal p) (a b : R) : nav (a - b) ≥ min (nav a) (nav b) := by
+  rw [sub_eq_add_neg]
+  convert nav.v_add_ge_min_v a (-b) using 2
+  simp
+
 lemma val_sub_ge_of_ge {p : R} (nav : SurjVal p) {a b : R} (ha : nav a ≥ n) (hb : nav b ≥ n) :
   nav (a - b) ≥ n := by
   rw [sub_eq_add_neg]
@@ -193,20 +199,13 @@ structure EnatValRing {R : Type u} (p : R) [CommRing R] [IsDomain R] where
   inv_mod_spec' : ∀ r, valtn r > 0 → valtn (inv_mod r) > 0
   inv_mod_spec'' : ∀ r s, valtn (r - s) > 0 → inv_mod r = inv_mod s
   pth_root : R → R
-  pth_root_spec : ∀ r, valtn (pth_root r ^ residue_char - r) > 0
+  pth_root_spec : residue_char = 0 ∨ ∀ r, valtn (pth_root r ^ residue_char - r) > 0
   count_roots_cubic : (a b c d : R) → Nat
   -- count_roots_cubic_spec : ∀ (a b c d : R), exists a smallest finset of elts solving
   quad_roots_in_residue_field : R → R → R → Bool
 
 namespace EnatValRing
-
--- def sub_val {p : R} (evr : EnatValRing p) (x : R) (n : ℕ) : R :=
---   match n with
---   | 0 => x
---   | Nat.succ n =>
---     match evr.valtn x with
---     | 0 => x
---     | _ => sub_val evr (evr.decr_val x) n
+open SurjVal
 
 @[simp]
 lemma decr_val_zero {p : R} (evr : EnatValRing p) : evr.decr_val 0 = 0 := by
@@ -430,6 +429,18 @@ lemma val_poly_of_double_root {p : R} (evr : EnatValRing p) (a b c : R)
   evr.valtn (a * (double_root evr a b c)^2 + b * (double_root evr a b c) + c) > 0 ∧
   evr.valtn (2*a*(double_root evr a b c) + b) > 0 := by sorry
 
+lemma pth_root_pos_of_pos {p : R} (evr : EnatValRing p) (r : R) (ha : 0 < evr.valtn r)
+  (hchar : evr.residue_char ≠ 0) :
+  evr.valtn (evr.pth_root r) > 0 :=
+by
+  suffices 0 < evr.valtn (evr.pth_root r ^ evr.residue_char) by
+    . simp at this
+      exact this.2
+  have :
+    min (SurjVal.v evr.valtn (pth_root evr r ^ evr.residue_char - r)) (SurjVal.v evr.valtn r) > 0 :=
+  min_rec' (LT.lt 0) (evr.pth_root_spec.resolve_left hchar r) ha -- TODO ew
+  have := this.trans_le (evr.valtn.v_add_ge_min_v (evr.pth_root r ^ evr.residue_char - r) r)
+  simpa using this
 
 end EnatValRing
 
@@ -849,7 +860,7 @@ def modulo (x : ℤ) (p : ℕ) := x % (p:ℤ)
 def inv_mod (x : ℤ) (p : ℕ) := gcdA x p
 
 def count_roots_cubic_aux (a b c d : ℤ) (p : ℕ) (x : ℕ) : ℕ := match x with
-  | Nat.zero => if d = 0 then 1 else 0
+  | Nat.zero => if d % p = 0 then 1 else 0
   | Nat.succ x' => (if (a * (x^3 : ℕ) + b * (x^2 : ℕ) + c * x + d) % (p : ℤ) = 0 then 1 else 0) + count_roots_cubic_aux a b c d p x'
 
 def count_roots_cubic (a b c d : ℤ) (p : ℕ) : ℕ :=
@@ -879,6 +890,7 @@ def primeEVR {p : ℕ} (hp : Nat.Prime p) : EnatValRing (p : ℤ) := {
 
   pth_root := id
   pth_root_spec := by
+    right
     intro r
     simp [inv_mod, pos_iff_ne_zero, Int.sub_emod]
     rw [Int.emod_emod]

@@ -19,7 +19,7 @@ lemma congruence_p_refl : ∀ x : R, congruence_p nav x x := by
 lemma congruence_p_symm : ∀ {x y : R}, congruence_p nav x y → congruence_p nav y x := by
   simp only [congruence_p, gt_iff_lt]
   intro x y H
-  rwa [←neg_neg (y-x), neg_sub, val_neg]
+  rwa [←neg_neg (y-x), neg_sub, nav.val_neg]
 
 lemma congruence_p_trans : ∀ {x y z : R},
   congruence_p nav x y → congruence_p nav y z → congruence_p nav x z := by
@@ -170,7 +170,7 @@ lemma mul_quot_one (a : Quotient nav.s) : a * 1 = a := by
 theorem neg_repr_eq_repr_neg (nav : SurjVal p) (a : R) : ∀ (a' : R), nav.s.r a' a → nav.s.r (-a') (-a) := by
   intro a' ha
   rw [SurjVal.s.r_eq] at *
-  rwa [congruence_p, ←val_neg, sub_eq_add_neg, neg_neg, neg_add, neg_neg, ←sub_eq_add_neg]
+  rwa [congruence_p, ←nav.val_neg, sub_eq_add_neg, neg_neg, neg_add, neg_neg, ←sub_eq_add_neg]
 
 def neg_quot' (a : R) : Quotient nav.s := ⟦-a⟧
 
@@ -328,9 +328,9 @@ instance : PerfectRing evr.RingCon.Quotient :=
     . intro x
       obtain ⟨B, rfl⟩ := evr.RingCon.exists_rep x
       use evr.pth_root B
-      rw [key]
+      rw [key] at *
       simp only
       rw [← RingCon.coe_pow]
       rw [RingCon.eq, RingCon.rel_mk, SurjVal.s.r_eq, congruence_p]
-      apply evr.pth_root_spec }
+      apply evr.pth_root_spec.resolve_left h }
 end EnatValRing

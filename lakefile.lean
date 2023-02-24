@@ -19,6 +19,9 @@ lean_lib ECTate {
 
   -- add any library configuration options here
 }
+@[default_target]
+lean_lib test {
+  globs := #[.andSubmodules `test] }
 
 
 -- target ffi.o (pkg : Package) : FilePath := do
@@ -39,8 +42,12 @@ lean_exe tate where
   root := `ECTate.Bin
 
 @[default_target]
-lean_exe test where
+lean_exe test_int where
   root := `test.TateTest
+
+@[default_target]
+lean_exe test_ring where
+  root := `test.TateRingTest
 
 
 -- module_facet docs (mod) : FilePath := do

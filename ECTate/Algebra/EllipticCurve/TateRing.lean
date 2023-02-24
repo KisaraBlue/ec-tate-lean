@@ -12,6 +12,152 @@ import Mathlib.Data.Int.Basic
 open ValidModel
 open Enat
 open Kodaira
+open EnatValRing
+open SurjVal
+
+
+def kodaira_type_Is
+  {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {π : R}
+  (evr : EnatValRing π) (e : ValidModel R) (u0 r0 s0 t0 : R) (m q : ℕ)
+  (hq : 1 < q) (h1 : evr.valtn e.a1 ≥ 1) (h2 : evr.valtn e.a2 = 1)
+  (h3 : evr.valtn e.a3 ≥ q) (h4 : evr.valtn e.a4 ≥ q + 1)
+  (h6 : evr.valtn e.a6 ≥ 2 * q) :
+  ℕ × ℕ × R × R :=
+  let evrp := evr
+  let surjvalp := evrp.valtn
+  let (r, t) := (r0, t0)
+  let a3q := sub_val evrp q e.a3
+  let a6q2 := sub_val evrp (2 * q) e.a6
+  have rw_a6 : sub_val evrp (2 * q) e.a6 = a6q2 := rfl --obvious rewriting lemmas that Lean should generate implicitly
+
+  if discr_1 : surjvalp (a3q ^ 2 + 4 * a6q2) = 0 then
+    let c := if evrp.quad_roots_in_residue_field 1 a3q (-a6q2) then 4 else 2
+    (m, c, (r, t))
+  else
+  have hdr : evrp.has_double_root 1 a3q (-a6q2) := by
+    apply And.intro (val_of_one surjvalp) _
+    apply Enat.pos_of_ne_zero
+    rw [mul_one, ←neg_mul_eq_mul_neg, sub_eq_add_neg, neg_neg]
+    exact discr_1
+  let a := evrp.double_root 1 a3q (-a6q2)
+
+  let e1 := rst_iso 0 0 (a * (π ^ q)) e
+  -- dbg_trace (_root_.repr e1)
+  have h1' : surjvalp e1.a1 ≥ 1 := by rwa [rt_of_a1]
+  have h2' : surjvalp e1.a2 = 1 := by rwa [t_of_a2]
+  have h3' : surjvalp e1.a3 ≥ q + 1 := by
+    rw [t_of_a3, evrp.factor_p_of_le_val h3, ←mul_assoc, mul_comm (2*a),
+      ←mul_add, surjvalp.v_mul_eq_add_v, val_of_pow_uniformizer]
+    apply add_le_add (le_of_eq rfl)
+    rw [add_comm, ←mul_one 2]
+    exact succ_le_of_lt (val_poly_of_double_root evrp 1 a3q (-a6q2) hdr).2
+  have h4' : surjvalp e1.a4 ≥ q + 1 := by
+    rw [t_of_a4]
+    apply le_trans _ (surjvalp.v_sub_ge_min_v _ _)
+    apply le_min h4
+    rw [mul_assoc, surjvalp.v_mul_eq_add_v, add_comm, surjvalp.v_mul_eq_add_v,
+      val_of_pow_uniformizer]
+    conv =>
+      rhs
+      rw [add_comm, add_assoc]
+    rw [add_comm]
+    apply add_le_add (le_of_eq rfl)
+    exact le_trans h1 (le_add_right (surjvalp e.a1) _)
+  have h6' : evr.valtn e1.a6 ≥ 2 * q + 1 := by
+    rw [t_of_a6, evrp.factor_p_of_le_val h6, factor_p_of_le_val evrp h3, rw_a6, ←val_neg,
+      sub_eq_add_neg, sub_eq_add_neg, neg_add, neg_add, neg_neg, neg_neg,
+      pow_two]
+    erw [add_assoc (-(π ^ (2 * q) * a6q2) : R)]
+    rw [neg_mul_eq_mul_neg _ a6q2, factorize1 a a3q π q, ←pow_add, add_self_eq_mul_two,
+      ←mul_add, surjvalp.v_mul_eq_add_v, val_of_pow_uniformizer, add_mul, ←pow_two a,
+      ←one_mul (a ^ 2), add_comm (-a6q2)]
+    push_cast
+    exact add_le_add (le_of_eq rfl) (succ_le_of_lt (val_poly_of_double_root evrp 1 a3q (-a6q2) hdr).1)
+  let t := t + u0 ^ 3 * a * (π ^ q)
+  let a2p := sub_val evrp 1 e1.a2
+  let a4pq := sub_val evrp (q + 1) e1.a4
+  let a6pq2 := sub_val evrp (2 * q + 1) e1.a6
+  --obvious rewriting lemmas that Lean should generate implicitly
+  have rw_a2' : sub_val evrp 1 e1.a2 = a2p := rfl
+  have rw_a4' : sub_val evrp (q + 1) e1.a4 = a4pq := rfl
+  have rw_a6' : sub_val evrp (2 * q + 1) e1.a6 = a6pq2 := rfl
+  --less obvious lemma
+  have rw_a2 : sub_val evrp 1 e.a2 = a2p := by rw [←rw_a2', t_of_a2]
+  if discr_2 : surjvalp (a4pq ^ 2 - 4 * a2p * a6pq2) = 0 then
+    let c := if evrp.quad_roots_in_residue_field a2p a4pq a6pq2 then 4 else 2
+    (m + 1, c, (r, t))
+  else
+  have hdr' : evrp.has_double_root a2p a4pq a6pq2 := by
+    have v_a2p : surjvalp a2p = 0 := by
+      rw [←rw_a2', val_sub_val_eq evrp e1.a2 1 h2']
+      simp
+    apply And.intro v_a2p _
+    apply Enat.pos_of_ne_zero
+    assumption
+  let a' := evrp.double_root a2p a4pq a6pq2
+  have rw_a' : evrp.double_root a2p a4pq a6pq2 = a' := rfl
+  --if p = 2 then modulo a6pq2 2 else modulo (2 * a2p * -a4pq) 3
+  let e2 := rst_iso (a' * π ^ q) 0 0 e1
+  -- dbg_trace (_root_.repr e2)
+  have h1'' : surjvalp e2.a1 ≥ 1 := by rwa [rt_of_a1]
+  have h2'' : surjvalp e2.a2 = 1 := by
+    rwa [r_of_a2, v_add_eq_min_v surjvalp]
+    rw [h2']
+    apply lt_of_succ_le
+    apply val_mul_ge_of_right_ge surjvalp
+    apply val_mul_ge_of_right_ge surjvalp
+    rw [val_of_pow_uniformizer surjvalp]
+    rw [← lt_ofN 1 q] at hq
+    exact succ_le_of_lt hq
+  have h3'' : surjvalp e2.a3 ≥ q + 1 := by
+    rw [r_of_a3]
+    apply le_trans _ (surjvalp.v_add_ge_min_v _ _)
+    apply le_min h3'
+    rw [mul_comm a', mul_assoc, surjvalp.v_mul_eq_add_v, val_of_pow_uniformizer]
+    exact add_le_add (le_of_eq rfl) (val_mul_ge_of_right_ge surjvalp h1')
+  have h4'' : surjvalp e2.a4 ≥ q + 2 := by
+    rw [r_of_a4, factor_p_of_le_val evrp h4', rw_a4', factor_p_of_le_val evrp (le_of_eq h2'.symm),
+      rw_a2', factorize2 a' a2p (↑π) q, ←pow_add, ←mul_add, add_comm a4pq]
+    apply le_trans (le_min _ _) (surjvalp.v_add_ge_min_v _ _)
+    . rw [Nat.add_succ q, Nat.succ_eq_add_one, surjvalp.v_mul_eq_add_v, val_of_pow_uniformizer]
+      rw [Nat.cast_add, Nat.cast_one, add_assoc]
+      rw [show (2 : ℕ∪∞) = 1 + 1 by norm_num, ← add_assoc, ← add_assoc]
+      apply add_le_add (le_of_eq rfl)
+      exact (succ_le_of_lt (val_poly_of_double_root evrp a2p a4pq a6pq2 hdr').2)
+    . rw [pow_two, factorize3 a' π q, ←pow_add]
+      apply val_mul_ge_of_left_ge surjvalp _
+      rw [val_of_pow_uniformizer]
+      exact (le_ofN _ _).2 (Nat.add_le_add (le_of_eq rfl) (Nat.succ_le_of_lt hq))
+  have h6'' : surjvalp e2.a6 ≥ 2 * (q + 1) := by
+    rw [r_of_a6]
+    apply le_trans (le_min _ _) (surjvalp.v_add_ge_min_v _ _)
+    . rw [factor_p_of_le_val evrp h6', rw_a6', factor_p_of_le_val evrp h4', rw_a4',
+        factor_p_of_eq_val evrp h2', rw_a2', factorize4 a' a2p a4pq a6pq2 π q, ←pow_add, ←pow_add,
+        ←pow_add, ←Nat.add_assoc, add_self_eq_mul_two q, ←mul_add, ←mul_add, mul_add,
+        ←add_self_eq_mul_two 1, ←add_assoc, surjvalp.v_mul_eq_add_v, val_of_pow_uniformizer]
+      push_cast
+      apply add_le_add (le_of_eq rfl)
+      rw [show 1 = Enat.succ 0 by rfl]
+      apply succ_le_of_lt
+      have := (val_poly_of_double_root evrp a2p a4pq a6pq2 hdr').1
+      push_cast at this
+      exact this
+    . rw [mul_pow a' _ 3, ←pow_mul, mul_add, mul_one, Nat.mul_succ] -- TODO why did this break
+      apply val_mul_ge_of_right_ge surjvalp
+      rw [val_of_pow_uniformizer, mul_comm q]
+      exact (le_ofN _ _).2 (Nat.add_le_add (le_of_eq rfl) (Nat.succ_le_of_lt hq))
+  let r := r + u0 ^ 2 + a' * (π ^ q) -- TODO check these
+  let t := t + u0 ^ 2 * s0 * a' * (π ^ q)
+  kodaira_type_Is evrp e2 u0 r s0 t (m + 2) (q + 1) (Nat.lt_succ_of_lt hq) h1'' h2'' h3'' h4'' h6''
+termination_by _ =>
+  val_discr_to_nat evr.valtn e - (2 * q + 2)
+decreasing_by
+  simp_wf
+  apply Nat.sub_lt_sub_left _ _
+  . rw [← lt_ofN, ofN_val_discr_to_nat]
+    exact lt_of_succ_le (v_discr_of_v_ai surjvalp e hq h1 h2 h3 h4 h6)
+  . exact Nat.add_lt_add_right (Nat.mul_lt_mul_of_pos_left q.lt_succ_self (Nat.zero_lt_succ 1)) 2
+
 
 -- TODO re-add ReductionType
 def tate_algorithm {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {π : R}
@@ -28,26 +174,26 @@ def tate_algorithm {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {π : 
     rw [(show ¬n = 0 ↔ 0 < n by simp [Nat.pos_iff_ne_zero]), ← lt_ofN, ofN_val_discr_to_nat] at testΔ
     exact succ_le_of_lt testΔ
 
-  -- Step 2
-  if test_b2 : evr.valtn e.b2 < 1 then -- TODO is it better to say == 0 or = 0
-    let (r1, t1) := if evr.residue_char = 2 then
-      (evr.norm_repr e.a3, evr.norm_repr (e.a3 + e.a4))
-    else
-      let r1' := evr.norm_repr (-e.b2 * e.b4)
-      (r1', evr.norm_repr (e.a1 * r1' + e.a3))
-    let e := rst_iso r1 0 t1 e
-    let r := r + r1 * u ^ 2
-    let t := t + t1 * u ^ 3 + s * r1 * u ^ 2
-    let c := if evr.quad_roots_in_residue_field 1 e.a1 (-e.a2) then n else Int.gcd 2 n
-    (I n, 1, c, (u, r, s, t))
-  else
-  have hb2 : evr.valtn e.b2 ≥ 1 := le_of_not_lt test_b2
-
   let r1s1t1 := Model.move_singular_point_to_origin_triple evr e.toModel
 
   let e1 := rst_triple e r1s1t1
-  let (r, s) := (r + r1s1t1.fst * u ^ 2, s + u * r1s1t1.snd.fst)
+  let (r, s) := (r + r1s1t1.fst * u ^ 2, s + u * r1s1t1.snd.fst) -- TODO urst comp
   let t := t + r1s1t1.snd.snd * u ^ 3 + s * r1s1t1.fst * u ^ 2
+
+  -- Step 2
+  if test_b2 : evr.valtn e1.b2 < 1 then -- todo change to = 0..
+    let (r1, t1) := if evr.residue_char = 2 then
+      (evr.norm_repr e1.a3, evr.norm_repr (e1.a3 + e1.a4))
+    else
+      let r1' := evr.norm_repr (-e1.b2 * e.b4)
+      (r1', evr.norm_repr (e1.a1 * r1' + e1.a3))
+    let e := rst_iso r1 0 t1 e1
+    let r := r + r1 * u ^ 2
+    let t := t + t1 * u ^ 3 + s * r1 * u ^ 2
+    let c := if evr.quad_roots_in_residue_field 1 e1.a1 (-e1.a2) then n else Int.gcd 2 n
+    (I n, 1, c, (u, r, s, t))
+  else
+  have hb2 : evr.valtn e1.b2 ≥ 1 := le_of_not_lt test_b2
 
   have sing_origin : Model.is_local_singular_point evr.valtn e1.toModel (0, 0) := by
     simp [rst_iso]
@@ -62,7 +208,8 @@ def tate_algorithm {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {π : 
     simp only [Model.dweierstrass_dy, mul_zero, add_zero, zero_add] at singular_dy
     apply succ_le_of_lt singular_dy
 
-  /- These two valuations can be proved at this point but are not used explicitly until stronger valuations are obtained
+  -- /- These two valuations can be proved at this point but are not used explicitly until stronger valuations are obtained
+
   have h4 : evr.valtn e1.a4 ≥ 1 := by
     delta Model.is_local_singular_point at sing_origin
     have singular_dx := And.left (And.right sing_origin)
@@ -70,11 +217,12 @@ def tate_algorithm {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {π : 
     apply succ_le_of_lt singular_dx
 
   have h6 : evr.valtn e1.a6 ≥ 1 := by
+    -- TODO a6_of_is_local_singular_point_zero_zero _ _ sing_origin
     delta Model.is_local_singular_point at sing_origin
     have singular := And.left sing_origin
     simp [Model.weierstrass, pow_succ, sub_eq_add_neg] at singular
     apply succ_le_of_lt singular
-    -/
+    -- -/
 
   --have hb2 : evr.valtn e.b2 ≥ 1 := sorry --adapt test_b2 after change of coordinates
 
@@ -92,13 +240,49 @@ def tate_algorithm {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {π : 
     let c := if evr.quad_roots_in_residue_field 1 a3p (-a6p2) then 3 else 1
     (IV, n - 2, c, (u, r, s, t))
   else
+  -- Step 6
   have hb6 : evr.valtn e1.b6 ≥ 3 := le_of_not_lt test_b6
 
-  have hb2 : evr.valtn e1.b2 ≥ 1 := by
-    rw [(show e1 = rst_iso r1s1t1.fst r1s1t1.snd.fst r1s1t1.snd.snd e by rfl)]
-    simp [rst_of_b2]
-    apply v_rst_b2_of_small_char evr.valtn e r1s1t1.fst r1s1t1.snd.fst r1s1t1.snd.snd hb2
-    exact small_char_div_12 sorry evr.valtn
+  -- have hb2 : evr.valtn e1.b2 ≥ 1 := by
+  --   rw [(show e1 = rst_iso r1s1t1.fst r1s1t1.snd.fst r1s1t1.snd.snd e by rfl)]
+  --   simp
+  --   rw [Model.rst_b2]
+  --   have : 1 ≤ evr.valtn (12 * (Model.move_singular_point_to_origin_triple evr e.toModel).fst)
+  --   . simp [Model.move_singular_point_to_origin_triple, Model.singular_point_on_special]
+  --     split
+  --     . split
+  --       . simp
+  --         sorry
+  --         -- rw [← Enat.succ_zero]
+  --         -- apply Enat.succ_le_of_lt
+  --         -- apply evr.pth_root_pos_of_pos
+  --         -- simp [*]
+  --       . simp
+  --         sorry
+  --       . simp
+  --         rw [(show (1 : Enat) = 0 + (1 + 0) by simp)]
+  --         repeat' apply add_le_add
+  --         exact zero_le _
+  --         assumption
+  --         exact zero_le _
+  --     . simp
+
+
+
+
+
+
+
+    -- have : 1 ≤ evr.valtn (12 * (Model.move_singular_point_to_origin_triple evr e.toModel).fst)
+    -- . simp
+    --   exact le_trans this (le_add_left _ _)
+    -- sorry
+    -- rw [show (1 : Enat) = min 1 1 by simp]
+    -- convert evr.valtn.v_add_ge_min_v _ _
+    -- . exact hb2
+    -- . sorry
+  --   apply v_rst_b2_of_small_char evr.valtn e r1s1t1.fst r1s1t1.snd.fst r1s1t1.snd.snd hb2
+  --   exact small_char_div_12 sorry evr.valtn
 
   --let k := if evr.valtn e.a6 < 3 then if p = 2 then 2 else evr.norm_repr e.a3 9 else 0
   have hdr_b2 : evr.has_double_root 1 e1.a1 (-e1.a2) := by
@@ -180,10 +364,10 @@ def tate_algorithm {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {π : 
     | inr v_a4_gt_1 =>
       exact succ_le_of_lt v_a4_gt_1
 
-  let (a2p, a4p2, a6p3) := (evr.sub_val 1 e.a2, evr.sub_val 2 e.a4, evr.sub_val 3 e.a6)
+  let (a2p, a4p2, a6p3) := (evr.sub_val 1 e2.a2, evr.sub_val 2 e2.a4, evr.sub_val 3 e2.a6)
   -- 18bcd – 4b³d + b²c² – 4c³ – 27d²
   let Δcube := -4 * a2p^3 * a6p3 + a2p^2 * a4p2^2 - 4 * a4p2^3 - 27 * a6p3^2
-  -- Step 6
+
   if test_Δcubic : evr.valtn (Δcubic (model_to_cubic evr e2)) = 0 then -- TODO don't recompute a2p,a4pw above
     let c := 1 + evr.count_roots_cubic 1 a2p a4p2 a6p3
     (Is 0, n - 4, c, (u, r, s, t))
@@ -242,7 +426,8 @@ def tate_algorithm {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {π : 
       . exact succ_le_of_lt (move_cubic_double_root_to_origin evr e2 e2_cubic_has_double_root).2.2
 
     -- Step 7 (subprocedure)
-    let (m, c, (r, t)) := (0,0,0,0) --sorry--kodaira_type_Is p hp e u r s t 1 2 (Nat.lt_succ_self 1) h1 h2 h3 h4 h6
+    let (m, c, (r, t)) := kodaira_type_Is evr e3 u r s t 1 2 (Nat.lt_succ_self 1) h1' h2' h3 h4' h6
+    -- let (m, c, (r, t)) := (0,0,0,0) --sorry--kodaira_type_Is p hp e u r s t 1 2 (Nat.lt_succ_self 1) h1 h2 h3 h4 h6
     (Is m, n - m - 4, c, (u, r, s, t))
   else
 
@@ -272,7 +457,7 @@ def tate_algorithm {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {π : 
     rw [r_of_a3, evr.factor_p_of_le_val h1, pow_one]
     apply val_add_ge_of_ge evr.valtn
     . exact h3'
-    . rw [←mul_assoc, mul_comm _ (pi:R), ←mul_assoc, ←pow_two, mul_assoc]
+    . rw [←mul_assoc, mul_comm _ (π : R), ←mul_assoc, ←pow_two, mul_assoc]
       apply val_mul_ge_of_left_ge evr.valtn (le_of_eq (val_of_pow_uniformizer evr.valtn).symm)
 
   have h6 : evr.valtn e3.a6 ≥ 4 := by-- T=0 triple root => a_6,3 = 0
@@ -308,7 +493,7 @@ def tate_algorithm {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {π : 
   have Ha : evr.double_root 1 (evr.sub_val 2 e3.a3) (-evr.sub_val 4 e3.a6) = a := by rfl
   let k := a * (π ^ 2 : R)
   let e4 := rst_iso 0 0 k e3
-  have He4 : rst_iso 0 0 (a * (pi:R) ^ 2) e3 = e4 := by rfl
+  have He4 : rst_iso 0 0 (a * (π : R) ^ 2) e3 = e4 := by rfl
   let t := t + k * u ^ 3
   --have h6 : evr.valtn e.a6 ≥ 5 := sorry
   have h3 : evr.valtn e4.a3 ≥ 3 := by
