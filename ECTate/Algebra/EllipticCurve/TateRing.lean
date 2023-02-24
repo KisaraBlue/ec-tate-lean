@@ -546,4 +546,4 @@ decreasing_by
 
 def test_model : ValidModel ℤ := ⟨⟨1, -1, 1, -23130, -1322503⟩, by simp⟩
 
-#eval tate_algorithm (Int.primeEVR (sorry : Nat.Prime 2)) test_model 1 0 0 0
+#eval tate_algorithm (Int.primeEVR ((by norm_num) : Nat.Prime 2)) test_model 1 0 0 0
