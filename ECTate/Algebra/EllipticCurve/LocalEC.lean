@@ -9,7 +9,9 @@ import Mathlib.Tactic.Contrapose
 import Aesop
 import Mathlib.Tactic.Linarith
 import ECTate.Algebra.ResidueRing
+-- import ECTate.Tactic.Elinarith
 -- import Mathlib.Algebra.Order.Field.Defs
+
 
 open Enat
 
@@ -317,7 +319,6 @@ end Model
 
 namespace ValidModel
 
-@[simps]
 def pi_scaling (evr : EnatValRing p) (e : ValidModel R) (h1 : evr.valtn e.a1 ≥ 1)
   (h2 : evr.valtn e.a2 ≥ 2) (h3 : evr.valtn e.a3 ≥ 3) (h4 : evr.valtn e.a4 ≥ 4)
   (h6 : evr.valtn e.a6 ≥ 6) : ValidModel R := {
@@ -329,6 +330,14 @@ def pi_scaling (evr : EnatValRing p) (e : ValidModel R) (h1 : evr.valtn e.a1 ≥
     simp only [mul_zero] at H'
     rw [←evr.factor_p_of_le_val (Model.val_discr_of_val_ai evr e.toModel h1 h2 h3 h4 h6)] at H'
     apply e.discr_not_zero H' }
+
+@[simp]
+theorem pi_scaling_toModel
+  (evr : EnatValRing p) (e : ValidModel R) (h1 : SurjVal.v evr.valtn e.toModel.a1 ≥ 1)
+  (h2 : SurjVal.v evr.valtn e.toModel.a2 ≥ 2) (h3 : SurjVal.v evr.valtn e.toModel.a3 ≥ 3)
+  (h4 : SurjVal.v evr.valtn e.toModel.a4 ≥ 4) (h6 : SurjVal.v evr.valtn e.toModel.a6 ≥ 6) :
+  (pi_scaling evr e h1 h2 h3 h4 h6).toModel = Model.pi_scaling evr e.toModel :=
+Eq.refl (pi_scaling evr e h1 h2 h3 h4 h6).toModel
 
 open SurjVal
 
@@ -417,6 +426,12 @@ lemma v_b8_of_v_ai {p : R} {q : ℕ} (valp : SurjVal p) (e : ValidModel R) (h1 :
     exact le_of_succ_le h4
 
 
+private lemma aux (n q : ℕ) (h : 1 < q) (hn : 2 * q ≤ n) : 2 * q + 3 ≤ n + n :=
+by linarith
+
+private lemma aux' (n q m t : ℕ) (h : 1 < q) (h2': 1 ≤ n) (h4': q + 1 ≤ m) (h6': 2 * q ≤ t) :
+  2 * q + 3 ≤ n + (m + t) :=
+by linarith
 
 lemma v_discr_of_v_ai {p : R} {q : ℕ} (valp : SurjVal p) (e : ValidModel R) (hq : q > 1)
   (h1 : valp e.a1 ≥ 1) (h2 : valp e.a2 = 1) (h3 : valp e.a3 ≥ q)
@@ -430,7 +445,7 @@ lemma v_discr_of_v_ai {p : R} {q : ℕ} (valp : SurjVal p) (e : ValidModel R) (h
   rw [sub_eq_add_neg, sub_eq_add_neg]
   repeat' apply val_add_ge_of_ge valp
   . rw [←neg_mul_eq_neg_mul, ←neg_mul_eq_neg_mul, val_neg]
-    simp at *
+    simp only [v_mul_eq_add_v, ge_iff_le] at *
     rw [(show 2 * (q : Enat) + 3 = 1 + 1 + (2 * q + 1) by ring)]
     repeat' apply add_le_add
     all_goals assumption
@@ -438,14 +453,42 @@ lemma v_discr_of_v_ai {p : R} {q : ℕ} (valp : SurjVal p) (e : ValidModel R) (h
       (show (q : Enat) + q + 3 = q + 1 + (q + 1) + 1 by ring)]
     exact val_mul_ge_of_right_ge valp (val_mul_ge_of_both_ge valp
       (val_mul_ge_of_both_ge valp h4' h4') (le_trans ((le_ofN _ _).2 (Nat.le_add_left 1 q)) h4'))
-  . simp at *
-    sorry
+  . simp only [val_neg, v_mul_eq_add_v, ge_iff_le] at *
+    cases hh6 : v valp (Model.b6 e.toModel) with
+    | ofN n =>
+      rw [add_assoc]
+      apply le_add_of_nonneg_of_le (zero_le _) _
+      simp [hh6] at *
+      norm_cast at *
+      exact aux n q hq h6' -- TODO linarith doesn't work
+    | top =>
+      simp
+      exact Enat.le_top _
     -- rw [(show 2 * (q : Enat) + 3 = 0 + 1 + (2 * q + 1) by ring)]
     -- rw [val_neg, mul_assoc, (show 3 = 2 + 1 by rfl)]
     -- apply val_mul_ge_of_right_ge valp (val_mul_ge_of_both_ge valp h6' (le_trans ((le_ofN _ _).2 _) h6'))
     -- rw [←add_self_eq_mul_two q]
     -- exact Nat.add_le_add (Nat.succ_le_of_lt hq) (Nat.le_of_lt hq)
-  .  sorry
+  . cases hh2 : v valp (Model.b2 e.toModel) with
+    | ofN n =>
+      cases hh4 : v valp (Model.b4 e.toModel) with
+      | ofN m =>
+        cases hh6 : v valp (Model.b6 e.toModel) with
+        | ofN t =>
+          simp [*] at *
+          rw [add_assoc, add_assoc]
+          apply le_add_of_nonneg_of_le (zero_le _) _
+          norm_cast at *
+          exact aux' n q m t hq h2' h4' h6' -- TODO linarith doesn't work
+        | top =>
+          simp [hh6]
+          exact Enat.le_top _
+      | top =>
+        simp [hh4]
+        exact Enat.le_top _
+    | top =>
+      simp [hh2]
+      exact Enat.le_top _
     -- rw [(show 3 = 1 + (1 + 1) by rfl), mul_comm, mul_assoc 9]
     -- exact val_mul_ge_of_both_ge valp h6' (val_mul_ge_of_right_ge valp
     --   (val_mul_ge_of_both_ge valp h2' (le_trans ((le_ofN _ _).2
@@ -493,7 +536,7 @@ evr.valtn (Δcubic (model_to_cubic evr e)) > 0 ∧ evr.valtn (δmultiplicity (mo
 
 def move_cubic_double_root_to_origin_iso {p : R} (evr : EnatValRing p) (e : ValidModel R) : ValidModel R :=
   let (a2p, a4p2, _) := model_to_cubic evr e
-  rst_iso (p * (evr.norm_repr (if evr.residue_char = 2 then a4p2 else a2p * a4p2))) 0 0 e
+  rst_iso (p * (evr.norm_repr (if evr.residue_char = 2 then a4p2 else evr.inv_mod a2p * evr.pth_root a4p2))) 0 0 e
 
 def cubic_double_root_is_zero {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop :=
   let (a2p, a4p2, a6p3) := model_to_cubic evr e
@@ -504,7 +547,7 @@ lemma move_cubic_double_root_to_origin {p : R} (evr : EnatValRing p) (e : ValidM
 
 def move_cubic_triple_root_to_origin_iso {p : R} (evr : EnatValRing p) (e : ValidModel R) : ValidModel R :=
   let (a2p, _, a6p3) := model_to_cubic evr e
-  rst_iso (p * (evr.norm_repr (if evr.residue_char = 2 then -a2p else -a6p3))) 0 0 e
+  rst_iso (evr.norm_repr (if evr.residue_char = 3 then -evr.pth_root a6p3 else -a2p * evr.inv_mod 3)) 0 0 e
 
 def cubic_triple_root_is_zero {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop :=
   let (a2p, a4p2, a6p3) := model_to_cubic evr e

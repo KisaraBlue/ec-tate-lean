@@ -801,8 +801,6 @@ lemma int_val_eq_top_iff_zero {p : ℕ} (gt1 : 1 < p) (a : ℤ) : int_val p a = 
           apply False.elim ((of_decide_eq_true rfl : ¬1 < 1) gt1)
         | succ n =>
           simp [hp, hp', abs_a, nat_valuation_aux, nat_valuation_aux'] at hval
-          rw [←ofN_eq_ofNat] at hval
-          exact False.elim (Enat.noConfusion hval)
   . intro ha
     simp [ha, int_val, nat_valuation]
 
@@ -860,7 +858,7 @@ def modulo (x : ℤ) (p : ℕ) := x % (p:ℤ)
 def inv_mod (x : ℤ) (p : ℕ) := gcdA x p
 
 def count_roots_cubic_aux (a b c d : ℤ) (p : ℕ) (x : ℕ) : ℕ := match x with
-  | Nat.zero => if d % p = 0 then 1 else 0
+  | Nat.zero => if d = 0 then 1 else 0
   | Nat.succ x' => (if (a * (x^3 : ℕ) + b * (x^2 : ℕ) + c * x + d) % (p : ℤ) = 0 then 1 else 0) + count_roots_cubic_aux a b c d p x'
 
 def count_roots_cubic (a b c d : ℤ) (p : ℕ) : ℕ :=

@@ -132,7 +132,7 @@ theorem ofN_inj : ofN m = ofN n ↔ m = n := ⟨ofN.inj, congrArg _⟩
 @[simp, norm_cast]
 lemma cast_eq_cast_iff_Nat (m n : ℕ) : (m : Enat) = (n : Enat) ↔ m = n := ofN_inj
 
-@[simp]
+@[simp, norm_cast]
 lemma ofN_eq_ofNat : ofN a = a :=
 rfl
 
@@ -162,13 +162,22 @@ induction a with
 | zero => simp [zero_nsmul]
 | succ k ih => simp [Nat.succ_mul, succ_nsmul, ← ih, add_comm]
 
-theorem lt_top (n : ℕ) : n < ∞ := And.intro Enat.noConfusion le.below_top
+protected theorem lt_top (n : ℕ) : n < ∞ := And.intro Enat.noConfusion le.below_top
 
-theorem succ_pos (n : ℕ∪∞) : 0 < succ n := by
-  cases n with
+protected theorem le_top (n : ℕ) : n ≤ ∞ := le.below_top
+
+@[simp, norm_cast]
+protected theorem le_iff_cast_le_cast {n m : ℕ} : (n : Enat) ≤ m ↔ n ≤ m := ⟨by
+  intro h
+  cases h
+  assumption,
+  le.in_nat⟩
+
+theorem succ_pos (n : ℕ∪∞) : 0 < succ n :=
+  match n with
   | ofN n =>
-    exact And.intro (Enat.noConfusion) (by rw [succ_ofN n]; exact le.in_nat (Nat.succ_le_succ (Nat.zero_le n)))
-  | top => exact lt_top 0
+    .intro Enat.noConfusion (by rw [succ_ofN n]; exact le.in_nat (Nat.succ_le_succ (Nat.zero_le n)))
+  | top => Enat.lt_top 0
 
 protected theorem zero_le (n : ℕ∪∞) : 0 ≤ n := by
   cases n with
@@ -375,7 +384,7 @@ match n, m with
 protected theorem eq_zero_or_pos : ∀ (n : ℕ∪∞), n = 0 ∨ n > 0
   | ofN 0   => Or.inl rfl
   | ofN (Nat.succ n) => by rw [←succ_ofN n]; exact Or.inr (succ_pos _)
-  | ∞ => Or.inr (lt_top 0)
+  | ∞ => Or.inr (Enat.lt_top 0)
 
 protected lemma pos_of_ne_zero {n : ℕ∪∞} : n ≠ 0 → 0 < n :=
 Or.resolve_left (Enat.eq_zero_or_pos n)
@@ -398,6 +407,11 @@ instance : LinearOrder ℕ∪∞ :=
   decidable_le     := inferInstance,
   decidable_eq     := inferInstance }
 
+
+@[simp, norm_cast]
+protected theorem lt_iff_cast_lt_cast {n m : ℕ} : (n : Enat) < m ↔ n < m :=
+by simp [lt_iff_le_and_ne]
+
 theorem add_right_cancel_ofN (a : ℕ) (b c : ℕ∪∞) : b + a = c + a → b = c := by
   cases b with
   | top   => cases c with
@@ -408,7 +422,7 @@ theorem add_right_cancel_ofN (a : ℕ) (b c : ℕ∪∞) : b + a = c + a → b =
   | ofN b => cases c with
     | top   => exact fun h => absurd h Enat.noConfusion
     | ofN c =>
-      simp
+      simp only [ofN_eq_ofNat, cast_eq_cast_iff_Nat]
       norm_cast
       exact Nat.add_right_cancel
 
@@ -421,6 +435,7 @@ And.intro Enat.noConfusion h
 theorem lt_iff_succ_le {n : ℕ} {m : ℕ∪∞} : n < m ↔ succ n ≤ m :=
 Iff.intro succ_le_of_lt lt_of_succ_le
 
+-- TODO this should be automatically derivable
 theorem enat_disjunction (a : ℕ∪∞) : a = ∞ ∨ ∃ n : ℕ, a = n :=
   match a with
   | top => Or.inl rfl
@@ -458,7 +473,6 @@ instance : CanonicallyOrderedAddMonoid ℕ∪∞ :=
         exact_mod_cast hc
       case top =>
         simp at h
-        contradiction
     case top =>
       use ∞
       simp

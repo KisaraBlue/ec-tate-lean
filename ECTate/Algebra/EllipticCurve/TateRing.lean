@@ -17,7 +17,9 @@ open SurjVal
 
 
 def kodaira_type_Is
-  {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {π : R}
+  {R : Type u}
+[Repr R] -- TODO delete
+  [DecidableEq R] [CommRing R] [IsDomain R] {π : R}
   (evr : EnatValRing π) (e : ValidModel R) (u0 r0 s0 t0 : R) (m q : ℕ)
   (hq : 1 < q) (h1 : evr.valtn e.a1 ≥ 1) (h2 : evr.valtn e.a2 = 1)
   (h3 : evr.valtn e.a3 ≥ q) (h4 : evr.valtn e.a4 ≥ q + 1)
@@ -84,6 +86,8 @@ def kodaira_type_Is
   --less obvious lemma
   have rw_a2 : sub_val evrp 1 e.a2 = a2p := by rw [←rw_a2', t_of_a2]
   if discr_2 : surjvalp (a4pq ^ 2 - 4 * a2p * a6pq2) = 0 then
+    dbg_trace (_root_.repr π)
+    dbg_trace (_root_.repr a2p)
     let c := if evrp.quad_roots_in_residue_field a2p a4pq a6pq2 then 4 else 2
     (m + 1, c, (r, t))
   else
@@ -160,7 +164,7 @@ decreasing_by
 
 
 -- TODO re-add ReductionType
-def tate_algorithm {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {π : R}
+def tate_algorithm {R : Type u} [Repr R] [DecidableEq R] [CommRing R] [IsDomain R] {π : R}
   (evr : EnatValRing π) (e : ValidModel R) (u0 r0 s0 t0 : R) :
   Kodaira × ℕ × ℕ × (R × R × R × R) :=
   let (u, r, s, t) := (u0, r0, s0, t0)
@@ -443,30 +447,35 @@ def tate_algorithm {R : Type u} [DecidableEq R] [CommRing R] [IsDomain R] {π : 
 
   have h2' : evr.valtn e3.a2 ≥ 2 := by-- T=0 triple root => a_2,1 = 0
     have h2'' : evr.valtn e3.a2 ≥ 1 := by
-      simp only [move_cubic_triple_root_to_origin_iso]
-      rw [r_of_a2, evr.factor_p_of_le_val h2, pow_one, ←mul_assoc, mul_comm 3, mul_assoc, ←mul_add]
-      apply val_mul_ge_of_left_ge
-      exact le_of_eq evr.valtn.v_uniformizer.symm
+      --erw [←Enat.succ_zero, ← Enat.lt_iff_succ_le]
+      have := move_cubic_triple_root_to_origin evr e2 e2_cubic_has_triple_root
+      sorry
+      -- simp only [move_cubic_triple_root_to_origin_iso]
+      -- rw [r_of_a2, evr.factor_p_of_le_val h2, pow_one, ←mul_assoc, mul_comm 3, mul_assoc, ←mul_add]
+      -- apply val_mul_ge_of_left_ge
+      -- exact le_of_eq evr.valtn.v_uniformizer.symm
     rw [evr.factor_p_of_le_val h2'', evr.valtn.v_mul_eq_add_v, pow_one, show (2 : ℕ∪∞) = 1 + 1 by rfl]
     apply add_le_add
     . exact le_of_eq evr.valtn.v_uniformizer.symm
     . exact succ_le_of_lt (move_cubic_triple_root_to_origin evr e2 e2_cubic_has_triple_root).1
 
-  have h3 : evr.valtn e3.a3 ≥ 2 := by-- preserved
+  have h3 : evr.valtn e3.a3 ≥ 2 := by
     simp only [move_cubic_triple_root_to_origin_iso]
     rw [r_of_a3, evr.factor_p_of_le_val h1, pow_one]
     apply val_add_ge_of_ge evr.valtn
     . exact h3'
-    . rw [←mul_assoc, mul_comm _ (π : R), ←mul_assoc, ←pow_two, mul_assoc]
-      apply val_mul_ge_of_left_ge evr.valtn (le_of_eq (val_of_pow_uniformizer evr.valtn).symm)
+    . sorry
+      -- rw [←mul_assoc, mul_comm _ (π : R), ←mul_assoc, ←pow_two, mul_assoc]
+      -- apply val_mul_ge_of_left_ge evr.valtn (le_of_eq (val_of_pow_uniformizer evr.valtn).symm)
 
   have h6 : evr.valtn e3.a6 ≥ 4 := by-- T=0 triple root => a_6,3 = 0
     have h6' : evr.valtn e3.a6 ≥ 3 := by
       simp only [move_cubic_triple_root_to_origin_iso]
-      rw [r_of_a6, evr.factor_p_of_le_val h6, evr.factor_p_of_le_val h4,
-        evr.factor_p_of_le_val h2, factorize8]
-      apply val_mul_ge_of_left_ge evr.valtn _
-      exact le_of_eq (val_of_pow_uniformizer evr.valtn).symm
+      sorry
+      -- rw [r_of_a6, evr.factor_p_of_le_val h6, evr.factor_p_of_le_val h4,
+      --   evr.factor_p_of_le_val h2, factorize8]
+      -- apply val_mul_ge_of_left_ge evr.valtn _
+      -- exact le_of_eq (val_of_pow_uniformizer evr.valtn).symm
     rw [evr.factor_p_of_le_val h6', evr.valtn.v_mul_eq_add_v, show (4 : ℕ∪∞) = 3 + 1 by rfl]
     apply add_le_add
     . exact le_of_eq (val_of_pow_uniformizer evr.valtn).symm
@@ -544,6 +553,7 @@ decreasing_by
 
   exact Model.val_discr_of_val_ai evr e4.toModel h1 h2 h3 h4 h6
 
-def test_model : ValidModel ℤ := ⟨⟨1, -1, 1, -23130, -1322503⟩, by simp⟩
+-- def test_model : ValidModel ℤ := ⟨⟨1, -1, 1, -23130, -1322503⟩, by simp⟩
+def test_model : ValidModel ℤ := ⟨⟨1,-1,1,-965,-13940⟩, by simp⟩
 
-#eval tate_algorithm (Int.primeEVR ((by norm_num) : Nat.Prime 2)) test_model 1 0 0 0
+#eval tate_algorithm (Int.primeEVR ((by sorry) : Nat.Prime 7)) test_model 1 0 0 0
