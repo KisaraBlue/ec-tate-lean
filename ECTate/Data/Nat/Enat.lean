@@ -132,7 +132,7 @@ theorem ofN_inj : ofN m = ofN n ↔ m = n := ⟨ofN.inj, congrArg _⟩
 @[simp, norm_cast]
 lemma cast_eq_cast_iff_Nat (m n : ℕ) : (m : Enat) = (n : Enat) ↔ m = n := ofN_inj
 
-@[simp, norm_cast]
+@[simp]
 lemma ofN_eq_ofNat : ofN a = a :=
 rfl
 

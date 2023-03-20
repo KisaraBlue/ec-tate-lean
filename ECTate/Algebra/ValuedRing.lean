@@ -610,10 +610,11 @@ def nat_valuation : ℕ → ℕ → ℕ∪∞
   | 1, (_+1) => ∞
   | (q+2), (m+1) => nat_valuation_aux (q+2) (Nat.succ_lt_succ (Nat.zero_lt_succ q)) (m+1)
 
-lemma nat_valuation_add_two (q m : ℕ) : nat_valuation (q+2) m = nat_valuation_aux (q+2) (Nat.succ_lt_succ (Nat.zero_lt_succ q)) m :=
-  by cases m
-     . rfl
-     . simp [nat_valuation]
+lemma nat_valuation_add_two (q m : ℕ) :
+  nat_valuation (q+2) m = nat_valuation_aux (q+2) (Nat.succ_lt_succ (Nat.zero_lt_succ q)) m := by
+  cases m
+  . rfl
+  . simp [nat_valuation]
 
 lemma nat_valuation_of_one_lt (p m : ℕ) (hp : 1 < p) : nat_valuation p m = nat_valuation_aux p hp m :=
   by cases p
@@ -747,7 +748,8 @@ cases a with
 lemma nat_val_mul_eq_add (p : ℕ) (prime : Nat.Prime p) (a b : ℕ) :
   nat_valuation p (a * b) = nat_valuation p a + nat_valuation p b := by
 convert nat_val_aux_mul_eq_add p prime prime.one_lt a b <;>
-  simp [← nat_valuation_of_one_lt]
+ext <;>
+rw [(nat_valuation_of_one_lt p _ prime.one_lt)]
 
 lemma int_val_mul_eq_add {p : ℕ} (prime : Nat.Prime p) (a b : ℤ) :
   int_val p (a * b) = int_val p a + int_val p b := by

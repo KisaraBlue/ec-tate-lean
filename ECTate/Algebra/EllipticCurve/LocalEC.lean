@@ -9,7 +9,7 @@ import Mathlib.Tactic.Contrapose
 import Aesop
 import Mathlib.Tactic.Linarith
 import ECTate.Algebra.ResidueRing
--- import ECTate.Tactic.Elinarith
+-- import ECTate.Tactic.ELinarith
 -- import Mathlib.Algebra.Order.Field.Defs
 
 
