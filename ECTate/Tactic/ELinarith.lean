@@ -24,7 +24,7 @@ def is_atom (e : Expr) : Mathlib.Tactic.AtomM Bool :=
 open Lean Meta Elab Tactic Term PrettyPrinter in
 elab "elinarith" : tactic => do
   let mvarId ← getMainTarget
-  logInfo mvarId
+  -- logInfo mvarId
   -- (←getMainGoal).withContext do
   --   withLocalDeclDQ (← mkFreshUserName `x) q(ℤ) fun x => do
   --   let e : Q(Prop) := q($x ≤ $x+2)
@@ -43,8 +43,11 @@ elab "elinarith" : tactic => do
   let mut goals := [(← getMainGoal)]
   for e in a do
     let tac ←
-      `(tactic| cases $(←delab e):term <;>
-                simp only [Enat.ofN_eq_ofNat, add_top, top_add] at * <;>
+      `(tactic| cases h : $(←delab e):term <;>
+                simp only [h, Enat.ofN_eq_ofNat, Enat.top_add, Enat.add_top,
+                  Enat.ofNatAtLeastTwoMulInfty, Enat.inftyMulofNatAtLeastTwo,
+                  Nat.cast_add, Nat.cast_one, Nat.cast_mul, Nat.cast_ofNat
+                ] at * <;>
                 norm_cast at * <;>
                 try linarith)
     -- logInfo e
@@ -56,7 +59,7 @@ elab "elinarith" : tactic => do
   setGoals goals
 
 def tt : Enat -> Enat := sorry
-example (x : Enat) (h : 1 ≤ x) : 2 ≤ 1 + x :=
+example (x : Enat) (h : 1 ≤ tt x) : 2 ≤ 1 + tt x :=
 by
   elinarith
 
@@ -77,11 +80,12 @@ by
   simp?
 
 
+example (y  x : Enat) (h : 0 < y) (g : y ≤ 3) : y < 2 * y :=
+by
+  elinarith
 example (x y : Enat) (h : 0 < x) (g : 3 ≤ y) : 3 ≤ 1 + 2 * x + y :=
 by
   elinarith
-  simp
-  simp
 
 
 -- TODO spell check all comments / docstrings, linarith thaat

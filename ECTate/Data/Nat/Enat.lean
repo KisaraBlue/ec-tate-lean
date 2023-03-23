@@ -610,6 +610,13 @@ instance : CommSemiring ℕ∪∞ :=
     | (ofN (_ + 1)), (ofN 0), ∞ => rfl
     | (ofN (_ + 1)), (ofN (_ + 1)), ∞ => rfl }
 
+@[simp]
+lemma ofNatAtLeastTwoMulInfty {n : ℕ} (h : Nat.AtLeastTwo (m + 2)) :
+  (@OfNat.ofNat _ _ (@instOfNat ℕ∪∞ _ Semiring.toNatCast h) : Enat) * ∞ = ∞ := rfl
+@[simp]
+lemma inftyMulofNatAtLeastTwo {n : ℕ} (h : Nat.AtLeastTwo (m + 2)) :
+  ∞ * (@OfNat.ofNat _ _ (@instOfNat ℕ∪∞ _ Semiring.toNatCast h) : Enat) = ∞ := rfl
+
 instance : CanonicallyOrderedCommSemiring ℕ∪∞ :=
 { Enat.instCommSemiringEnat, Enat.instCanonicallyOrderedAddMonoidEnat with
   eq_zero_or_eq_zero_of_mul_eq_zero := by
