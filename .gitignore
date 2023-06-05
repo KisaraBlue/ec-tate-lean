@@ -1,7 +1,7 @@
 lib/
 bin/
 ir/
-/build/*
+build/
 !/build/doc
 /prelude/build
 /lake-packages

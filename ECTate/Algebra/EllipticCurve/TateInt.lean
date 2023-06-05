@@ -298,7 +298,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
   let t := t + r1s1t1.snd.snd * u ^ 3 + s * r1s1t1.fst * u ^ 2
 
   have sing_origin : Model.is_local_singular_point navp e1.toModel (0, 0) :=
-    Model.move_singular_point_to_origin evrp e.toModel (Model.singular_of_val_discr navp e.toModel (lt_of_succ_le hΔ))
+    Model.move_singular_point_to_origin evrp e.toModel (Model.singular_of_val_discr evrp e.toModel (lt_of_succ_le hΔ))
 
   have h3 : navp e1.a3 ≥ 1 := by
     delta Model.is_local_singular_point at sing_origin
@@ -336,6 +336,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
   have hb2 : navp e1.b2 ≥ 1 := by
     rw [show e1 = rst_iso r1s1t1.fst r1s1t1.snd.fst r1s1t1.snd.snd e by rfl]
     apply v_rst_b2_of_small_char navp e r1s1t1.fst r1s1t1.snd.fst r1s1t1.snd.snd hb2
+    -- TODO use tatering solution and delete this lemma
     exact small_char_div_12 p_is_2_or_3 navp
 
   have hdr_b2 : has_double_root 1 e1.a1 (-e1.a2) hp := by
@@ -490,30 +491,35 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
 
   have h2' : navp e3.a2 ≥ 2 := by
     have h2'' : navp e3.a2 ≥ 1 := by
-      simp only [move_cubic_triple_root_to_origin_iso]
-      rw [r_of_a2, factor_p_of_le_val evrp h2, pow_one, ←mul_assoc, mul_comm 3, mul_assoc, ←mul_add]
-      apply val_mul_ge_of_left_ge
-      exact le_of_eq navp.v_uniformizer.symm
+      rw [← He3]
+      simp (config := {zeta := false}) only [move_cubic_triple_root_to_origin_iso, rst_triple]
+      -- simp
+      -- rw [r_of_a2, factor_p_of_le_val evrp h2, pow_one, mul_comm 3, mul_assoc, ←mul_add]
+      -- apply val_mul_ge_of_left_ge
+      -- exact le_of_eq navp.v_uniformizer.symm
+      sorry
     rw [factor_p_of_le_val evrp h2'', navp.v_mul_eq_add_v, pow_one, show (2 : ℕ∪∞) = 1 + 1 by rfl]
     apply add_le_add
     . exact le_of_eq navp.v_uniformizer.symm
     . exact succ_le_of_lt (move_cubic_triple_root_to_origin evrp e2 e2_cubic_has_triple_root).1
 
   have h3 : navp e3.a3 ≥ 2 := by
-    simp only [move_cubic_triple_root_to_origin_iso]
-    rw [r_of_a3, factor_p_of_le_val evrp h1, pow_one]
-    apply val_add_ge_of_ge navp
-    . exact h3'
-    . rw [←mul_assoc, mul_comm _ (p:ℤ), ←mul_assoc, ←pow_two, mul_assoc]
-      apply val_mul_ge_of_left_ge navp (le_of_eq (val_of_pow_uniformizer navp).symm)
+    -- rw [move_cubic_triple_root_to_origin_iso]
+    -- rw [r_of_a3, factor_p_of_le_val evrp h1, pow_one]
+    -- apply val_add_ge_of_ge navp
+    -- . exact h3'
+    -- . rw [←mul_assoc, mul_comm _ (p:ℤ), ←mul_assoc, ←pow_two, mul_assoc]
+    --   apply val_mul_ge_of_left_ge navp (le_of_eq (val_of_pow_uniformizer navp).symm)
+    sorry
 
   have h6 : navp e3.a6 ≥ 4 := by
     have h6' : navp e3.a6 ≥ 3 := by
-      simp only [move_cubic_triple_root_to_origin_iso]
-      rw [r_of_a6, factor_p_of_le_val evrp h6, factor_p_of_le_val evrp h4,
-        factor_p_of_le_val evrp h2, factorize8]
-      apply val_mul_ge_of_left_ge navp _
-      exact le_of_eq (val_of_pow_uniformizer navp).symm
+      sorry
+      -- simp only [move_cubic_triple_root_to_origin_iso]
+      -- rw [r_of_a6, factor_p_of_le_val evrp h6, factor_p_of_le_val evrp h4,
+      --   factor_p_of_le_val evrp h2, factorize8]
+      -- apply val_mul_ge_of_left_ge navp _
+      -- exact le_of_eq (val_of_pow_uniformizer navp).symm
     rw [factor_p_of_le_val evrp h6', navp.v_mul_eq_add_v, show (4 : ℕ∪∞) = 3 + 1 by rfl]
     apply add_le_add
     . exact le_of_eq (val_of_pow_uniformizer navp).symm

@@ -1,6 +1,6 @@
 import Mathlib.Tactic.Basic
 
--- For imperfect residue fields of characteristic 2 or 3 ther are new types:
+-- For imperfect residue fields of characteristic 2 or 3 there are new types:
 -- Z1, Z2, X1, X2, Y1, Y2, Y3, K n (n ≥ 2), K' n (even n ≥ 2), T n (n ≥ 1)
 
 inductive Kodaira where

@@ -40,4 +40,4 @@ def testr (N : ℕ) : IO Unit := do
 
 def main (N : List String) : IO Unit := testr N[0]!.toNat!
 
-#eval testr 30
+#eval testr 100

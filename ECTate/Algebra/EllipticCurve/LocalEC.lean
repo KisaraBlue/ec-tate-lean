@@ -9,6 +9,7 @@ import Mathlib.Tactic.Contrapose
 import Aesop
 import Mathlib.Tactic.Linarith
 import ECTate.Algebra.ResidueRing
+import Mathlib.RingTheory.Ideal.Quotient
 -- import ECTate.Tactic.ELinarith
 -- import Mathlib.Algebra.Order.Field.Defs
 
@@ -17,7 +18,6 @@ open Enat
 
 variable {R : Type u} [CommRing R] [inst : IsDomain R]
 
-
 namespace Model
 
 variable {p : R}
@@ -25,25 +25,23 @@ variable {p : R}
 def is_local_singular_point (valp : SurjVal p) (e : Model R) (P : R × R) : Prop :=
 valp (weierstrass e P) > 0 ∧ valp (dweierstrass_dx e P) > 0 ∧ valp (dweierstrass_dy e P) > 0
 
-lemma mk'_apply [NonAssocRing R] (x : R) (c : RingCon R) : c.mk' x = x := rfl
-lemma is_local_singular_point_iff (evr : EnatValRing p) (e : Model R) (P : R × R) :
-  is_local_singular_point evr.valtn e P ↔ is_singular_point (e.map evr.RingCon.mk') (P.map evr.RingCon.mk' evr.RingCon.mk')
-  := by
-  rw [is_singular_point]
-  rw [weierstrass_map, dweierstrass_dx_map, dweierstrass_dy_map]
-  simp [mk'_apply]
-  rw [← RingCon.coe_zero]
-  rw [RingCon.eq, RingCon.rel_mk, SurjVal.s.r_eq, congruence_p]
-  rw [RingCon.eq, RingCon.rel_mk, SurjVal.s.r_eq, congruence_p]
-  rw [RingCon.eq, RingCon.rel_mk, SurjVal.s.r_eq, congruence_p]
-  simp
-  rfl
+-- lemma mk'_apply [NonAssocRing R] (x : R) (c : RingCon R) : c.mk' x = x := rfl
 
-lemma singular_of_val_discr (valp : SurjVal p) (e : Model R) (h : valp e.discr > 0) :
-  ∃ P, is_local_singular_point valp e P :=
+lemma is_local_singular_point_iff (evr : EnatValRing p) (e : Model R) (P : R × R) :
+  is_local_singular_point evr.valtn e P ↔
+  is_singular_point (e.map (Ideal.Quotient.mk evr.valtn.ideal)) (P.map (Ideal.Quotient.mk evr.valtn.ideal) (Ideal.Quotient.mk evr.valtn.ideal))
+  := by
+  rw [is_singular_point, weierstrass_map, dweierstrass_dx_map, dweierstrass_dy_map, is_local_singular_point]
+  simp [Ideal.Quotient.eq_zero_iff_mem]
+
+lemma singular_of_val_discr (evr : EnatValRing p) (e : Model R) (h : evr.valtn e.discr > 0) :
+  ∃ P, is_local_singular_point evr.valtn e P :=
 by
+
   sorry
 
+
+#check singular_of_val_discr
 --TODO norm_reprs here?
 def singular_point_on_special [DecidableEq R] (evr : EnatValRing p) (e : Model R) : R × R :=
   if 0 < evr.valtn e.c4 then
@@ -75,7 +73,7 @@ lemma move_singular_point_to_origin [DecidableEq R] (evr : EnatValRing p) (e : M
   is_local_singular_point evr.valtn (move_singular_point_to_origin_iso evr e) (0, 0) :=
 by
   rintro ⟨P, h⟩
-  have := Model.Field.move_singular_point_to_origin' (e.map evr.RingCon.mk') ⟨P.map evr.RingCon.mk' evr.RingCon.mk', ?_⟩
+  have := Model.Field.move_singular_point_to_origin' (e.map (Ideal.Quotient.mk evr.valtn.ideal)) ⟨P.map (Ideal.Quotient.mk evr.valtn.ideal) (Ideal.Quotient.mk evr.valtn.ideal), ?_⟩
   . rw [is_local_singular_point_iff]
     simp
     convert this
@@ -374,56 +372,68 @@ lemma v_b2_of_v_a1_a2 {p : R} (valp : SurjVal p) (e : ValidModel R) (h1 : valp e
 
 lemma v_b4_of_v_a1_a3_a4 {p : R} (valp : SurjVal p) (e : ValidModel R) (h1 : valp e.a1 ≥ 1)
   (h3 : valp e.a3 ≥ q) (h4 : valp e.a4 ≥ q + 1) : valp e.b4 ≥ q + 1 := by
-  apply val_add_ge_of_ge valp
-  . rw [add_comm]
-    exact (val_mul_ge_of_both_ge valp h1 h3)
-  . exact (val_mul_ge_of_right_ge valp h4)
+  apply val_add_ge_of_ge valp <;>
+  . simp
+    elinarith
+  -- apply val_add_ge_of_ge valp
+  -- . rw [add_comm]
+  --   exact (val_mul_ge_of_both_ge valp h1 h3)
+  -- . exact (val_mul_ge_of_right_ge valp h4)
 
 lemma v_b6_of_v_a3_a6 {p : R} {q : ℕ} (valp : SurjVal p) (e : ValidModel R) (h3 : valp e.a3 ≥ q)
   (h6 : valp e.a6 ≥ 2 * q) : valp e.b6 ≥ 2 * q := by
-  apply val_add_ge_of_ge valp
-  . simp -- TOOD use powers in defs of bis not mul...
-    rw [(show 2 * (q : Enat) = q + q by ring)]
-    exact add_le_add h3 h3
-  . exact (val_mul_ge_of_right_ge valp h6)
+  -- rw [Model.b6]
+  apply val_add_ge_of_ge valp <;>
+  . simp
+    elinarith
+  -- . simp
+  --   elinarith
+  --   linarith
+  -- . elinarith
+  -- . simp -- TOOD use powers in defs of bis not mul...
+  --   rw [(show 2 * (q : Enat) = q + q by ring)]
+  --   exact add_le_add h3 h3
+  -- . exact (val_mul_ge_of_right_ge valp h6)
 
 lemma v_b8_of_v_ai {p : R} {q : ℕ} (valp : SurjVal p) (e : ValidModel R) (h1 : valp e.a1 ≥ 1)
   (h2 : valp e.a2 = 1) (h3 : valp e.a3 ≥ q) (h4 : valp e.a4 ≥ q + 1)
   (h6 : valp e.a6 ≥ 2 * q) : valp e.b8 ≥ 2 * q + 1 := by
-  simp only [Model.b8]
-  rw [sub_eq_add_neg, sub_eq_add_neg]
-  repeat apply val_add_ge_of_ge valp
+  -- rw [Model.b8]
+  -- rw [sub_eq_add_neg, sub_eq_add_neg]
+  apply_rules [val_add_ge_of_ge, val_sub_ge_of_ge] <;>
   . simp
-    rw [(show 2 * (q : Enat) + 1 = 0 + 1 + 2 * q by ring)]
-    repeat' apply add_le_add
-    exact zero_le _
-    assumption
-    assumption
-  . simp
-    rw [(show 2 * (q : Enat) + 1 = 0 + q + (q + 1) by ring)]
-    repeat' apply add_le_add
-    exact zero_le _
-    assumption
-    assumption
-  . simp
-    rw [(show 2 * (q : Enat) + 1 = 0 + 1 + (2 * q) by ring)]
-    repeat' apply add_le_add
-    exact zero_le _
-    apply le_of_eq
-    exact h2.symm
-    assumption
-  . simp at *
-    rw [(show 2 * (q : Enat) + 1 = 1 + q + q by ring)]
-    repeat' apply add_le_add
-    apply le_of_eq
-    exact h2.symm
-    assumption
-    assumption
-  . simp
-    rw [(show 2 * (q : Enat) + 1 = q + 1 + q by ring)]
-    apply add_le_add
-    assumption
-    exact le_of_succ_le h4
+    elinarith
+  -- . simp
+  --   rw [(show 2 * (q : Enat) + 1 = 0 + 1 + 2 * q by ring)]
+  --   repeat' apply add_le_add
+  --   exact zero_le _
+  --   assumption
+  --   assumption
+  -- . simp
+  --   rw [(show 2 * (q : Enat) + 1 = 0 + q + (q + 1) by ring)]
+  --   repeat' apply add_le_add
+  --   exact zero_le _
+  --   assumption
+  --   assumption
+  -- . simp
+  --   rw [(show 2 * (q : Enat) + 1 = 0 + 1 + (2 * q) by ring)]
+  --   repeat' apply add_le_add
+  --   exact zero_le _
+  --   apply le_of_eq
+  --   exact h2.symm
+  --   assumption
+  -- . simp at *
+  --   rw [(show 2 * (q : Enat) + 1 = 1 + q + q by ring)]
+  --   repeat' apply add_le_add
+  --   apply le_of_eq
+  --   exact h2.symm
+  --   assumption
+  --   assumption
+  -- . simp
+  --   rw [(show 2 * (q : Enat) + 1 = q + 1 + q by ring)]
+  --   apply add_le_add
+  --   assumption
+  --   exact le_of_succ_le h4
 
 
 private lemma aux (n q : ℕ) (h : 1 < q) (hn : 2 * q ≤ n) : 2 * q + 3 ≤ n + n :=
@@ -433,6 +443,7 @@ private lemma aux' (n q m t : ℕ) (h : 1 < q) (h2': 1 ≤ n) (h4': q + 1 ≤ m)
   2 * q + 3 ≤ n + (m + t) :=
 by linarith
 
+-- set_option trace.profiler true in
 lemma v_discr_of_v_ai {p : R} {q : ℕ} (valp : SurjVal p) (e : ValidModel R) (hq : q > 1)
   (h1 : valp e.a1 ≥ 1) (h2 : valp e.a2 = 1) (h3 : valp e.a3 ≥ q)
   (h4 : valp e.a4 ≥ q + 1) (h6 : valp e.a6 ≥ 2 * q) :
@@ -441,58 +452,62 @@ lemma v_discr_of_v_ai {p : R} {q : ℕ} (valp : SurjVal p) (e : ValidModel R) (h
   have h4' := v_b4_of_v_a1_a3_a4 valp e h1 h3 h4
   have h6' := v_b6_of_v_a3_a6 valp e h3 h6
   have h8' := v_b8_of_v_ai valp e h1 h2 h3 h4 h6
-  simp only [Model.discr]
-  rw [sub_eq_add_neg, sub_eq_add_neg]
-  repeat' apply val_add_ge_of_ge valp
-  . rw [←neg_mul_eq_neg_mul, ←neg_mul_eq_neg_mul, val_neg]
-    simp only [v_mul_eq_add_v, ge_iff_le] at *
-    rw [(show 2 * (q : Enat) + 3 = 1 + 1 + (2 * q + 1) by ring)]
-    repeat' apply add_le_add
-    all_goals assumption
-  . rw [val_neg, pow_succ', pow_succ', pow_one, ←add_self_eq_mul_two,
-      (show (q : Enat) + q + 3 = q + 1 + (q + 1) + 1 by ring)]
-    exact val_mul_ge_of_right_ge valp (val_mul_ge_of_both_ge valp
-      (val_mul_ge_of_both_ge valp h4' h4') (le_trans ((le_ofN _ _).2 (Nat.le_add_left 1 q)) h4'))
-  . simp only [val_neg, v_mul_eq_add_v, ge_iff_le] at *
-    cases hh6 : v valp (Model.b6 e.toModel) with
-    | ofN n =>
-      rw [add_assoc]
-      apply le_add_of_nonneg_of_le (zero_le _) _
-      simp [hh6] at *
-      norm_cast at *
-      exact aux n q hq h6' -- TODO linarith doesn't work
-    | top =>
-      simp
-      exact Enat.le_top _
-    -- rw [(show 2 * (q : Enat) + 3 = 0 + 1 + (2 * q + 1) by ring)]
-    -- rw [val_neg, mul_assoc, (show 3 = 2 + 1 by rfl)]
-    -- apply val_mul_ge_of_right_ge valp (val_mul_ge_of_both_ge valp h6' (le_trans ((le_ofN _ _).2 _) h6'))
-    -- rw [←add_self_eq_mul_two q]
-    -- exact Nat.add_le_add (Nat.succ_le_of_lt hq) (Nat.le_of_lt hq)
-  . cases hh2 : v valp (Model.b2 e.toModel) with
-    | ofN n =>
-      cases hh4 : v valp (Model.b4 e.toModel) with
-      | ofN m =>
-        cases hh6 : v valp (Model.b6 e.toModel) with
-        | ofN t =>
-          simp [*] at *
-          rw [add_assoc, add_assoc]
-          apply le_add_of_nonneg_of_le (zero_le _) _
-          norm_cast at *
-          exact aux' n q m t hq h2' h4' h6' -- TODO linarith doesn't work
-        | top =>
-          simp [hh6]
-          exact Enat.le_top _
-      | top =>
-        simp [hh4]
-        exact Enat.le_top _
-    | top =>
-      simp [hh2]
-      exact Enat.le_top _
-    -- rw [(show 3 = 1 + (1 + 1) by rfl), mul_comm, mul_assoc 9]
-    -- exact val_mul_ge_of_both_ge valp h6' (val_mul_ge_of_right_ge valp
-    --   (val_mul_ge_of_both_ge valp h2' (le_trans ((le_ofN _ _).2
-    --   (Nat.add_le_add (Nat.le_of_lt hq) (le_of_eq rfl))) h4')))
+  apply_rules [val_add_ge_of_ge, val_sub_ge_of_ge] <;> -- TODO bizarre h2_symm appears
+  . simp
+    elinarith
+
+  -- simp only [Model.discr]
+  -- rw [sub_eq_add_neg, sub_eq_add_neg]
+  -- repeat' apply val_add_ge_of_ge valp
+  -- . rw [←neg_mul_eq_neg_mul, ←neg_mul_eq_neg_mul, val_neg]
+  --   simp only [v_mul_eq_add_v, ge_iff_le] at *
+  --   rw [(show 2 * (q : Enat) + 3 = 1 + 1 + (2 * q + 1) by ring)]
+  --   repeat' apply add_le_add
+  --   all_goals assumption
+  -- . rw [val_neg, pow_succ', pow_succ', pow_one, ←add_self_eq_mul_two,
+  --     (show (q : Enat) + q + 3 = q + 1 + (q + 1) + 1 by ring)]
+  --   exact val_mul_ge_of_right_ge valp (val_mul_ge_of_both_ge valp
+  --     (val_mul_ge_of_both_ge valp h4' h4') (le_trans ((le_ofN _ _).2 (Nat.le_add_left 1 q)) h4'))
+  -- . simp only [val_neg, v_mul_eq_add_v, ge_iff_le] at *
+  --   cases hh6 : v valp (Model.b6 e.toModel) with
+  --   | ofN n =>
+  --     rw [add_assoc]
+  --     apply le_add_of_nonneg_of_le (zero_le _) _
+  --     simp [hh6] at *
+  --     norm_cast at *
+  --     exact aux n q hq h6' -- TODO linarith doesn't work
+  --   | top =>
+  --     simp
+  --     exact Enat.le_top _
+  --   -- rw [(show 2 * (q : Enat) + 3 = 0 + 1 + (2 * q + 1) by ring)]
+  --   -- rw [val_neg, mul_assoc, (show 3 = 2 + 1 by rfl)]
+  --   -- apply val_mul_ge_of_right_ge valp (val_mul_ge_of_both_ge valp h6' (le_trans ((le_ofN _ _).2 _) h6'))
+  --   -- rw [←add_self_eq_mul_two q]
+  --   -- exact Nat.add_le_add (Nat.succ_le_of_lt hq) (Nat.le_of_lt hq)
+  -- . cases hh2 : v valp (Model.b2 e.toModel) with
+  --   | ofN n =>
+  --     cases hh4 : v valp (Model.b4 e.toModel) with
+  --     | ofN m =>
+  --       cases hh6 : v valp (Model.b6 e.toModel) with
+  --       | ofN t =>
+  --         simp [*] at *
+  --         rw [add_assoc, add_assoc]
+  --         apply le_add_of_nonneg_of_le (zero_le _) _
+  --         norm_cast at *
+  --         exact aux' n q m t hq h2' h4' h6' -- TODO linarith doesn't work
+  --       | top =>
+  --         simp [hh6]
+  --         exact Enat.le_top _
+  --     | top =>
+  --       simp [hh4]
+  --       exact Enat.le_top _
+  --   | top =>
+  --     simp [hh2]
+  --     exact Enat.le_top _
+  --   -- rw [(show 3 = 1 + (1 + 1) by rfl), mul_comm, mul_assoc 9]
+  --   -- exact val_mul_ge_of_both_ge valp h6' (val_mul_ge_of_right_ge valp
+  --   --   (val_mul_ge_of_both_ge valp h2' (le_trans ((le_ofN _ _).2
+  --   --   (Nat.add_le_add (Nat.le_of_lt hq) (le_of_eq rfl))) h4')))
 
 lemma small_char_div_12 {p : R} (hp : p = 2 ∨ p = 3) (valp : SurjVal p) : valp 12 ≥ 1 := by
   cases hp with
@@ -535,8 +550,10 @@ def cubic_has_triple_root {p : R} (evr : EnatValRing p) (e : ValidModel R) : Pro
 evr.valtn (Δcubic (model_to_cubic evr e)) > 0 ∧ evr.valtn (δmultiplicity (model_to_cubic evr e)) > 0
 
 def move_cubic_double_root_to_origin_iso {p : R} (evr : EnatValRing p) (e : ValidModel R) : ValidModel R :=
-  let (a2p, a4p2, _) := model_to_cubic evr e
-  rst_iso (p * (evr.norm_repr (if evr.residue_char = 2 then a4p2 else evr.inv_mod a2p * evr.pth_root a4p2))) 0 0 e
+  let (a2p, a4p2, a6p3) := model_to_cubic evr e
+  rst_iso (p * (evr.norm_repr (if evr.residue_char = 2 then evr.pth_root a4p2 else if
+                                  evr.residue_char = 3 then a4p2 * evr.inv_mod a2p else
+                                  (9 * a6p3 - a2p * a4p2) * evr.inv_mod (2 * (a2p ^ 2 - 3 * a4p2))))) 0 0 e
 
 def cubic_double_root_is_zero {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop :=
   let (a2p, a4p2, a6p3) := model_to_cubic evr e
@@ -545,9 +562,13 @@ def cubic_double_root_is_zero {p : R} (evr : EnatValRing p) (e : ValidModel R) :
 lemma move_cubic_double_root_to_origin {p : R} (evr : EnatValRing p) (e : ValidModel R) :
   cubic_has_double_root evr e → cubic_double_root_is_zero evr (move_cubic_double_root_to_origin_iso evr e) := sorry
 
+@[simps!?]
 def move_cubic_triple_root_to_origin_iso {p : R} (evr : EnatValRing p) (e : ValidModel R) : ValidModel R :=
   let (a2p, _, a6p3) := model_to_cubic evr e
-  rst_iso (evr.norm_repr (if evr.residue_char = 3 then -evr.pth_root a6p3 else -a2p * evr.inv_mod 3)) 0 0 e
+  rst_iso (p * (evr.norm_repr ( -- TODO shiould have p in
+                         if evr.residue_char = 2 then a2p else
+                         if evr.residue_char = 3 then -evr.pth_root a6p3 else
+                          -a2p * evr.inv_mod 3))) 0 0 e
 
 def cubic_triple_root_is_zero {p : R} (evr : EnatValRing p) (e : ValidModel R) : Prop :=
   let (a2p, a4p2, a6p3) := model_to_cubic evr e

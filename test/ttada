@@ -1,0 +1,33 @@
+import Mathlib.Tactic.Rewrites
+-- import Mathlib.Data.Nat.Basic
+
+
+lemma l : n + 0 = n := by
+  rewrites
+  sorry
+lemma a : n + 0 = m := by
+  rewrites
+  sorry
+lemma b (h : 0 + n = n) :  0 + n + 0 = m := by
+  rewrites -- dup results for add_zero
+  sorry
+def H : Prop := sorry
+
+
+lemma d (h : Nat) : h = 1 := by
+  rewrite [eq.symm] at _d
+  rewrites at *
+
+
+
+lemma d' (h : Nat) : h = 1 := by
+  rewrites at *
+  rw [h] at h
+
+lemma c : 0 + 1 + n = n := by
+  rewrites!
+
+
+lemma r (h : 0 + n = n) (h : H) : 1 + n = n := by
+  rewrites at *
+  rw [h] at h

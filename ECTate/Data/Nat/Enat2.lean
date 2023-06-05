@@ -116,25 +116,39 @@ protected def one := ofN 1
 instance : AddMonoidWithOne ℕ∪∞ :=
 { inferInstanceAs (AddMonoid Enat) with
   one    := Enat.one
-  natCast := ofN
-  natCast_zero := rfl
-  natCast_succ := fun _ => rfl }
+  -- natCast := ofN
+  -- natCast_zero := rfl
+  -- natCast_succ := fun _ => rfl
+  }
 
 @[simp]
-theorem succ_ofNat (a : Nat) : succ a = a.succ := rfl
+theorem succ_ofNat (a : Nat) : succ a = a.succ :=
+by
+  induction a with
+  | zero => simp
+  | succ l ih => simp at *; rw [add_assoc, ← ih]; sorry
+
 @[simp]
 theorem succ_zero : succ 0 = 1 := rfl
 
-theorem add_ofNat (a b : Nat) : a + b = (↑(a + b) : Enat) := rfl
+theorem add_ofNat (a b : Nat) : a + b = (↑(a + b) : Enat) := (Nat.cast_add _ _).symm
 
 theorem ofN_inj : ofN m = ofN n ↔ m = n := ⟨ofN.inj, congrArg _⟩
 
-@[simp, norm_cast]
-lemma cast_eq_cast_iff_Nat (m n : ℕ) : (m : Enat) = (n : Enat) ↔ m = n := ofN_inj
-
 @[simp]
 lemma ofN_eq_ofNat : ofN a = a :=
-rfl
+by
+  induction a with
+  | zero => simp
+  | succ l ih => simp [← ih]; rfl
+
+#check ofN_eq_ofNat
+
+@[simp, norm_cast]
+lemma cast_eq_cast_iff_Nat (m n : ℕ) : (m : Enat) = (n : Enat) ↔ m = n := by
+  rw [← ofN_eq_ofNat]
+  rw [← ofN_eq_ofNat]
+  exact ofN_inj
 
 -- set_option trace.Meta.Tactic.simp.rewrite true
 theorem succ_add (a b : ℕ∪∞) : succ a + b = succ (a + b) := by
@@ -162,16 +176,29 @@ induction a with
 | zero => simp [zero_nsmul]
 | succ k ih => simp [Nat.succ_mul, succ_nsmul, ← ih, add_comm]
 
-protected theorem lt_top (n : ℕ) : n < ∞ := And.intro Enat.noConfusion le.below_top
+protected theorem lt_top (n : ℕ) : n < ∞ := And.intro (ofN_eq_ofNat ▸ Enat.noConfusion) le.below_top
 
-protected theorem le_top (n : Enat) : n ≤ ∞ := le.below_top
+protected theorem le_top (n : ℕ) : n ≤ ∞ := le.below_top
 
 @[simp, norm_cast]
 protected theorem le_iff_cast_le_cast {n m : ℕ} : (n : Enat) ≤ m ↔ n ≤ m := ⟨by
+  rw [← ofN_eq_ofNat, ← ofN_eq_ofNat]
   intro h
   cases h
   assumption,
-  le.in_nat⟩
+  ofN_eq_ofNat ▸ ofN_eq_ofNat ▸ le.in_nat⟩
+
+@[simp, norm_cast]
+protected theorem lt_iff_cast_lt_cast {n m : ℕ} : (n : Enat) < m ↔ n < m := ⟨by
+  rw [← ofN_eq_ofNat, ← ofN_eq_ofNat]
+  intro h
+  cases h
+  simp at *
+  have : (↑ (n + 1): Enat) ≤ m
+  . assumption
+  rw [Enat.le_iff_cast_le_cast] at this
+  assumption,
+  ofN_eq_ofNat ▸ ofN_eq_ofNat ▸ sorry⟩
 
 theorem succ_pos (n : ℕ∪∞) : 0 < succ n :=
   match n with
@@ -288,7 +315,6 @@ theorem add_le_add_left {n m : ℕ∪∞} (h : n ≤ m) (k : ℕ∪∞) : k + n 
         simp
         exact le.below_top
       | ofN m =>
-        simp
         apply le.in_nat
         cases h with
           | in_nat h => exact Nat.add_le_add_left h k
@@ -304,7 +330,9 @@ Iff.intro (eq_top_of_top_le _) (fun h => by simp [h])
 theorem eq_top_of_add_eq_top (a : ℕ∪∞) (n : ℕ) (h : a + n = ∞) : a = ∞ := by
   cases a with
   | top => rfl
-  | ofN a => exact Enat.noConfusion h
+  | ofN a =>
+    rw [← ofN_eq_ofNat, Enat.add_ofN] at h
+    exact Enat.noConfusion h
 
 protected theorem le_of_add_le_add_left {a : ℕ} {b c : ℕ∪∞} (h : a + b ≤ a + c) : b ≤ c :=
 by
@@ -317,6 +345,7 @@ by
     | ofN c =>
       apply le.in_nat
       apply @Nat.le_of_add_le_add_left a b
+      rw [← ofN_eq_ofNat] at h
       cases h with
       | in_nat h' => exact h'
 
@@ -343,28 +372,12 @@ protected theorem le_total (m n : ℕ∪∞) : m ≤ n ∨ n ≤ m :=
   | Or.inr h => Or.inr h
 
 @[simp]
-lemma le_ofN (m n : Nat) : (m : Enat) ≤ n ↔ m ≤ n := by
-  apply Iff.intro
-  . intro h
-    cases h
-    assumption
-  .  exact le.in_nat
+lemma le_ofN (m n : Nat) : ofN m ≤ ofN n ↔ m ≤ n := by simp
 
 @[simp]
-theorem lt_ofN (m n : ℕ) : (m : Enat) < n ↔ m < n := by
-  apply Iff.intro
-  . intro h
-    cases h.right
-    assumption
-  . intro h
-    exact And.intro (Enat.noConfusion) (le.in_nat h)
+theorem lt_ofN (m n : Nat) : (m : Enat) < n ↔ m < n := by simp
 
-lemma eq_ofN (m n : Nat) : m = n ↔ (m : Enat) = n := by
-  apply Iff.intro
-  . exact congrArg ofN
-  . intro h
-    cases h
-    rfl
+lemma eq_ofN (m n : Nat) : m = n ↔ (m : Enat) = n := by simp
 
 instance : DecidableRel ((. ≤ . ) : ℕ∪∞ → ℕ∪∞ → Prop) := fun n m =>
 match n, m with
@@ -403,13 +416,9 @@ instance : LinearOrder ℕ∪∞ :=
   max := fun a b => if a ≤ b then b else a,
   le_antisymm      := @Enat.le_antisymm,
   le_total         := @Enat.le_total,
+  -- decidableLT     := inferInstance, -- TODO check if these are actually better than the defaults
   decidableLE     := inferInstance,
   decidableEq     := inferInstance }
-
-
-@[simp, norm_cast]
-protected theorem lt_iff_cast_lt_cast {n m : ℕ} : (n : Enat) < m ↔ n < m :=
-by simp [lt_iff_le_and_ne]
 
 theorem add_right_cancel_ofN (a : ℕ) (b c : ℕ∪∞) : b + a = c + a → b = c := by
   cases b with
@@ -417,9 +426,10 @@ theorem add_right_cancel_ofN (a : ℕ) (b c : ℕ∪∞) : b + a = c + a → b =
     | top   => intro; rfl
     | ofN c =>
       rw [top_add]
-      exact fun h => absurd h Enat.noConfusion
+      -- exact fun h => absurd h Enat.noConfusion
+      sorry
   | ofN b => cases c with
-    | top   => exact fun h => absurd h Enat.noConfusion
+    | top   => sorry --exact fun h => absurd h Enat.noConfusion
     | ofN c =>
       simp only [ofN_eq_ofNat, cast_eq_cast_iff_Nat]
       norm_cast
@@ -429,7 +439,8 @@ theorem add_left_inj_ofN (a : ℕ) {b c : ℕ∪∞} : b + a = c + a ↔ b = c :
 ⟨add_right_cancel_ofN a b c, λ h => h ▸ rfl⟩
 
 theorem lt_of_succ_le {n : ℕ} {m : ℕ∪∞} (h : succ n ≤ m) : n < m :=
-And.intro Enat.noConfusion h
+-- And.intro Enat.noConfusion h
+sorry
 
 theorem lt_iff_succ_le {n : ℕ} {m : ℕ∪∞} : n < m ↔ succ n ≤ m :=
 Iff.intro succ_le_of_lt lt_of_succ_le
@@ -438,21 +449,21 @@ Iff.intro succ_le_of_lt lt_of_succ_le
 theorem enat_disjunction (a : ℕ∪∞) : a = ∞ ∨ ∃ n : ℕ, a = n :=
   match a with
   | top => Or.inl rfl
-  | ofN n => Or.inr (Exists.intro n rfl)
+  | ofN n => Or.inr (Exists.intro n ofN_eq_ofNat)
 
-def to_nat {a : ℕ∪∞} (h : a ≠ ∞) : ℕ := by
-  cases a with
-  | top => exact False.elim (h (Eq.refl ∞))
-  | ofN n => exact n
+def to_nat {a : ℕ∪∞} (h : a ≠ ∞) : ℕ :=
+  match a with
+  | top => False.elim (h (Eq.refl ∞))
+  | ofN n => n
 
 @[simp]
-lemma to_nat_ofN {a : ℕ} (h : (a : ℕ∪∞) ≠ ∞) : to_nat h = a := rfl
+lemma to_nat_ofN {a : ℕ} (h : (a : ℕ∪∞) ≠ ∞) : to_nat h = a := sorry
 
 @[simp]
 lemma ofN_to_nat_eq_self {a : ℕ∪∞} (h : a ≠ ∞) : to_nat h = a := by
   cases a with
   | top => exact False.elim (h (Eq.refl ∞))
-  | ofN n => rfl
+  | ofN n => simp
 
 instance : CanonicallyOrderedAddMonoid ℕ∪∞ :=
 { Enat.instLinearOrderEnat with
@@ -471,7 +482,8 @@ instance : CanonicallyOrderedAddMonoid ℕ∪∞ :=
         simp
         exact_mod_cast hc
       case top =>
-        simp at h
+        use 0
+        simpa using h
     case top =>
       use ∞
       simp
@@ -499,7 +511,7 @@ protected lemma zero_mul : 0 * (a : ℕ∪∞) = 0 := by
 
 
 protected lemma mul_coe (a b : ℕ) : (a : Enat) * (b : Enat) = ↑(a * b) :=
-by cases a <;> cases b <;> rfl
+by cases a <;> cases b <;> sorry
 
 protected theorem mul_comm (a b : ℕ∪∞) : a * b = b * a := by
   cases a with
@@ -611,10 +623,16 @@ instance : CommSemiring ℕ∪∞ :=
 
 @[simp]
 lemma ofNatAtLeastTwoMulInfty {m : ℕ} (h : Nat.AtLeastTwo (m + 2)) :
-  (@OfNat.ofNat _ _ (@instOfNat ℕ∪∞ _ AddMonoidWithOne.toNatCast h) : Enat) * ∞ = ∞ := rfl
+  (@OfNat.ofNat _ _ (@instOfNat ℕ∪∞ _ AddMonoidWithOne.toNatCast h) : Enat) * ∞ = ∞ := by
+  rw [← Nat.cast_eq_ofNat]
+  rw [← ofN_eq_ofNat]
+  rfl
 @[simp]
 lemma inftyMulofNatAtLeastTwo {m : ℕ} (h : Nat.AtLeastTwo (m + 2)) :
-  ∞ * (@OfNat.ofNat _ _ (@instOfNat ℕ∪∞ _ AddMonoidWithOne.toNatCast h) : Enat) = ∞ := rfl
+  ∞ * (@OfNat.ofNat _ _ (@instOfNat ℕ∪∞ _ AddMonoidWithOne.toNatCast h) : Enat) = ∞ := by
+  rw [← Nat.cast_eq_ofNat]
+  rw [← ofN_eq_ofNat]
+  rfl
 
 instance : CanonicallyOrderedCommSemiring ℕ∪∞ :=
 { Enat.instCommSemiringEnat, Enat.instCanonicallyOrderedAddMonoidEnat with

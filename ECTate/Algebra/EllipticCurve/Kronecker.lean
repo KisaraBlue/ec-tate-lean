@@ -102,7 +102,6 @@ lemma odd_part_le_self_nat (x : ℕ) : (val_bin_nat x).2 ≤ x := by
             simp;
           rw [if_neg (not_and_of_not_right (0 < Nat.succ x) not_even)]
           rw [if_pos (zero_lt_succ x)]
-          exact le_refl (Nat.succ x)
       | step y_le_x => exact le_trans (ih y y_le_x) (le_succ x);
   exact acc x (le_refl x)
 
@@ -145,7 +144,7 @@ lemma odd_part_succ_pos (x : ℕ) : 0 < (val_bin_nat (Nat.succ x)).2 := by
           rw [if_neg (not_and_of_not_right (0 < Nat.succ (Nat.succ x)) not_even)]
           rw [if_pos (zero_lt_succ (Nat.succ x))]
           exact zero_lt_succ (Nat.succ x)
-      |step y_le_x => exact ih y y_le_x;
+      | step y_le_x => exact ih y y_le_x;
   exact acc x (le_refl x)
 
 lemma odd_part_nat_pos (x : ℕ) : x ≠ 0 → 0 < (val_bin_nat x).2 := by

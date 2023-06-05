@@ -1,8 +1,9 @@
 import Mathlib.Tactic.Linarith
 import ECTate.Data.Nat.Enat
+import ECTate.Tactic.SimpSafe
 open Qq Lean Meta Tactic Mathlib.Tactic.Ring
 
-def is_atom (e : Expr) : Mathlib.Tactic.AtomM Bool :=
+def is_atom (e : Expr) : Mathlib.Tactic.AtomM (Bool × Bool) :=
   fun rctx ↦ do
     try
       let e ← withReducible <| whnf e
@@ -10,9 +11,10 @@ def is_atom (e : Expr) : Mathlib.Tactic.AtomM Bool :=
       let sα ← synthInstanceQ (q(CommSemiring $α) : Q(Type u))
       let c ← mkCache sα
       match ← isAtomOrDerivable sα c e rctx with
-      | some none => pure .true
-      | _ => pure .false
-    catch _ => pure .false
+      | some none => pure (.true, .false)
+      | some (some _) => pure (.false, .true)
+      | _ => pure (.false, .false)
+    catch _ => pure (.false, .false)
 
 
 -- /-- Run a computation in the `AtomM` monad and return the atoms. -/
@@ -35,63 +37,38 @@ elab "elinarith" : tactic => do
         mvarId.forEach' fun e' =>
           do
             let b ← is_atom e'
-            if b then
+            if b.1 then
               set ((← get).push e')
-            pure ¬ b
+            pure ¬ (b.1 ∨ b.2)
       #[]
   -- logInfo (← getMainGoal)
-  let mut goals := [(← getMainGoal)]
+  let mut goals := [← getMainGoal]
   for e in a do
     let tac ←
-      `(tactic| cases h : $(←delab e):term <;>
-                simp only [h, Enat.ofN_eq_ofNat, Enat.top_add, Enat.add_top,
+      `(tactic| cases h : ($(←delab e):term : Enat) <;>
+                -- trace_state <;>
+                simp_safe only [h, Enat.ofN_eq_ofNat, Enat.top_add, Enat.add_top,
                   Enat.ofNatAtLeastTwoMulInfty, Enat.inftyMulofNatAtLeastTwo,
-                  Nat.cast_add, Nat.cast_one, Nat.cast_mul, Nat.cast_ofNat
+                  Nat.cast_add, Nat.cast_one, Nat.cast_mul, Nat.cast_ofNat,
+                  Nat.cast_zero, Nat.zero_eq, Nat.mul_zero, Nat.zero_le,
+                  Enat.le_top, Enat.lt_top
                 ] at * <;>
+                -- trace_state <;>
                 norm_cast at * <;>
-                try linarith)
+                -- trace_state <;>
+                try linarith) -- TODO move after
     -- logInfo e
     let mut newgs := []
     for g in goals do
-      let a ← Elab.runTactic g tac
-      newgs := newgs ++ a.1
+      let o ← Elab.runTactic g tac
+      newgs := newgs ++ o.1
     goals := newgs
-  setGoals goals
-
-def tt : Enat -> Enat := sorry
-example (x : Enat) (h : 1 ≤ tt x) : 2 ≤ 1 + tt x :=
-by
-  elinarith
-
-example (x : Enat) (h : 0 < x) : 2 ≤ 1 + x :=
-by
-  elinarith
-
-example (x : Enat) (h : 0 < x) : 3 ≤ 1 + 2 * x :=
-by
-  elinarith
-
-example (x : Enat) (h : 0 < x) : 3 ≤ 1 + 2 * x :=
-by
-  cases x
-  simp at *
-  norm_cast at *
-  linarith
-  simp?
-
-
-example (y  x : Enat) (h : 0 < y) (g : y ≤ 3) : y < 2 * y :=
-by
-  elinarith
-example (x y : Enat) (h : 0 < x) (g : 3 ≤ y) : 3 ≤ 1 + 2 * x + y :=
-by
-  elinarith
-
-
--- TODO spell check all comments / docstrings, linarith thaat
+  appendGoals goals
+-- TODO spell check all comments / docstrings
+-- TODO minimiser
 -- TODO go to definition in doc comments eg `Mathlib.Tactic.casesMatching`
 
-#check Mathlib.Tactic.casesMatching
+-- #check Mathlib.Tactic.casesMatching
 
 
 

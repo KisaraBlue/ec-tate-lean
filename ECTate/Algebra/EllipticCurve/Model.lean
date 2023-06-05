@@ -1,9 +1,9 @@
 import ECTate.Algebra.Ring.Basic
-import ECTate.Algebra.CharP.Basic
+import Mathlib.Algebra.CharP.Basic
 import ECTate.FieldTheory.PerfectClosure
 import Mathlib.Tactic.SplitIfs
 import Mathlib.Tactic.NormNum
-import Mathlib.Tactic.Ring
+import Mathlib.Tactic.LinearCombination
 import Mathlib.Tactic.PrintPrefix
 import Mathlib.Tactic.LibrarySearch
 import Mathlib.Util.WhatsNew
@@ -363,21 +363,22 @@ end
 section invariant_lemmas
 variable {K : Type u} [CommRing K] [IsDomain K]
 
-lemma c4_zero_iff_a1_zero_of_char_two (e : Model K) (h : ring_char K = 2) :
+lemma c4_zero_iff_a1_zero_of_char_two (e : Model K) (h : ringChar K = 2) :
   e.c4 = 0 ↔ e.a1 = 0 :=
 by
-  have hchar' : (ring_char K : K) = 2 := by simp [h]
-  have hchar'' : (2 : K) = 0 := by simp [← hchar', ring_char_eq_zero]
+  have hchar' : (ringChar K : K) = 2 := by simp [h]
+  have hchar'' : (2 : K) = 0 := by simp [← hchar', ringChar.Nat.cast_ringChar]
+  -- TODO use the nicer mod strategy from cubic roots here or a tactic
   rw [c4, b2, show (24 : K) = 2 * 12 by norm_num, show (4 : K) = 2 * 2 by norm_num, hchar'', ← pow_two] -- TODO this used to work without type ascription
   simp only [mul_zero, zero_mul, add_zero, ← pow_mul, sub_zero] -- TODO simp? doesn't do back arrows
   rw [pow_eq_zero_iff]
   norm_num
 
-lemma c4_zero_iff_b2_zero_of_char_three (e : Model K) (h : ring_char K = 3) :
+lemma c4_zero_iff_b2_zero_of_char_three (e : Model K) (h : ringChar K = 3) :
   e.c4 = 0 ↔ e.b2 = 0 :=
 by
-  have hchar' : (ring_char K : K) = 3 := by simp [h]
-  have hchar'' : (3 : K) = 0 := by simp [← hchar', ring_char_eq_zero]
+  have hchar' : (ringChar K : K) = 3 := by simp [h]
+  have hchar'' : (3 : K) = 0 := by simp [← hchar', ringChar.Nat.cast_ringChar]
   rw [c4, show (24 : K) = 3 * 8 by norm_num, hchar'']
   simp only [mul_zero, zero_mul, add_zero, sub_zero] -- TODO simp? doesn't do back arrows
   rw [pow_eq_zero_iff]
@@ -385,11 +386,11 @@ by
 
 -- TODO is this actually an iff
 lemma a3_zero_of_a1_zero_of_disc_zero_of_char_two
-  (e : Model K) (h : ring_char K = 2) (hdisc : e.discr = 0) (ha1 : e.a1 = 0) :
+  (e : Model K) (h : ringChar K = 2) (hdisc : e.discr = 0) (ha1 : e.a1 = 0) :
   e.a3 = 0 :=
 by
-  have hchar' : (ring_char K : K) = 2 := by simp [h]
-  have hchar'' : (2 : K) = 0 := by simp [← hchar', ring_char_eq_zero]
+  have hchar' : (ringChar K : K) = 2 := by simp [h]
+  have hchar'' : (2 : K) = 0 := by simp [← hchar', ringChar.Nat.cast_ringChar]
   rw [discr, b2, b4, b6, b8, ha1,
     show (8 : K) = 2 * 4 by norm_num, show (4 : K) = 2 * 2 by norm_num, show (27 : K) = 2 * 13 + 1 by norm_num, hchar''] at hdisc
   -- TODO simp identifier "at" can't be on next line
@@ -400,11 +401,11 @@ by
 
 -- TODO is this actually an iff discr
 lemma b4_zero_of_b2_zero_of_disc_zero_of_char_three
-  (e : Model K) (h : ring_char K = 3) (hdisc : e.discr = 0) (hb2 : e.b2 = 0) :
+  (e : Model K) (h : ringChar K = 3) (hdisc : e.discr = 0) (hb2 : e.b2 = 0) :
   e.b4 = 0 :=
 by
-  have hchar' : (ring_char K : K) = 3 := by simp [h]
-  have hchar'' : (3 : K) = 0 := by simp [← hchar', ring_char_eq_zero]
+  have hchar' : (ringChar K : K) = 3 := by simp [h]
+  have hchar'' : (3 : K) = 0 := by simp [← hchar', ringChar.Nat.cast_ringChar]
   rw [discr, hb2,
     show (27 : K) = 3 * 9 by norm_num,
     show (8 : K) = 3 * 3 - 1 by norm_num,
@@ -425,7 +426,7 @@ https://www.math.rug.nl/~top/ian.pdf
 noncomputable
 def singular_point [PerfectRing K] (e : Model K) : K × K :=
   if e.c4 = 0 then
-    match ring_char K with
+    match ringChar K with
     | 2 => (pth_root e.a4, pth_root (e.a2 * e.a4 + e.a6))
     | 3 => (pth_root (-(e.a3 ^ 2) - e.a6), e.a1 * pth_root (-(e.a3 ^ 2) - e.a6) + e.a3)
     | _ => (-e.b2 / 12, -(-e.a1 * e.b2 / 12 + e.a3) / 2)
@@ -433,10 +434,14 @@ def singular_point [PerfectRing K] (e : Model K) : K × K :=
     ((18 * e.b6 - e.b2 * e.b4) / e.c4, (e.b2 * e.b5 + 3 * e.b7) / e.c4)
 
 
--- TODO probably can be deleted
-instance [h : IsAssociative R op] : Lean.IsAssociative op := {h with}
-instance [h : IsCommutative R op] : Lean.IsCommutative op := by infer_instance
-instance [h : IsIdempotent R op] : Lean.IsIdempotent op := {h with}
+lemma ringChar_eq_of_Prime [Nat.AtLeastTwo n] (hn : @OfNat.ofNat K n _ = 0) (hnp : Nat.Prime n) :
+  ringChar K = n :=
+by
+  rw [← Nat.cast_eq_ofNat, ringChar.spec] at hn
+  cases (Nat.dvd_prime hnp).mp hn
+  . sorry
+  . assumption
+
 -- lemma test (e : Model K) :
 --   c4 e ^ 3 * ((b2 e * b5 e + 3 * b7 e) ^ 2 * (c4 e)⁻¹ ^ 2) + 0 =
 --             c4 e^ 3 * (c4 e)⁻¹ ^ 2 * ((b2 e * b5 e + 3 * b7 e) ^ 2) :=
@@ -452,16 +457,16 @@ lemma is_singular_point_singular_point [PerfectRing K] (e : Model K) (h : e.disc
   is_singular_point e (singular_point e) :=
 by
   rw [singular_point]
-  split_ifs with hc4 hc4
+  split_ifs with hc4 _hc4
   . have hc6 : c6 e = 0 := by
       simpa [h, hc4, pow_succ, mul_eq_zero] using discr_identity e
     split
     -- case _ hchar => TODO get this working, but its subtly different
     . rw [is_singular_point]
-      have hchar : ring_char K = 2 := by assumption
-      have hchar' : (ring_char K : K) = 2 := by simp [hchar]
-      have hchar'' : (2 : K) = 0 := by simp [← hchar', ring_char_eq_zero]
-      have hcharne : ring_char K ≠ 0 := by simp [hchar]
+      have hchar : ringChar K = 2 := by assumption
+      have hchar' : (ringChar K : K) = 2 := by simp [hchar]
+      have hchar'' : (2 : K) = 0 := by simp [← hchar', ringChar.Nat.cast_ringChar]
+      have hcharne : ringChar K ≠ 0 := by simp [hchar]
       have ha1 : e.a1 = 0 := by simpa [c4_zero_iff_a1_zero_of_char_two e hchar] using hc4
       have ha3 : e.a3 = 0 := a3_zero_of_a1_zero_of_disc_zero_of_char_two e hchar h ha1
       refine ⟨?_, ?_, ?_⟩
@@ -471,10 +476,8 @@ by
         rw [pow_succ _ 2]
         rw [← hchar, pth_root_pow_char hcharne]
         rw [pth_root_pow_char hcharne]
-        simp only [add_sub_add_right_eq_sub, sub_eq_iff_eq_add, zero_add]
-        rw [show pth_root e.a4 * e.a4 + e.a2 * e.a4 + e.a4 * pth_root e.a4 =
-                2 * (pth_root e.a4 * e.a4) + e.a2 * e.a4 by ring]
-        rw [hchar'', zero_mul, zero_add]
+        ring_nf
+        simp [hchar'']
       . rw [dweierstrass_dx]
         simp only [ha1, zero_mul, hchar'', add_zero, zero_sub, neg_add_rev]
         rw [← hchar, pth_root_pow_char hcharne, ← sub_eq_add_neg]
@@ -484,10 +487,10 @@ by
         simp [← neg_mul_eq_neg_mul]
       . simp [dweierstrass_dy, ha1, ha3, hchar'']
     . rw [is_singular_point]
-      have hchar : ring_char K = 3 := by assumption
-      have hcharne : ring_char K ≠ 0 := by simp [hchar]
-      have hchar' : (ring_char K : K) = 3 := by simp [hchar]
-      have hchar'' : (3 : K) = 0 := by simp [← hchar', ring_char_eq_zero]
+      have hchar : ringChar K = 3 := by assumption
+      have hcharne : ringChar K ≠ 0 := by simp [hchar]
+      have hchar' : (ringChar K : K) = 3 := by simp [hchar]
+      have hchar'' : (3 : K) = 0 := by simp [← hchar', ringChar.Nat.cast_ringChar]
       have hb2 : e.b2 = 0 := by simpa [c4_zero_iff_b2_zero_of_char_three e hchar] using hc4
       have hb4 : e.b4 = 0 := b4_zero_of_b2_zero_of_disc_zero_of_char_three e hchar h hb2
       rw [b2] at hb2 -- TODO get versions that elim one b
@@ -512,7 +515,7 @@ by
           rw [show (4 : K) = 1 by rw [← add_zero 1, ← hchar'']; norm_num]
           simp only [neg_mul, one_mul] at hb4
           simp [sub_eq_add_neg, hb4]
-        . sorry
+        . linear_combination (norm := ring_nf <;> simp [hchar'']) -hb2
       . rw [dweierstrass_dx]
         rw [hchar'', zero_mul, zero_add]
         simp only
@@ -528,10 +531,11 @@ by
         rw [show 2 * (e.a1 * pth_root (-(e.a3 ^ 2) - e.a6) + e.a3)
             + e.a1 * pth_root (- (e.a3 ^ 2) - e.a6) + e.a3 = 3 * ((e.a1 * pth_root (-(e.a3 ^ 2) - e.a6)) + e.a3) by ring]
         rw [hchar'', zero_mul]
-    . rw [is_singular_point]
+    . rename_i hn2 hn3
+      rw [is_singular_point]
       -- have hb4 : e.b2 ^ 2 = 24 * e.b4 := sorry
-      have h2 : (2 : K) ≠ 0 := sorry
-      have h3 : (3 : K) ≠ 0 := sorry
+      have h2 : (2 : K) ≠ 0 := fun hh => hn2 (ringChar_eq_of_Prime hh (by norm_num))
+      have h3 : (3 : K) ≠ 0 := fun hh => hn3 (ringChar_eq_of_Prime hh (by norm_num))
       have h12 : (12 : K) ≠ 0 := by
         rw [show (12 : K) = 2 * 2 * 3 by norm_num]
         repeat' apply mul_ne_zero

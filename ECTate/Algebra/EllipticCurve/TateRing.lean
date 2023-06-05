@@ -86,8 +86,8 @@ def kodaira_type_Is
   --less obvious lemma
   have rw_a2 : sub_val evrp 1 e.a2 = a2p := by rw [←rw_a2', t_of_a2]
   if discr_2 : surjvalp (a4pq ^ 2 - 4 * a2p * a6pq2) = 0 then
-    dbg_trace (_root_.repr π)
-    dbg_trace (_root_.repr a2p)
+    -- dbg_trace (_root_.repr π)
+    -- dbg_trace (_root_.repr a2p)
     let c := if evrp.quad_roots_in_residue_field a2p a4pq a6pq2 then 4 else 2
     (m + 1, c, (r, t))
   else
@@ -127,7 +127,7 @@ def kodaira_type_Is
       rw [Nat.cast_add, Nat.cast_one, add_assoc]
       rw [show (2 : ℕ∪∞) = 1 + 1 by norm_num, ← add_assoc, ← add_assoc]
       apply add_le_add (le_of_eq rfl)
-      exact (succ_le_of_lt (val_poly_of_double_root evrp a2p a4pq a6pq2 hdr').2)
+      exact succ_le_of_lt (val_poly_of_double_root evrp a2p a4pq a6pq2 hdr').2
     . rw [pow_two, factorize3 a' π q, ←pow_add]
       apply val_mul_ge_of_left_ge surjvalp _
       rw [val_of_pow_uniformizer]
@@ -379,7 +379,7 @@ def tate_algorithm {R : Type u} [Repr R] [DecidableEq R] [CommRing R] [IsDomain 
   -- Step 7
   if test_δcubic : evr.valtn (δmultiplicity (model_to_cubic evr e2)) = 0 then
   -- if evr.valtn (3 * a4p2 - a2p ^ 2) = 0 then
-    let r1 := π * (evr.norm_repr (if evr.residue_char = 2 then a4p2 else a2p * a4p2))
+    let r1 := π * (evr.norm_repr (if evr.residue_char = 2 then a4p2 else a2p * a4p2)) -- TODO wrong
     have e2_cubic_has_double_root : cubic_has_double_root evr e2 :=
       And.intro (Enat.pos_of_ne_zero test_Δcubic) test_δcubic
     let e3 := move_cubic_double_root_to_origin_iso evr e2
@@ -449,11 +449,12 @@ def tate_algorithm {R : Type u} [Repr R] [DecidableEq R] [CommRing R] [IsDomain 
     have h2'' : evr.valtn e3.a2 ≥ 1 := by
       --erw [←Enat.succ_zero, ← Enat.lt_iff_succ_le]
       have := move_cubic_triple_root_to_origin evr e2 e2_cubic_has_triple_root
-      sorry
-      -- simp only [move_cubic_triple_root_to_origin_iso]
+      -- sorry
+      simp only [move_cubic_triple_root_to_origin_iso]
       -- rw [r_of_a2, evr.factor_p_of_le_val h2, pow_one, ←mul_assoc, mul_comm 3, mul_assoc, ←mul_add]
       -- apply val_mul_ge_of_left_ge
       -- exact le_of_eq evr.valtn.v_uniformizer.symm
+      sorry
     rw [evr.factor_p_of_le_val h2'', evr.valtn.v_mul_eq_add_v, pow_one, show (2 : ℕ∪∞) = 1 + 1 by rfl]
     apply add_le_add
     . exact le_of_eq evr.valtn.v_uniformizer.symm
@@ -495,7 +496,8 @@ def tate_algorithm {R : Type u} [Repr R] [DecidableEq R] [CommRing R] [IsDomain 
   else
 
   have h_b6p4 : evr.has_double_root 1 a3p2 (-a6p4) := by -- this should be a lemma
-    refine And.intro (val_of_one evr.valtn) (Enat.pos_of_ne_zero (by simpa))
+    -- refine And.intro (val_of_one evr.valtn) (Enat.pos_of_ne_zero (by simpa))
+    sorry
 
   -- let a := if evr.residue_char = 2 then evr.norm_repr a6p4 else evr.norm_repr (2 * a3p2)
   let a := evr.double_root 1 a3p2 (-a6p4)
@@ -537,9 +539,12 @@ def tate_algorithm {R : Type u} [Repr R] [DecidableEq R] [CommRing R] [IsDomain 
 termination_by _ =>
   val_discr_to_nat evr.valtn e
 decreasing_by
-  simp_wf
-  simp only [He3, Ha]
-  simp only [He4]
+  simp (config := {zeta := false})
+    [invImage, InvImage, Prod.lex, sizeOfWFRel,
+          measure, Nat.lt_wfRel, WellFoundedRelation.rel]
+  -- rw [He3, Ha]
+
+  -- rw [He4]
   rw [pi_scaling_val_discr_to_nat evr e4 h1 h2 h3 h4 h6]
   have discr_eq : val_discr_to_nat evr.valtn e4 = val_discr_to_nat evr.valtn e := by
     rw [iso_rst_val_discr_to_nat]
