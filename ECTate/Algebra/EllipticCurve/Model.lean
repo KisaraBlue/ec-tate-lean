@@ -122,17 +122,17 @@ variable {R S : Type u} [CommRing R] [CommRing S] (f : R →+* S)
 @[simps]
 def map : Model R → Model S := fun e => ⟨f e.a1, f e.a2, f e.a3, f e.a4, f e.a6⟩
 
-@[simp] lemma map_b2 : (map f e).b2 = f e.b2 := by simp [Model.b2, (by norm_num : (4 : R) = 1 + 1 + 1 + 1)]; norm_num
-@[simp] lemma map_b4 : (map f e).b4 = f e.b4 := by simp [Model.b4, (by norm_num : (2 : R) = 1 + 1)]; norm_num
-@[simp] lemma map_b5 : (map f e).b5 = f e.b5 := by simp [Model.b5, (by norm_num : (2 : R) = 1 + 1)]; norm_num
-@[simp] lemma map_b6 : (map f e).b6 = f e.b6 := by simp [Model.b6, (by norm_num : (4 : R) = 1 + 1 + 1 + 1)]; norm_num
-@[simp] lemma map_b7 : (map f e).b7 = f e.b7 := by simp [Model.b7, (by norm_num : (8 : R) = 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1), (by norm_num : (12 : R) = 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1)]; norm_num
-@[simp] lemma map_b8 : (map f e).b8 = f e.b8 := by simp [Model.b8, (by norm_num : (4 : R) = 1 + 1 + 1 + 1)]; norm_num
+@[simp] lemma map_b2 : (map f e).b2 = f e.b2 := by simp [Model.b2]
+@[simp] lemma map_b4 : (map f e).b4 = f e.b4 := by simp [Model.b4]
+@[simp] lemma map_b5 : (map f e).b5 = f e.b5 := by simp [Model.b5]
+@[simp] lemma map_b6 : (map f e).b6 = f e.b6 := by simp [Model.b6]
+@[simp] lemma map_b7 : (map f e).b7 = f e.b7 := by simp [Model.b7]
+@[simp] lemma map_b8 : (map f e).b8 = f e.b8 := by simp [Model.b8]
 
-@[simp] lemma map_c4 : (map f e).c4 = f e.c4 := by simp [Model.c4, (by norm_num : (36 : R) = (1 + 1) ^ 2 * (1 + 1 + 1)^2), (by norm_num : (24 : R) = (1 + 1) ^ 3 * (1 + 1 + 1))]; norm_num
-@[simp] lemma map_c6 : (map f e).c6 = f e.c6 := by simp [Model.c6, (by norm_num : (36 : R) = (1 + 1) ^ 2 * (1 + 1 + 1)^2), (by norm_num : (216 : R) = (1 + 1) ^ 3 * (1 + 1 + 1)^3)]; norm_num
+@[simp] lemma map_c4 : (map f e).c4 = f e.c4 := by simp [Model.c4]
+@[simp] lemma map_c6 : (map f e).c6 = f e.c6 := by simp [Model.c6]
 
-@[simp] lemma map_discr : (map f e).discr = f e.discr := by simp [Model.discr, (by norm_num : (8 : R) = (1 + 1) ^ 3), (by norm_num : (9 : R) = (1 + 1 + 1) ^ 2), (by norm_num : (27 : R) = (1 + 1 + 1) ^ 3)]; norm_num
+@[simp] lemma map_discr : (map f e).discr = f e.discr := by simp [Model.discr]
 
 end Map
 
@@ -157,12 +157,12 @@ by simp [weierstrass]
 @[simp]
 lemma dweierstrass_dx_map (e : Model R) (P : R × R) : dweierstrass_dx (e.map f) (P.map f f) =
   f (dweierstrass_dx e P) :=
-by simp [dweierstrass_dx, (by norm_num : (3 : R) = 1 + 1 + 1), (by norm_num : (2 : R) = 1 + 1)]; norm_num
+by simp [dweierstrass_dx]
 
 @[simp]
 lemma dweierstrass_dy_map (e : Model R) (P : R × R) : dweierstrass_dy (e.map f) (P.map f f) =
   f (dweierstrass_dy e P) :=
-by simp [dweierstrass_dy, (by norm_num : (2 : R) = 1 + 1)]; norm_num
+by simp [dweierstrass_dy]
 
 end map
 
@@ -393,8 +393,8 @@ by
   have hchar'' : (2 : K) = 0 := by simp [← hchar', ringChar.Nat.cast_ringChar]
   rw [discr, b2, b4, b6, b8, ha1,
     show (8 : K) = 2 * 4 by norm_num, show (4 : K) = 2 * 2 by norm_num, show (27 : K) = 2 * 13 + 1 by norm_num, hchar''] at hdisc
-  -- TODO simp identifier "at" can't be on next line
-  simp only [mul_zero, zero_mul, add_zero, neg_zero, sub_self, zero_add, one_mul, zero_sub, neg_eq_zero] at hdisc
+  simp only [mul_zero, zero_mul, add_zero, neg_zero, sub_self, zero_add, one_mul, zero_sub, neg_eq_zero]
+    at hdisc
   rw [← pow_two, ← pow_two, ← pow_mul] at hdisc
   rwa [pow_eq_zero_iff] at hdisc
   norm_num
