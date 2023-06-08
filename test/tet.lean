@@ -4,8 +4,8 @@ import Mathlib.Data.Nat.Basic
 
 #check List.replicate
 open List
-set_option trace.compiler true
-set_option trace.Compiler true
+-- set_option trace.compiler true
+-- set_option trace.Compiler true
 def f (n : ℕ) := List.sum $ List.replicate n (1 : ℤ)
 
 def g (R : Type _) [Ring R] (n : ℕ) : R := List.sum $ List.replicate n (1 : R)

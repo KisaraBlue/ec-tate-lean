@@ -15,7 +15,7 @@ def h (R : Type _) [Ring R] (l : List R) : R := match l with
 | [] => 0
 | a :: l => a + h R l
 
-set_option trace.compiler true
+-- set_option trace.compiler true
 @[specialize ℤ]
 def f := h
 

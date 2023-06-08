@@ -12,35 +12,6 @@ import Mathlib.Algebra.EuclideanDomain.Instances
 import Mathlib.Algebra.EuclideanDomain.Basic
 
 
-namespace Mathlib
-open Lean hiding Rat mkRat
-open Meta
-
-namespace Meta.NormNum
-open Qq
--- TODO move to mathlib next to mod
-
-theorem isNat_natDiv : {a b : ℕ} → {a' b' c : ℕ} →
-    IsNat a a' → IsNat b b' → Nat.div a' b' = c → IsNat (a / b) c
-  | _, _, _, _, _, ⟨rfl⟩, ⟨rfl⟩, rfl => ⟨by aesop⟩
-
-/-- The `norm_num` extension which identifies expressions of the form `Nat.div a b`,
-such that `norm_num` successfully recognises both `a` and `b`. -/
-@[norm_num (_ : ℕ) % _, HDiv.hDiv (_ : ℕ) _, Nat.div _ _] def evalNatDiv :
-    NormNumExt where eval {u α} e := do
-  let .app (.app f (a : Q(ℕ))) (b : Q(ℕ)) ← whnfR e | failure
-  -- We trust that the default instance for `HDiv` is `Nat.div` when the first parameter is `ℕ`.
-  guard <|← withNewMCtxDepth <| isDefEq f q(HDiv.hDiv (α := ℕ))
-  let sℕ : Q(AddMonoidWithOne ℕ) := q(instAddMonoidWithOneNat)
-  let ⟨na, pa⟩ ← deriveNat a sℕ; let ⟨nb, pb⟩ ← deriveNat b sℕ
-  have pa : Q(IsNat $a $na) := pa
-  have pb : Q(IsNat $b $nb) := pb
-  have nc : Q(ℕ) := mkRawNatLit (na.natLit! / nb.natLit!)
-  let r : Q(Nat.div $na $nb = $nc) := (q(Eq.refl $nc) : Expr)
-  return (.isNat sℕ nc q(isNat_natDiv $pa $pb $r) : Result q($a / $b))
-end Meta.NormNum
-end Mathlib
-
 
 namespace Field
 variable {K : Type u} [Field K]
@@ -106,6 +77,8 @@ by
     rw [← Nat.cast_ofNat (R := ℤ), ← Nat.mod_add_div 2 (ringChar K)]
     simp
     simp [heq] -- TODO why no nat mod self fires
+    -- change (a * b + c) ^ 2 = 0 at hd
+    -- simp at hd
     sorry
 
   . rename_i heq
