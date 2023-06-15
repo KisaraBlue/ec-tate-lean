@@ -1,4 +1,7 @@
 import Mathlib.Algebra.Group.Defs
+import Mathlib.Order.ConditionallyCompleteLattice.Basic
+import Mathlib.Data.Finset.Lattice
+import Mathlib.Data.Nat.Lattice
 import Mathlib.Init.Algebra.Order
 import ECTate.Algebra.Ring.Basic
 import Mathlib.Init.Data.Nat.Lemmas
@@ -190,6 +193,7 @@ theorem val_of_pow_uniformizer {p : R} (nav : SurjVal p) {n : ℕ} : nav (p ^ n)
 
 end SurjVal
 
+open scoped Finset
 structure EnatValRing {R : Type u} (p : R) [CommRing R] [IsDomain R] where
   valtn : SurjVal p
   decr_val : R → R
@@ -199,6 +203,7 @@ structure EnatValRing {R : Type u} (p : R) [CommRing R] [IsDomain R] where
   zero_valtn_decr {x : R} (h : valtn x = 0) : decr_val x = x
   pos_valtn_decr {x : R} (h : valtn x > 0) : x = p * decr_val x -- TODO remove
   residue_char : ℕ
+  residue_char_spec : residue_char = sInf ({i : ℕ | 0 < i ∧ 0 < valtn i})
   norm_repr : R → R --generalization of modulo
   norm_repr_spec : ∀ r, valtn (r - norm_repr r) > 0
   inv_mod : R → R
@@ -864,18 +869,22 @@ by
   sorry
 
 @[simp]
-lemma primeVal_eq_zero_iff {p : ℕ} {k : ℤ} (hp : Nat.Prime p) : primeVal hp k = 0 ↔ k % p ≠ 0 :=
-by rw [primeVal, int_valuation_eq_zero_iff hp.one_lt]
+lemma primeVal_eq_zero_iff {p : ℕ} {k : ℤ} (hp : Nat.Prime p) : primeVal hp k = 0 ↔ ¬ (↑ p ∣ k) :=
+by rw [primeVal, int_valuation_eq_zero_iff hp.one_lt, Int.dvd_iff_emod_eq_zero]
+
+@[simp]
+lemma primeVal_pos_iff {p : ℕ} {k : ℤ} (hp : Nat.Prime p) : 0 < primeVal hp k ↔ ↑ p ∣ k := by
+  simp [← not_iff_not]
 
 lemma zero_valtn_decr_p {p : ℕ} {k : ℤ} {hp : Nat.Prime p} (h : primeVal hp k = 0) :
   decr_val_p p k = k :=
 by
-  simp [decr_val_p] at *
+  simp [decr_val_p, Int.dvd_iff_emod_eq_zero] at * -- TODO simp? doesn't work
   aesop
 
 def norm_repr_p (p : ℕ) (x : ℤ) : ℤ := x % (p : ℤ)
 
-def modulo (x : ℤ) (p : ℕ) := x % (p:ℤ)
+def modulo (x : ℤ) (p : ℕ) := x % (p : ℤ)
 
 def inv_mod (x : ℤ) (p : ℕ) := gcdA x p
 
@@ -894,10 +903,16 @@ def primeEVR {p : ℕ} (hp : Nat.Prime p) : EnatValRing (p : ℤ) := {
   zero_valtn_decr := zero_valtn_decr_p -- todo we really shouldn't need this!
   pos_valtn_decr := sorry
   residue_char := p
+  residue_char_spec := by
+    rw [Nat.sInf_def]
+    symm
+    simp [Nat.find_eq_iff]
+    sorry
+    sorry -- TODO this feels like a dup goal, is there a better abstraction here
   norm_repr := (. % p)
   norm_repr_spec := by
     intro r
-    simp [pos_iff_ne_zero, Int.sub_emod]
+    simp [dvd_sub_of_emod_eq] -- TODO can this  be simp?
   inv_mod := (inv_mod . p)
   inv_mod_spec := by
     intro r h

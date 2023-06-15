@@ -448,10 +448,10 @@ lemma v_discr_of_v_ai {p : R} {q : ℕ} (valp : SurjVal p) (e : ValidModel R) (h
   (h1 : valp e.a1 ≥ 1) (h2 : valp e.a2 = 1) (h3 : valp e.a3 ≥ q)
   (h4 : valp e.a4 ≥ q + 1) (h6 : valp e.a6 ≥ 2 * q) :
   valp e.discr ≥ 2 * q + 3 := by
-  have h2' := v_b2_of_v_a1_a2 valp e h1 h2
-  have h4' := v_b4_of_v_a1_a3_a4 valp e h1 h3 h4
-  have h6' := v_b6_of_v_a3_a6 valp e h3 h6
-  have h8' := v_b8_of_v_ai valp e h1 h2 h3 h4 h6
+  have h2' : valp e.b2 ≥ 1 := v_b2_of_v_a1_a2 valp e h1 h2
+  have h4' : valp e.b4 ≥ q + 1 := v_b4_of_v_a1_a3_a4 valp e h1 h3 h4
+  have h6' : valp e.b6 ≥ 2 * q := v_b6_of_v_a3_a6 valp e h3 h6
+  have h8' : valp e.b8 ≥ 2 * q + 1 := v_b8_of_v_ai valp e h1 h2 h3 h4 h6
   apply_rules [val_add_ge_of_ge, val_sub_ge_of_ge] <;> -- TODO bizarre h2_symm appears
   . simp
     elinarith

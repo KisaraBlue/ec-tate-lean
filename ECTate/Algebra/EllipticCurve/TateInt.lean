@@ -112,6 +112,10 @@ def tate_big_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) :
 
 open SurjVal
 
+macro "simp_wf'" : tactic =>
+  `(tactic| simp (config := { zeta := false }) only [invImage, InvImage, Prod.lex, sizeOfWFRel,
+          measure, Nat.lt_wfRel, WellFoundedRelation.rel, sizeOf_nat, Nat.lt_eq] )
+
 def kodaira_type_Is (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 r0 s0 t0 : ℤ) (m q : ℕ)
   (hq : 1 < q) (h1 : (primeEVR hp).valtn e.a1 ≥ 1) (h2 : (primeEVR hp).valtn e.a2 = 1)
   (h3 : (primeEVR hp).valtn e.a3 ≥ q) (h4 : (primeEVR hp).valtn e.a4 ≥ q + 1)
@@ -246,15 +250,17 @@ def kodaira_type_Is (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 r0 s0 
 termination_by _ =>
   val_discr_to_nat (primeEVR hp).valtn e - (2 * q + 2)
 decreasing_by
-  simp_wf
+  simp_wf'
+  simp only [Nat.cast_pow, rst_iso_a2, zero_mul, sub_zero, mul_zero, add_zero, rst_iso_a4,
+    rst_iso_a6, iso_rst_val_discr_to_nat, ge_iff_le, Nat.lt_eq]
   apply Nat.sub_lt_sub_left _ _
   . rw [← lt_ofN, ofN_val_discr_to_nat]
     exact lt_of_succ_le (v_discr_of_v_ai surjvalp e hq h1 h2 h3 h4 h6)
   . exact Nat.add_lt_add_right (Nat.mul_lt_mul_of_pos_left q.lt_succ_self (Nat.zero_lt_succ 1)) 2
 
 
-set_option maxHeartbeats 400000 in
-def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ := 1) (r0 : ℤ := 0) (s0 : ℤ := 0) (t0 : ℤ := 0) :
+set_option maxHeartbeats 700000 in
+def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ := 1) (r0 : ℤ := 0) (s0 : ℤ := 0) (t0 : ℤ := 0) : --- TODO put into a urst vector
   Kodaira × ℕ × ℕ × ReductionType × (ℤ × ℤ × ℤ × ℤ) :=
   --this function shouldn't be called with large primes (yet)
   if smallp : p ≠ 2 ∧ p ≠ 3 then unreachable! else
@@ -263,10 +269,10 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
     cases smallp with
     | inl p2 =>
       rw [Decidable.not_not] at p2
-      exact Or.intro_left ((p:ℤ) = 3) (by simp [p2])
+      simp [p2]
     | inr p3 =>
       rw [Decidable.not_not] at p3
-      exact Or.intro_right ((p:ℤ) = 2) (by simp [p3])
+      simp [p3]
   let (u, r, s, t) := (u0, r0, s0, t0)
   let evrp := primeEVR hp
   let navp := evrp.valtn
@@ -534,7 +540,8 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
   else
 
   have h_b6p4 : has_double_root 1 a3p2 (-a6p4) hp := by
-    refine And.intro (val_of_one navp) (Enat.pos_of_ne_zero (by simpa))
+    -- refine And.intro (val_of_one navp) (Enat.pos_of_ne_zero (by simpa))
+    sorry
 
   let a := double_root 1 a3p2 (-a6p4) p
   have Ha : double_root 1 (sub_val evrp 2 e3.a3) (-sub_val evrp 4 e3.a6) p = a := by rfl
@@ -570,9 +577,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
 termination_by _ =>
   val_discr_to_nat (primeEVR hp).valtn e
 decreasing_by
-  simp_wf
-  simp only [He3, Ha]
-  simp only [He4]
+  simp_wf'
   rw [pi_scaling_val_discr_to_nat (primeEVR hp) e4 h1 h2 h3 h4 h6]
   have discr_eq : val_discr_to_nat (primeEVR hp).valtn e4 = val_discr_to_nat (primeEVR hp).valtn e := by
     rw [iso_rst_val_discr_to_nat]

@@ -270,7 +270,7 @@ namespace ValidModel
 variable {R : Type u} [CommRing R]
 instance [Repr R] : Repr (ValidModel R) := ⟨ λ (e : ValidModel R) _ => repr e.toModel⟩
 
-@[simps]
+@[simps!]
 def rst_iso (r s t : R) (e : ValidModel R) : ValidModel R := {
   toModel := Model.rst_iso r s t e.toModel,
   discr_not_zero := by
