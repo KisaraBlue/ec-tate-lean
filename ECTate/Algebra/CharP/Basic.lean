@@ -7,23 +7,29 @@ import Mathlib.Init.Data.Nat.Lemmas
 import Mathlib.Algebra.CharP.Basic
 
 open Classical
-variable (R : Type _) [Semiring R]
+-- variable (R : Type _) [Semiring R]
 
 
 lemma ringChar_is_zero_or_prime (R : Type _) [NonAssocSemiring R] [NoZeroDivisors R] [Nontrivial R]:
   ringChar R = 0 ∨ Nat.Prime (ringChar R) :=
 (CharP.char_is_prime_or_zero R (ringChar R)).symm
 
-lemma add_pow_ringChar {R : Type _} [CommRing R] [IsDomain R] (h : ringChar R ≠ 0) :
+lemma add_pow_ringChar {R : Type _} [CommRing R] [IsDomain R] (a b : R) (h : ringChar R ≠ 0) :
   (a + b) ^ ringChar R =
   a ^ ringChar R +
-  b ^ ringChar R := by sorry
+  b ^ ringChar R := by
+  have : NeZero (ringChar R) := ⟨h⟩
+  have := CharP.char_is_prime_of_pos R (ringChar R)
+  exact add_pow_char _ _ _
 
 
-lemma sub_pow_ringChar {R : Type _} (a b : R) [CommRing R] [IsDomain R] (h : ringChar R ≠ 0) :
+lemma sub_pow_ringChar {R : Type _} [CommRing R] [IsDomain R] (a b : R) (h : ringChar R ≠ 0) :
   (a - b) ^ ringChar R =
   a ^ ringChar R -
-  b ^ ringChar R := by sorry
+  b ^ ringChar R := by
+  have : NeZero (ringChar R) := ⟨h⟩
+  have := CharP.char_is_prime_of_pos R (ringChar R)
+  exact sub_pow_char _ _ _
 
 
 lemma pow_ringChar_injective {R : Type _} [CommRing R] [IsDomain R]

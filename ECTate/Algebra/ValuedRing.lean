@@ -207,9 +207,9 @@ structure EnatValRing {R : Type u} (p : R) [CommRing R] [IsDomain R] where
   norm_repr : R → R --generalization of modulo
   norm_repr_spec : ∀ r, valtn (r - norm_repr r) > 0
   inv_mod : R → R
-  inv_mod_spec : ∀ r, valtn r = 0 → valtn (r * inv_mod r - 1) > 0
-  inv_mod_spec' : ∀ r, valtn r > 0 → valtn (inv_mod r) > 0
-  inv_mod_spec'' : ∀ r s, valtn (r - s) > 0 → inv_mod r = inv_mod s -- TODO is this too strong?
+  inv_mod_spec : ∀ {r}, valtn r = 0 → valtn (r * inv_mod r - 1) > 0
+  inv_mod_spec' : ∀ {r}, valtn r > 0 → valtn (inv_mod r) > 0
+  inv_mod_spec'' : ∀ {r s}, valtn (r - s) > 0 → inv_mod r = inv_mod s -- TODO is this too strong?
   pth_root : R → R
   pth_root_spec : residue_char = 0 ∨ ∀ r, valtn (pth_root r ^ residue_char - r) > 0
   count_roots_cubic : (a b c d : R) → Nat

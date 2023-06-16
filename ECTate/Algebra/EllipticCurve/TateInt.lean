@@ -8,6 +8,7 @@ import Mathlib.Data.Int.Basic
 import Mathlib.Tactic.LibrarySearch
 import ECTate.Algebra.EllipticCurve.LocalEC
 import Mathlib.Init.Algebra.Order
+import Mathlib.Tactic.Set
 
 
 
@@ -259,7 +260,7 @@ decreasing_by
   . exact Nat.add_lt_add_right (Nat.mul_lt_mul_of_pos_left q.lt_succ_self (Nat.zero_lt_succ 1)) 2
 
 
-set_option maxHeartbeats 700000 in
+set_option maxHeartbeats 400000 in
 def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ := 1) (r0 : ℤ := 0) (s0 : ℤ := 0) (t0 : ℤ := 0) : --- TODO put into a urst vector
   Kodaira × ℕ × ℕ × ReductionType × (ℤ × ℤ × ℤ × ℤ) :=
   --this function shouldn't be called with large primes (yet)
@@ -540,8 +541,10 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
   else
 
   have h_b6p4 : has_double_root 1 a3p2 (-a6p4) hp := by
-    -- refine And.intro (val_of_one navp) (Enat.pos_of_ne_zero (by simpa))
-    sorry
+    constructor
+    exact val_of_one navp
+    apply Enat.pos_of_ne_zero
+    simpa (config := {zeta := false})
 
   let a := double_root 1 a3p2 (-a6p4) p
   have Ha : double_root 1 (sub_val evrp 2 e3.a3) (-sub_val evrp 4 e3.a6) p = a := by rfl

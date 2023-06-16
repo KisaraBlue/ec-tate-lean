@@ -39,9 +39,8 @@ by
   simp [neg_mul, val_neg, SurjVal.v_mul_eq_add_v, nat_of_val] -- need simp lemma coe_of_nat_of_val
   norm_num
   convert zero_add (?_ : Enat) -- TODO lean needs help here why, no _
+  convert_to (primeEVR hp).valtn (2^5) = 0
   sorry
-  exact rfl
-  exact rfl
 
 -- TODO clean up these examples like last
 lemma Mordell_KodairaTypeII (p) (hp : Nat.Prime p) (hn23 : p ≠ 2 ∧ p ≠ 3) :

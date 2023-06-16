@@ -331,23 +331,19 @@ variable {R : Type u} [CommRing R] [IsDomain R] {p : R} (evr : EnatValRing p)
 --   add' := add_repr_eq_repr_add evr.valtn _ _ _ _
 --   mul' := mul_repr_eq_repr_mul evr.valtn _ _ _ _ }
 
-instance : IsDomain (R ⧸ evr.valtn.ideal) := {}
+-- instance : IsDomain (R ⧸ evr.valtn.ideal) := {}
 
-instance : Field (R ⧸ evr.valtn.ideal) :=
-{ inv := Quotient.lift (fun x => (evr.inv_mod x : R ⧸ evr.valtn.ideal)) (by
-    intro a b H
-    simp
-    rw [Ideal.Quotient.eq]
-    simp at *
-    rw [evr.inv_mod_spec'' a b]
-    simp
-    -- rw [Submodule.quotientRel_r_def] at H
-    sorry
-    -- exact H
-)
-  mul_inv_cancel := sorry
-  inv_zero := sorry }
-
+open Ideal in
+instance : evr.valtn.ideal.IsMaximal := by
+  rw [isMaximal_iff]
+  constructor
+  . simp
+  . intro J x Jle hx hxJ
+    simp only [SurjVal.mem_ideal_iff, gt_iff_lt, not_lt, nonpos_iff_eq_zero] at hx -- TODO simp? at * bad
+    have : x * evr.inv_mod x - 1 ∈ evr.valtn.ideal
+    . simpa using evr.inv_mod_spec x hx
+    simpa [sub_sub] using Submodule.neg_mem _ -- TODO this feels like it should be a tactic
+      <| Ideal.sub_mem _ (Jle this) <| Ideal.mul_mem_right (evr.inv_mod x) _ hxJ
 
 lemma key : ringChar (R ⧸ evr.valtn.ideal) = evr.residue_char := by
   sorry
