@@ -12,6 +12,10 @@ variable {R : Type u} [CommRing R]
 instance (I : Ideal R) : CoeTC R (R ⧸ I) :=
   ⟨Ideal.Quotient.mk I⟩
 
+variable (x : R) (I : Ideal R)
+
+#check (x : R ⧸ I)
+
 variable [IsDomain R]
 
 namespace SurjVal
@@ -341,7 +345,7 @@ instance : evr.valtn.ideal.IsMaximal := by
   . intro J x Jle hx hxJ
     simp only [SurjVal.mem_ideal_iff, gt_iff_lt, not_lt, nonpos_iff_eq_zero] at hx -- TODO simp? at * bad
     have : x * evr.inv_mod x - 1 ∈ evr.valtn.ideal
-    . simpa using evr.inv_mod_spec x hx
+    . simpa using evr.inv_mod_spec hx
     simpa [sub_sub] using Submodule.neg_mem _ -- TODO this feels like it should be a tactic
       <| Ideal.sub_mem _ (Jle this) <| Ideal.mul_mem_right (evr.inv_mod x) _ hxJ
 

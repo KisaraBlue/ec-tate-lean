@@ -18,6 +18,11 @@ def kodaira_decode : ℤ → Kodaira
   | n => if n > 0 then I (Int.natAbs (n - 4))
     else Is (Int.natAbs (-n - 4))
 
+/--
+
+lmfdb=> \copy (select ainvs, prime, conductor_valuation , discriminant_valuation, j_denominator_valuation, kodaira_symbol, tamagawa_number, reduction_type from ec_curvedata c inner join ec_localdata using ("lmfdb_label") order by c.conductor) to 'test.csv' with delimiter as '&';
+-/
+
 def parsefunc (s : String) : Model ℤ × ℕ × Kodaira × ℕ × ℕ × ℤ :=
   match String.split s (λ c => c = '{' || c = '}') with
   | "" :: mdl :: lcldata :: [] =>
