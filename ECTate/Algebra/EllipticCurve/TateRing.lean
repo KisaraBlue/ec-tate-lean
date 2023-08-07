@@ -75,7 +75,7 @@ def kodaira_type_Is
       ←one_mul (a ^ 2), add_comm (-a6q2)]
     push_cast
     exact add_le_add (le_of_eq rfl) (succ_le_of_lt (val_poly_of_double_root evrp 1 a3q (-a6q2) hdr).1)
-  let t := t + u0 ^ 3 * a * (π ^ q)
+  let t := t + u0 ^ 3 * a * (π ^ q) -- TODO use set termelab can this even do the subst?
   let a2p := sub_val evrp 1 e1.a2
   let a4pq := sub_val evrp (q + 1) e1.a4
   let a6pq2 := sub_val evrp (2 * q + 1) e1.a6

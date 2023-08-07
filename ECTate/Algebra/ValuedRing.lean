@@ -856,7 +856,7 @@ by
   simp only [int_val]
   rw [nat_valuation_eq_zero_iff hp]
   rw [not_iff_not]
-  aesop
+  aesop -- TODO aesop? to print what was done
   . cases k
     . aesop
       exact eq_zero_of_natAbs_eq_zero a
@@ -894,6 +894,8 @@ def count_roots_cubic_aux (a b c d : ℤ) (p : ℕ) (x : ℕ) : ℕ := match x w
 
 def count_roots_cubic (a b c d : ℤ) (p : ℕ) : ℕ :=
   count_roots_cubic_aux (modulo a p) (modulo b p) (modulo c p) (modulo d p) p (p - 1)
+
+-- TODO use https://github.com/leanprover-community/mathlib4/pull/5158
 
 def primeEVR {p : ℕ} (hp : Nat.Prime p) : EnatValRing (p : ℤ) := {
   valtn := primeVal hp
