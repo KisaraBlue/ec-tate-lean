@@ -52,7 +52,7 @@ instance : LT ℕ∪∞ where
 
 theorem succ_ofN (a : Nat) : succ (ofN a) = ofN a.succ := rfl
 
-@[simp] theorem add_ofN (a b : Nat) : ofN a + ofN b = ofN (a + b) := rfl
+theorem add_ofN (a b : Nat) : ofN a + ofN b = ofN (a + b) := rfl
 
 @[simp] theorem add_top (a : ℕ∪∞) : a + ∞ = ∞ := match a with
   | top => rfl
@@ -68,17 +68,17 @@ protected theorem add_assoc (a b c : ℕ∪∞) : a + b + c = a + (b + c) := by
     | top => simp
     | ofN b => cases c with
       | top => simp
-      | ofN c => simp [Nat.add_assoc]
+      | ofN c => simp [add_ofN, Nat.add_assoc]
 
 protected theorem add_zero (a : ℕ∪∞) : a + ofN 0 = a := by
   match a with
   | top => exact top_add (ofN 0)
-  | ofN a => simp
+  | ofN a => simp [add_ofN]
 
 protected theorem zero_add (a : ℕ∪∞) : ofN 0 + a = a := by
   match a with
   | top => exact add_top (ofN 0)
-  | ofN a => simp
+  | ofN a => simp [add_ofN]
 
 -- theorem nsmul_zero' (x : ℕ∪∞) : nsmul_rec 0 x = ofN 0 := by
 --   simp [nsmul_rec]
@@ -142,7 +142,7 @@ by
   | zero => simp
   | succ l ih => simp [← ih]; rfl
 
-#check ofN_eq_ofNat
+-- #check ofN_eq_ofNat
 
 @[simp, norm_cast]
 lemma cast_eq_cast_iff_Nat (m n : ℕ) : (m : Enat) = (n : Enat) ↔ m = n := by
@@ -188,7 +188,7 @@ protected theorem le_iff_cast_le_cast {n m : ℕ} : (n : Enat) ≤ m ↔ n ≤ m
   assumption,
   ofN_eq_ofNat ▸ ofN_eq_ofNat ▸ le.in_nat⟩
 
-@[simp, norm_cast]
+@[norm_cast]
 protected theorem lt_iff_cast_lt_cast {n m : ℕ} : (n : Enat) < m ↔ n < m := ⟨by
   rw [← ofN_eq_ofNat, ← ofN_eq_ofNat]
   intro h
@@ -375,7 +375,7 @@ protected theorem le_total (m n : ℕ∪∞) : m ≤ n ∨ n ≤ m :=
 lemma le_ofN (m n : Nat) : ofN m ≤ ofN n ↔ m ≤ n := by simp
 
 @[simp]
-theorem lt_ofN (m n : Nat) : (m : Enat) < n ↔ m < n := by simp
+theorem lt_ofN (m n : Nat) : (m : Enat) < n ↔ m < n := by simp [Enat.lt_iff_cast_lt_cast]
 
 lemma eq_ofN (m n : Nat) : m = n ↔ (m : Enat) = n := by simp
 
@@ -622,16 +622,19 @@ instance : CommSemiring ℕ∪∞ :=
     | (ofN (_ + 1)), (ofN (_ + 1)), ∞ => rfl }
 
 @[simp]
-lemma ofNatAtLeastTwoMulInfty {m : ℕ} (h : Nat.AtLeastTwo (m + 2)) :
+lemma ofNatAtLeastTwoMulInfty {m : ℕ} (h : Nat.AtLeastTwo m) :
   (@OfNat.ofNat _ _ (@instOfNat ℕ∪∞ _ AddMonoidWithOne.toNatCast h) : Enat) * ∞ = ∞ := by
   rw [← Nat.cast_eq_ofNat]
   rw [← ofN_eq_ofNat]
+  rw [Nat.eq_add_of_sub_eq h.1 rfl]
   rfl
+
 @[simp]
-lemma inftyMulofNatAtLeastTwo {m : ℕ} (h : Nat.AtLeastTwo (m + 2)) :
+lemma inftyMulofNatAtLeastTwo {m : ℕ} (h : Nat.AtLeastTwo m) :
   ∞ * (@OfNat.ofNat _ _ (@instOfNat ℕ∪∞ _ AddMonoidWithOne.toNatCast h) : Enat) = ∞ := by
   rw [← Nat.cast_eq_ofNat]
   rw [← ofN_eq_ofNat]
+  rw [Nat.eq_add_of_sub_eq h.1 rfl]
   rfl
 
 instance : CanonicallyOrderedCommSemiring ℕ∪∞ :=

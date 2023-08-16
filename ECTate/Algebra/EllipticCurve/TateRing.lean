@@ -212,7 +212,7 @@ def tate_algorithm {R : Type u} [Repr R] [DecidableEq R] [CommRing R] [IsDomain 
     simp only [Model.dweierstrass_dy, mul_zero, add_zero, zero_add] at singular_dy
     apply succ_le_of_lt singular_dy
 
-  -- /- These two valuations can be proved at this point but are not used explicitly until stronger valuations are obtained
+  /- These two valuations can be proved at this point but are not used explicitly until stronger valuations are obtained
 
   have h4 : evr.valtn e1.a4 ≥ 1 := by
     delta Model.is_local_singular_point at sing_origin
@@ -226,7 +226,7 @@ def tate_algorithm {R : Type u} [Repr R] [DecidableEq R] [CommRing R] [IsDomain 
     have singular := And.left sing_origin
     simp [Model.weierstrass, pow_succ, sub_eq_add_neg] at singular
     apply succ_le_of_lt singular
-    -- -/
+    -/
 
   --have hb2 : evr.valtn e.b2 ≥ 1 := sorry --adapt test_b2 after change of coordinates
 
@@ -553,7 +553,7 @@ decreasing_by
     simp only [rst_triple]
     rw [iso_rst_val_discr_to_nat]
   rw [discr_eq]
-  apply Nat.sub_lt_of_pos_le _ _ (Nat.zero_lt_succ 11)
+  apply Nat.sub_lt_of_pos_le (Nat.zero_lt_succ 11)
   rw [←le_ofN, ←discr_eq, ofN_val_discr_to_nat, show Nat.succ 11 = 12 by rfl]
 
   exact Model.val_discr_of_val_ai evr e4.toModel h1 h2 h3 h4 h6

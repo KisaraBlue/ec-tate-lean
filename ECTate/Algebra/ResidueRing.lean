@@ -335,7 +335,6 @@ variable {R : Type u} [CommRing R] [IsDomain R] {p : R} (evr : EnatValRing p)
 --   add' := add_repr_eq_repr_add evr.valtn _ _ _ _
 --   mul' := mul_repr_eq_repr_mul evr.valtn _ _ _ _ }
 
--- instance : IsDomain (R ⧸ evr.valtn.ideal) := {}
 
 open Ideal in
 instance : evr.valtn.ideal.IsMaximal := by
@@ -348,6 +347,8 @@ instance : evr.valtn.ideal.IsMaximal := by
     . simpa using evr.inv_mod_spec hx
     simpa [sub_sub] using Submodule.neg_mem _ -- TODO this feels like it should be a tactic
       <| Ideal.sub_mem _ (Jle this) <| Ideal.mul_mem_right (evr.inv_mod x) _ hxJ
+noncomputable
+instance : Field (R ⧸ evr.valtn.ideal) := Ideal.Quotient.field _
 
 lemma key : ringChar (R ⧸ evr.valtn.ideal) = evr.residue_char := by
   sorry

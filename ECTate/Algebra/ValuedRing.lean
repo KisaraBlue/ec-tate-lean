@@ -707,10 +707,12 @@ lemma nat_val_aux'_mul_eq_add (p : ℕ) (prime : Nat.Prime p) (hp : 1 < p := pri
         | succ d =>
           match Nat.le.dest (Nat.succ_le_of_lt prime.one_lt) with
           | ⟨q, hq⟩ =>
-            rw [(show Nat.succ 1 = 2 by rfl), Nat.add_comm] at hq
-            have mul_s_s : c.succ * d.succ = (c * d + c + d).succ := by simp [Nat.succ_mul, Nat.mul_succ, Nat.add_succ]
+            rw [Nat.add_comm] at hq
+            norm_num at hq -- norm_num with args issue fixed upstream in mathlib, TODO
+            have mul_s_s : c.succ * d.succ = (c * d + c + d).succ
+            . simp [Nat.succ_mul, Nat.mul_succ, Nat.add_succ]
             simp only [←hq, mul_s_s, nat_valuation_add_two, nat_valuation_aux]
-            simp only [hq, (show c * d + c + d + 1 = (c + 1) * (d + 1) by ring)]
+            simp only [hq, show c * d + c + d + 1 = (c + 1) * (d + 1) by ring]
             cases Nat.eq_zero_or_pos ((c + 1) * (d + 1) % p) with
             | inl h =>
               have hh : (c + 1) % p = 0 ∨ (d + 1) % p = 0 := sorry

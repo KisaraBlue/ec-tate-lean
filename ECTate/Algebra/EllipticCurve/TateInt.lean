@@ -589,7 +589,7 @@ decreasing_by
     simp only [rst_triple]
     rw [iso_rst_val_discr_to_nat]
   rw [discr_eq]
-  apply Nat.sub_lt_of_pos_le _ _ (Nat.zero_lt_succ 11)
+  apply Nat.sub_lt_of_pos_le (Nat.zero_lt_succ 11)
   rw [←le_ofN, ←discr_eq, ofN_val_discr_to_nat, show Nat.succ 11 = 12 by rfl]
 
   exact Model.val_discr_of_val_ai (primeEVR hp) e4.toModel h1 h2 h3 h4 h6

@@ -69,8 +69,8 @@ def move_singular_point_to_origin_iso [DecidableEq R] (evr : EnatValRing p) (e :
 rst_triple e (move_singular_point_to_origin_triple evr e)
 
 lemma move_singular_point_to_origin [DecidableEq R] (evr : EnatValRing p) (e : Model R) :
-(∃ P, is_local_singular_point evr.valtn e P) →
-  is_local_singular_point evr.valtn (move_singular_point_to_origin_iso evr e) (0, 0) :=
+  (∃ P, is_local_singular_point evr.valtn e P) →
+    is_local_singular_point evr.valtn (move_singular_point_to_origin_iso evr e) (0, 0) :=
 by
   rintro ⟨P, h⟩
   have := Model.Field.move_singular_point_to_origin' (e.map (Ideal.Quotient.mk evr.valtn.ideal)) ⟨P.map (Ideal.Quotient.mk evr.valtn.ideal) (Ideal.Quotient.mk evr.valtn.ideal), ?_⟩
@@ -445,8 +445,8 @@ by linarith
 
 -- set_option trace.profiler true in
 lemma v_discr_of_v_ai {p : R} {q : ℕ} (valp : SurjVal p) (e : ValidModel R) (hq : q > 1)
-  (h1 : valp e.a1 ≥ 1) (h2 : valp e.a2 = 1) (h3 : valp e.a3 ≥ q)
-  (h4 : valp e.a4 ≥ q + 1) (h6 : valp e.a6 ≥ 2 * q) :
+    (h1 : valp e.a1 ≥ 1) (h2 : valp e.a2 = 1) (h3 : valp e.a3 ≥ q)
+    (h4 : valp e.a4 ≥ q + 1) (h6 : valp e.a6 ≥ 2 * q) :
   valp e.discr ≥ 2 * q + 3 := by
   have h2' : valp e.b2 ≥ 1 := v_b2_of_v_a1_a2 valp e h1 h2
   have h4' : valp e.b4 ≥ q + 1 := v_b4_of_v_a1_a3_a4 valp e h1 h3 h4
@@ -455,7 +455,6 @@ lemma v_discr_of_v_ai {p : R} {q : ℕ} (valp : SurjVal p) (e : ValidModel R) (h
   apply_rules [val_add_ge_of_ge, val_sub_ge_of_ge] <;> -- TODO bizarre h2_symm appears
   . simp
     elinarith
-
   -- simp only [Model.discr]
   -- rw [sub_eq_add_neg, sub_eq_add_neg]
   -- repeat' apply val_add_ge_of_ge valp

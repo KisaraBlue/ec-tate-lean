@@ -48,7 +48,7 @@ elab "elinarith" : tactic => do
       `(tactic| cases h : ($(←delab e):term : Enat) <;>
                 -- trace_state <;>
                 simp_safe only [h, Enat.ofN_eq_ofNat, Enat.top_add, Enat.add_top,
-                  Enat.ofNatAtLeastTwoMulInfty, Enat.inftyMulofNatAtLeastTwo,
+                  Enat.infty_mul, Enat.mul_infty, ite_true, ite_false,
                   Nat.cast_add, Nat.cast_one, Nat.cast_mul, Nat.cast_ofNat,
                   Nat.cast_zero, Nat.zero_eq, Nat.mul_zero, Nat.zero_le,
                   Enat.le_top, Enat.lt_top
