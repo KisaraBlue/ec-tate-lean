@@ -64,6 +64,57 @@ by
   rw [b8_identity]
   ring
 
+-- TODO rename
+structure urst_transform (R : Type _) [Ring R] where
+  u : Rˣ
+  (r s t : R)
+
+namespace urst_transform
+instance instMulURSTTransform : Mul (urst_transform R) where
+  mul f g := ⟨f.u * g.u, f.r + f.u * g.r, f.s + f.u * g.s, f.t + f.u * g.t⟩
+lemma mul_def (f g : urst_transform R) :
+  f * g = ⟨f.u * g.u, f.r + f.u * g.r, f.s + f.u * g.s, f.t + f.u * g.t⟩ := rfl
+instance : One (urst_transform R) where
+  one := ⟨1, 0, 0, 0⟩
+lemma one_def : (1 : urst_transform R) = ⟨1, 0, 0, 0⟩ := rfl
+
+instance : Monoid (urst_transform R) where
+  mul_one := by
+    intros
+    simp [urst_transform.mul_def, urst_transform.one_def]
+  one_mul := by
+    intros
+    simp [urst_transform.mul_def, urst_transform.one_def]
+  mul_assoc := by
+    intros
+    simp [urst_transform.mul_def, mul_assoc]
+    ring_nf
+instance : Inv (urst_transform R) where
+  inv f := ⟨f.u⁻¹, -f.u⁻¹ * f.r, -f.u⁻¹ * f.s, -f.u⁻¹ * f.t⟩
+lemma inv_def (f : urst_transform R) :
+  f⁻¹ = ⟨f.u⁻¹, -f.u⁻¹ * f.r, -f.u⁻¹ * f.s, -f.u⁻¹ * f.t⟩ := rfl
+
+instance : Group (urst_transform R) where
+  mul_left_inv := by
+    intros
+    simp [urst_transform.mul_def, urst_transform.one_def, urst_transform.inv_def]
+  mul_one := by
+    intros
+    simp [urst_transform.mul_def, urst_transform.one_def]
+  one_mul := by
+    intros
+    simp [urst_transform.mul_def, urst_transform.one_def]
+  mul_assoc := by
+    intros
+    simp [urst_transform.mul_def, mul_assoc]
+    ring_nf
+
+end urst_transform
+
+-- TODO maybe define as a subgroup?
+def rst_transform := {urst : urst_transform R // urst.u = 1}
+
+--TODO instance Group
 def rst_iso (r s t : R) (e : Model R) : Model R :=
 { a1 := e.a1 + 2*s
   a2 := e.a2 - s*e.a1 + 3*r - s*s
@@ -438,9 +489,11 @@ lemma ringChar_eq_of_Prime [Nat.AtLeastTwo n] (hn : @OfNat.ofNat K n _ = 0) (hnp
   ringChar K = n :=
 by
   rw [← Nat.cast_eq_ofNat, ringChar.spec] at hn
-  cases (Nat.dvd_prime hnp).mp hn
-  . sorry
-  . assumption
+  cases (Nat.dvd_prime hnp).mp hn with
+  | inl h =>
+    simpa [h] using CharP.char_is_prime_or_zero K (ringChar K)
+  | inr h =>
+    assumption
 
 -- lemma test (e : Model K) :
 --   c4 e ^ 3 * ((b2 e * b5 e + 3 * b7 e) ^ 2 * (c4 e)⁻¹ ^ 2) + 0 =
@@ -457,7 +510,7 @@ lemma is_singular_point_singular_point [PerfectRing K] (e : Model K) (h : e.disc
   is_singular_point e (singular_point e) :=
 by
   rw [singular_point]
-  split_ifs with hc4 _hc4
+  split_ifs with hc4
   . have hc6 : c6 e = 0 := by
       simpa [h, hc4, pow_succ, mul_eq_zero] using discr_identity e
     split

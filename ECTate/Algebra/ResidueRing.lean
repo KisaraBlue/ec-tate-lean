@@ -12,6 +12,9 @@ variable {R : Type u} [CommRing R]
 instance (I : Ideal R) : CoeTC R (R ⧸ I) :=
   ⟨Ideal.Quotient.mk I⟩
 
+variable (x : R) (I : AddSubgroup R)
+#check (x : R ⧸ I)
+
 variable (x : R) (I : Ideal R)
 
 #check (x : R ⧸ I)
