@@ -2,10 +2,17 @@ import Mathlib.Algebra.Ring.Basic
 import Mathlib.Algebra.CharP.Basic
 import Mathlib.Tactic.LibrarySearch
 
+import Mathlib.FieldTheory.PerfectClosure
 
+namespace ECTate
 /-- A perfect ring is one where raising to the power of the ring characteristic is a bijection
+  or a ring of char zero.
+
+  Note this is distinct from the mathlib version in that we allow char 0
 -/
 class PerfectRing (R : Type _) [CommSemiring R] :=
+-- TODO maybe refactor to be [Char R p] bijective pth power
+-- TODO maybe make this follow from mathlib perfect, via instance
 (pth_power_bijective : ringChar R = 0 ∨ Function.Bijective (fun x : R => x ^ (ringChar R)))
 
 namespace PerfectRing

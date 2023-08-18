@@ -468,7 +468,7 @@ end invariant_lemmas
 namespace Field
 variable {K : Type u} [Field K]
 
-open Classical PerfectRing
+open Classical ECTate ECTate.PerfectRing
 
 /--
 Proposition 1.5.4 of Elliptic Curve Handbook, Ian Connell February, 1999,

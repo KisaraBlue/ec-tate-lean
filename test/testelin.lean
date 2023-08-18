@@ -3,28 +3,28 @@ import Mathlib.Algebra.Ring.Pi
 
 
 
-lemma v_b6_of_v_a3_a {q : ℕ} (h : (q : Enat) ≥ 2): q ≥ (1 : Enat) := by
+lemma v_b6_of_v_a3_a {q : ℕ} (h : (q : ENat) ≥ 2): q ≥ (1 : ENat) := by
   elinarith
 
 
-def tt : Enat -> Enat := sorry
-example (x : Enat) (h : 1 ≤ tt x) : 2 ≤ 1 + tt x :=
+def tt : ENat -> ENat := sorry
+example (x : ENat) (h : 1 ≤ tt x) : 2 ≤ 1 + tt x :=
 by
   elinarith
 
-example (x : Enat) (h : 0 < x) : 2 ≤ 1 + x :=
+example (x : ENat) (h : 0 < x) : 2 ≤ 1 + x :=
 by
   elinarith
 
-example (x : Enat) (h : 0 < x) : 3 ≤ 1 + 2 * x :=
+example (x : ENat) (h : 0 < x) : 3 ≤ 1 + 2 * x :=
 by
   elinarith
 
-example (x : Enat) (h : 0 < x) : (x + 1) ≤ x + 2 + x :=
+example (x : ENat) (h : 0 < x) : (x + 1) ≤ x + 2 + x :=
 by
   elinarith
 
-example (x : Enat) (h : 0 < x) : 3 ≤ 1 + 2 * x :=
+example (x : ENat) (h : 0 < x) : 3 ≤ 1 + 2 * x :=
 by
   cases x
   simp at *
@@ -33,14 +33,14 @@ by
   simp
 
 
-example (y  x : Enat) (h : 0 < y) (g : y ≤ 3) : y < 2 * y :=
+example (y  x : ENat) (h : 0 < y) (g : y ≤ 3) : y < 2 * y :=
 by
   elinarith
-example (x y : Enat) (h : 0 < x) (g : 3 ≤ y) : 3 ≤ 1 + 2 * x + y :=
+example (x y : ENat) (h : 0 < x) (g : 3 ≤ y) : 3 ≤ 1 + 2 * x + y :=
 by
   elinarith
 
-example (y : Nat) (h : 0 < (y : Enat)) (g : (y : Enat) ≤ 3) : (y : Enat) < 2 * y :=
+example (y : Nat) (h : 0 < (y : ENat)) (g : (y : ENat) ≤ 3) : (y : ENat) < 2 * y :=
 by
   elinarith
 
@@ -52,7 +52,7 @@ def a3 (R) : R := sorry
 def a6 (R) : R := sorry
 def b6 (R) [CommRing R] : R := sorry
 def SurjVal' R (p : R) : Type := sorry
-def v {p : R} : SurjVal' R p → R → Enat := sorry
+def v {p : R} : SurjVal' R p → R → ENat := sorry
 -- R: Type u
 -- inst✝: CommRing R
 -- inst: IsDomain R
@@ -67,7 +67,7 @@ def v {p : R} : SurjVal' R p → R → Enat := sorry
 -- lemma v_b6_of_v_a3_a6  --{p : R}
 -- {q : ℕ} --(valp : SurjVal p) (e : ValidModel R)-- (h3 : valp e.a3 ≥ q)
 --   -- (h6 : valp e.a6 ≥ 2 * q)
---   : q ≥ (1 : Enat) := by
+--   : q ≥ (1 : ENat) := by
 --   elinarith
 
 -- -- set_option pp.raw  true in

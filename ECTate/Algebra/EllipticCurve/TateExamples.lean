@@ -31,14 +31,14 @@ open SurjVal
 lemma val_discr_mordell (p : ℕ) (hp : Nat.Prime p) (hn23 : p ≠ 2 ∧ p ≠ 3) (h) :
   val_discr_to_nat (primeEVR hp).valtn ⟨⟨0,0,0,0, b⟩, h⟩ = 2 * (nat_of_val (primeEVR hp).valtn (λ hb => by simp [hb] at h : b ≠ 0)) :=
 by
-  rw [Enat.eq_ofN, ofN_val_discr_to_nat]
+  rw [ENat.eq_ofN, ofN_val_discr_to_nat]
   dsimp
   conv =>
     lhs
     rw [discr_mordell]
   simp [neg_mul, val_neg, SurjVal.v_mul_eq_add_v, nat_of_val] -- need simp lemma coe_of_nat_of_val
   norm_num
-  convert zero_add (?_ : Enat) -- TODO lean needs help here why, no _
+  convert zero_add (?_ : ENat) -- TODO lean needs help here why, no _
   convert_to (primeEVR hp).valtn (2^5) = 0
   sorry
 
@@ -48,7 +48,7 @@ lemma Mordell_KodairaTypeII (p) (hp : Nat.Prime p) (hn23 : p ≠ 2 ∧ p ≠ 3) 
 by
   rw [tate_algorithm, if_neg hn23.1, if_neg hn23.2, tate_big_prime]
   generalize h : (⟨⟨0,0,0,0,p⟩, _⟩ : ValidModel ℤ) = e
-  have valc4 : 3 * (primeEVR hp).valtn e.c4 = ∞ := by
+  have valc4 : 3 * (primeEVR hp).valtn e.c4 = ⊤ := by
     simp [← h, c4_mordell]
   have valdisc : val_discr_to_nat (primeEVR hp).valtn e = 2 := by
     rw [← h, val_discr_mordell _ _ hn23, nat_of_val]
@@ -62,7 +62,7 @@ lemma Mordell_KodairaTypeIIs (p) (hp : Nat.Prime p) (hn23 : p ≠ 2 ∧ p ≠ 3)
 by
   rw [tate_algorithm, if_neg hn23.1, if_neg hn23.2, tate_big_prime]
   generalize h : (⟨⟨0,0,0,0,(p:ℤ)^5⟩, _⟩ : ValidModel ℤ) = e
-  have valc4 : 3 * (primeEVR hp).valtn e.c4 = ∞ := by
+  have valc4 : 3 * (primeEVR hp).valtn e.c4 = ⊤ := by
     simp [← h, c4_mordell]
   have valdisc : val_discr_to_nat (primeEVR hp).valtn e = 10 := by
     rw [← h, val_discr_mordell _ _ hn23, nat_of_val]
@@ -76,7 +76,7 @@ lemma Mordell_KodairaTypeIV (p) (hp : Nat.Prime p) (hn23 : p ≠ 2 ∧ p ≠ 3) 
 by
   rw [tate_algorithm, if_neg hn23.1, if_neg hn23.2, tate_big_prime]
   generalize h : (⟨⟨0,0,0,0,(p : ℤ)^2⟩, _⟩ : ValidModel ℤ) = e
-  have valc4 : 3 * (primeEVR hp).valtn e.c4 = ∞ := by
+  have valc4 : 3 * (primeEVR hp).valtn e.c4 = ⊤ := by
     simp [← h, c4_mordell]
   have valdisc : val_discr_to_nat (primeEVR hp).valtn e = 4 := by
     rw [← h, val_discr_mordell _ _ hn23, nat_of_val]
@@ -90,7 +90,7 @@ lemma Mordell_KodairaTypeIVs (p) (hp : Nat.Prime p) (hn23 : p ≠ 2 ∧ p ≠ 3)
 by
   rw [tate_algorithm, if_neg hn23.1, if_neg hn23.2, tate_big_prime]
   generalize h : (⟨⟨0,0,0,0,(p : ℤ)^4⟩, _⟩ : ValidModel ℤ) = e
-  have valc4 : 3 * (primeEVR hp).valtn e.c4 = ∞; simp [← h, c4_mordell]
+  have valc4 : 3 * (primeEVR hp).valtn e.c4 = ⊤; simp [← h, c4_mordell]
   have valdisc' : val_discr_to_nat (primeEVR hp).valtn e % 12 = 8
   . simp [← h, val_discr_mordell _ _ hn23, nat_of_val, c4_mordell]
   simp [valc4, valdisc']

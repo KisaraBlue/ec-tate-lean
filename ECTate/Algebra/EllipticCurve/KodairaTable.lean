@@ -21,7 +21,7 @@ lemma val_discr_abc :
   val_discr_to_nat (primeEVR hp).valtn ⟨⟨0, a, 0, b, c⟩, habc⟩ =
     nat_of_val (primeEVR hp).valtn (fun h => habc (by rwa [discr_abc]) : (-16*a^2*(4*a*c - b^2) + 288*a*b*c - 64*b^3 - 432*c^2) ≠ 0) :=
 by
-  rw [Enat.eq_ofN, ofN_val_discr_to_nat]
+  rw [ENat.eq_ofN, ofN_val_discr_to_nat]
   conv =>
     lhs
     rw [discr_abc]
@@ -32,7 +32,7 @@ by
 -- by
 --   rw [tate_algorithm, if_neg hn23.1, if_neg hn23.2, tate_big_prime]
 --   generalize h : (⟨⟨0,a,0,b,c⟩, _⟩ : ValidModel ℤ) = e
---   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ∞; simp [← h, c4_abc]
+--   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ⊤; simp [← h, c4_abc]
 --   sorry
 --   have valdisc' : val_discr_to_nat (primeEVR hp).valtn e % 12 = 0
 --   . simp [← h, val_discr_abc hp a b c habc, nat_of_val, c4_abc]
@@ -47,7 +47,7 @@ by
 -- by
 --   rw [tate_algorithm, if_neg hn23.1, if_neg hn23.2, tate_big_prime]
 --   generalize h : (⟨⟨0,a,0,b,c⟩, _⟩ : ValidModel ℤ) = e
---   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ∞; simp [← h, c4_abc]
+--   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ⊤; simp [← h, c4_abc]
 --   have valdisc' : val_discr_to_nat (primeEVR hp).valtn e % 12 = 8
 --   . simp [← h, val_discr_abc hp a b c habc, nat_of_val, c4_abc]
 --   simp [valc4, valdisc']
@@ -60,7 +60,7 @@ by
 -- by
 --   rw [tate_algorithm, if_neg hn23.1, if_neg hn23.2, tate_big_prime]
 --   generalize h : (⟨⟨0,a,0,b,c⟩, _⟩ : ValidModel ℤ) = e
---   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ∞; simp [← h, c4_abc]
+--   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ⊤; simp [← h, c4_abc]
 --   have valdisc' : val_discr_to_nat (primeEVR hp).valtn e % 12 = 8
 --   . simp [← h, val_discr_abc hp a b c habc, nat_of_val, c4_abc]
 --   simp [valc4, valdisc']
@@ -73,7 +73,7 @@ by
 -- by
 --   rw [tate_algorithm, if_neg hn23.1, if_neg hn23.2, tate_big_prime]
 --   generalize h : (⟨⟨0,a,0,b,c⟩, _⟩ : ValidModel ℤ) = e
---   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ∞; simp [← h, c4_abc]
+--   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ⊤; simp [← h, c4_abc]
 --   have valdisc' : val_discr_to_nat (primeEVR hp).valtn e % 12 = 8
 --   . simp [← h, val_discr_abc hp a b c habc, nat_of_val, c4_abc]
 --   simp [valc4, valdisc']
@@ -86,7 +86,7 @@ by
 -- by
 --   rw [tate_algorithm, if_neg hn23.1, if_neg hn23.2, tate_big_prime]
 --   generalize h : (⟨⟨0,a,0,b,c⟩, _⟩ : ValidModel ℤ) = e
---   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ∞; simp [← h, c4_abc]
+--   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ⊤; simp [← h, c4_abc]
 --   have valdisc' : val_discr_to_nat (primeEVR hp).valtn e % 12 = 8
 --   . simp [← h, val_discr_abc hp a b c habc, nat_of_val, c4_abc]
 --   simp [valc4, valdisc']
@@ -99,7 +99,7 @@ by
 -- by
 --   rw [tate_algorithm, if_neg hn23.1, if_neg hn23.2, tate_big_prime]
 --   generalize h : (⟨⟨0,a,0,b,c⟩, _⟩ : ValidModel ℤ) = e
---   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ∞; simp [← h, c4_abc]
+--   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ⊤; simp [← h, c4_abc]
 --   have valdisc' : val_discr_to_nat (primeEVR hp).valtn e % 12 = 8
 --   . simp [← h, val_discr_abc hp a b c habc, nat_of_val, c4_abc]
 --   simp [valc4, valdisc']
@@ -112,7 +112,7 @@ by
 -- by
 --   rw [tate_algorithm, if_neg hn23.1, if_neg hn23.2, tate_big_prime]
 --   generalize h : (⟨⟨0,a,0,b,c⟩, _⟩ : ValidModel ℤ) = e
---   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ∞; simp [← h, c4_abc]
+--   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ⊤; simp [← h, c4_abc]
 --   have valdisc' : val_discr_to_nat (primeEVR hp).valtn e % 12 = 8
 --   . simp [← h, val_discr_abc hp a b c habc, nat_of_val, c4_abc]
 --   simp [valc4, valdisc']
@@ -125,7 +125,7 @@ by
 -- by
 --   rw [tate_algorithm, if_neg hn23.1, if_neg hn23.2, tate_big_prime]
 --   generalize h : (⟨⟨0,a,0,b,c⟩, _⟩ : ValidModel ℤ) = e
---   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ∞; simp [← h, c4_abc]
+--   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ⊤; simp [← h, c4_abc]
 --   have valdisc' : val_discr_to_nat (primeEVR hp).valtn e % 12 = 8
 --   . simp [← h, val_discr_abc hp a b c habc, nat_of_val, c4_abc]
 --   simp [valc4, valdisc']
@@ -138,7 +138,7 @@ by
 -- by
 --   rw [tate_algorithm, if_neg hn23.1, if_neg hn23.2, tate_big_prime]
 --   generalize h : (⟨⟨0,a,0,b,c⟩, _⟩ : ValidModel ℤ) = e
---   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ∞; simp [← h, c4_abc]
+--   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ⊤; simp [← h, c4_abc]
 --   have valdisc' : val_discr_to_nat (primeEVR hp).valtn e % 12 = 8
 --   . simp [← h, val_discr_abc hp a b c habc, nat_of_val, c4_abc]
 --   simp [valc4, valdisc']
@@ -151,7 +151,7 @@ by
 -- by
 --   rw [tate_algorithm, if_neg hn23.1, if_neg hn23.2, tate_big_prime]
 --   generalize h : (⟨⟨0,a,0,b,c⟩, _⟩ : ValidModel ℤ) = e
---   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ∞; simp [← h, c4_abc]
+--   have valc4 : 3 * (primeEVR hp).valtn e.c4 = ⊤; simp [← h, c4_abc]
 --   have valdisc' : val_discr_to_nat (primeEVR hp).valtn e % 12 = 8
 --   . simp [← h, val_discr_abc hp a b c habc, nat_of_val, c4_abc]
 --   simp [valc4, valdisc']

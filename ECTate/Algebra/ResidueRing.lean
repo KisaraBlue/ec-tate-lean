@@ -5,19 +5,13 @@ import ECTate.Tactic.ELinarith
 import Mathlib.RingTheory.Congruence
 import Mathlib.RingTheory.Ideal.Quotient
 
-open Enat
+open ENat
 
 variable {R : Type u} [CommRing R]
 
 instance (I : Ideal R) : CoeTC R (R ⧸ I) :=
   ⟨Ideal.Quotient.mk I⟩
 
-variable (x : R) (I : AddSubgroup R)
-#check (x : R ⧸ I)
-
-variable (x : R) (I : Ideal R)
-
-#check (x : R ⧸ I)
 
 variable [IsDomain R]
 
@@ -330,8 +324,8 @@ end SurjVal
 lemma RingCon.exists_rep (RC : RingCon R) : ∀ a : RC.Quotient, ∃ A : R, A = a :=
 Quotient.exists_rep
 
-namespace EnatValRing
-variable {R : Type u} [CommRing R] [IsDomain R] {p : R} (evr : EnatValRing p)
+namespace ENatValRing
+variable {R : Type u} [CommRing R] [IsDomain R] {p : R} (evr : ENatValRing p)
 
 -- def RingCon : RingCon R :=
 -- { evr.valtn.ideal.Quotient with
@@ -355,6 +349,7 @@ instance : Field (R ⧸ evr.valtn.ideal) := Ideal.Quotient.field _
 
 lemma key : ringChar (R ⧸ evr.valtn.ideal) = evr.residue_char := by
   sorry
+open ECTate
 
 instance : PerfectRing (R ⧸ evr.valtn.ideal) :=
 { pth_power_bijective := by
@@ -371,4 +366,4 @@ instance : PerfectRing (R ⧸ evr.valtn.ideal) :=
       rw [← map_pow, Ideal.Quotient.eq]
       simp only [SurjVal.mem_ideal_iff, gt_iff_lt]
       apply evr.pth_root_spec.resolve_left h }
-end EnatValRing
+end ENatValRing

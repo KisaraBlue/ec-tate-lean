@@ -5,7 +5,7 @@ instance : IsDomain $ QuadRing ℤ 0 (-1) := sorry
 
 namespace QuadRing
 
-def gaussian_val (p : ℕ) (k : QuadRing ℤ 0 (-1)) : ℕ∪∞ :=
+def gaussian_val (p : ℕ) (k : QuadRing ℤ 0 (-1)) : ℕ∞ :=
   min (Int.int_val p k.b1) (Int.int_val p k.b2)
 
 @[simp]
@@ -23,18 +23,18 @@ lemma gaussian_val_add_ge_min (p : ℕ) (a b : QuadRing ℤ 0 (-1)) :
   simp [gaussian_val]
   sorry
 
-lemma eq_top_of_min_eq_top (a b : ℕ∪∞) : min a b = ∞ → a = ∞ :=
+lemma eq_top_of_min_eq_top (a b : ℕ∞) : min a b = ⊤ → a = ⊤ :=
 by
   sorry
 
 @[simp]
-lemma min_eq_top_iff (a b : ℕ∪∞) : min a b = ∞ ↔ a = ∞ ∧ b = ∞ :=
+lemma min_eq_top_iff (a b : ℕ∞) : min a b = ⊤ ↔ a = ⊤ ∧ b = ⊤ :=
 by
   -- aesop
   sorry
 
 lemma gaussian_val_eq_top_iff_zero {p : ℕ} (gt1 : 1 < p) (a : QuadRing ℤ 0 (-1)) :
-  gaussian_val p a = ∞ ↔ a = 0 :=
+  gaussian_val p a = ⊤ ↔ a = 0 :=
 by simp [gaussian_val, gt1, QuadRing.ext_iff]
 
 def primeVal {p : ℕ} (hp : Nat.Prime p) (hpi : p % 4 = 1) : SurjVal (p : QuadRing ℤ 0 (-1)) := {
@@ -52,7 +52,7 @@ def norm_repr_p (p : ℕ) (x : QuadRing ℤ 0 (-1)) : QuadRing ℤ 0 (-1) :=
 ⟨Int.norm_repr_p p x.b1,
  Int.norm_repr_p p x.b2⟩
 
-def primeEVR {p : ℕ} (hp : Nat.Prime p) (hpi  : p % 4 = 1) : EnatValRing (p : QuadRing ℤ 0 (-1)) :=
+def primeEVR {p : ℕ} (hp : Nat.Prime p) (hpi  : p % 4 = 1) : ENatValRing (p : QuadRing ℤ 0 (-1)) :=
 { valtn := primeVal hp hpi
   decr_val := decr_val_p p
   zero_valtn_decr := sorry

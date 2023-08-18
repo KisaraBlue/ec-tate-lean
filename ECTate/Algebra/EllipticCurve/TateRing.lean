@@ -10,9 +10,9 @@ import Mathlib.Init.Algebra.Order
 import Mathlib.Data.Int.Basic
 
 open ValidModel
-open Enat
+open ENat
 open Kodaira
-open EnatValRing
+open ENatValRing
 open SurjVal
 
 
@@ -20,7 +20,7 @@ def kodaira_type_Is
   {R : Type u}
 [Repr R] -- TODO delete
   [DecidableEq R] [CommRing R] [IsDomain R] {π : R}
-  (evr : EnatValRing π) (e : ValidModel R) (u0 r0 s0 t0 : R) (m q : ℕ)
+  (evr : ENatValRing π) (e : ValidModel R) (u0 r0 s0 t0 : R) (m q : ℕ)
   (hq : 1 < q) (h1 : evr.valtn e.a1 ≥ 1) (h2 : evr.valtn e.a2 = 1)
   (h3 : evr.valtn e.a3 ≥ q) (h4 : evr.valtn e.a4 ≥ q + 1)
   (h6 : evr.valtn e.a6 ≥ 2 * q) :
@@ -38,7 +38,7 @@ def kodaira_type_Is
   else
   have hdr : evrp.has_double_root 1 a3q (-a6q2) := by
     apply And.intro (val_of_one surjvalp) _
-    apply Enat.pos_of_ne_zero
+    apply ENat.pos_of_ne_zero
     rw [mul_one, ←neg_mul_eq_mul_neg, sub_eq_add_neg, neg_neg]
     exact discr_1
   let a := evrp.double_root 1 a3q (-a6q2)
@@ -96,7 +96,7 @@ def kodaira_type_Is
       rw [←rw_a2', val_sub_val_eq evrp e1.a2 1 h2']
       simp
     apply And.intro v_a2p _
-    apply Enat.pos_of_ne_zero
+    apply ENat.pos_of_ne_zero
     assumption
   let a' := evrp.double_root a2p a4pq a6pq2
   have rw_a' : evrp.double_root a2p a4pq a6pq2 = a' := rfl
@@ -125,7 +125,7 @@ def kodaira_type_Is
     apply le_trans (le_min _ _) (surjvalp.v_add_ge_min_v _ _)
     . rw [Nat.add_succ q, Nat.succ_eq_add_one, surjvalp.v_mul_eq_add_v, val_of_pow_uniformizer]
       rw [Nat.cast_add, Nat.cast_one, add_assoc]
-      rw [show (2 : ℕ∪∞) = 1 + 1 by norm_num, ← add_assoc, ← add_assoc]
+      rw [show (2 : ℕ∞) = 1 + 1 by norm_num, ← add_assoc, ← add_assoc]
       apply add_le_add (le_of_eq rfl)
       exact succ_le_of_lt (val_poly_of_double_root evrp a2p a4pq a6pq2 hdr').2
     . rw [pow_two, factorize3 a' π q, ←pow_add]
@@ -141,7 +141,7 @@ def kodaira_type_Is
         ←add_self_eq_mul_two 1, ←add_assoc, surjvalp.v_mul_eq_add_v, val_of_pow_uniformizer]
       push_cast
       apply add_le_add (le_of_eq rfl)
-      rw [show 1 = Enat.succ 0 by rfl]
+      rw [show 1 = ENat.succ 0 by rfl]
       apply succ_le_of_lt
       have := (val_poly_of_double_root evrp a2p a4pq a6pq2 hdr').1
       push_cast at this
@@ -165,7 +165,7 @@ decreasing_by
 
 -- TODO re-add ReductionType
 def tate_algorithm {R : Type u} [Repr R] [DecidableEq R] [CommRing R] [IsDomain R] {π : R}
-  (evr : EnatValRing π) (e : ValidModel R) (u0 r0 s0 t0 : R) :
+  (evr : ENatValRing π) (e : ValidModel R) (u0 r0 s0 t0 : R) :
   Kodaira × ℕ × ℕ × (R × R × R × R) :=
   let (u, r, s, t) := (u0, r0, s0, t0)
 
@@ -257,14 +257,14 @@ def tate_algorithm {R : Type u} [Repr R] [DecidableEq R] [CommRing R] [IsDomain 
   --     . split
   --       . simp
   --         sorry
-  --         -- rw [← Enat.succ_zero]
-  --         -- apply Enat.succ_le_of_lt
+  --         -- rw [← ENat.succ_zero]
+  --         -- apply ENat.succ_le_of_lt
   --         -- apply evr.pth_root_pos_of_pos
   --         -- simp [*]
   --       . simp
   --         sorry
   --       . simp
-  --         rw [(show (1 : Enat) = 0 + (1 + 0) by simp)]
+  --         rw [(show (1 : ENat) = 0 + (1 + 0) by simp)]
   --         repeat' apply add_le_add
   --         exact zero_le _
   --         assumption
@@ -281,7 +281,7 @@ def tate_algorithm {R : Type u} [Repr R] [DecidableEq R] [CommRing R] [IsDomain 
     -- . simp
     --   exact le_trans this (le_add_left _ _)
     -- sorry
-    -- rw [show (1 : Enat) = min 1 1 by simp]
+    -- rw [show (1 : ENat) = min 1 1 by simp]
     -- convert evr.valtn.v_add_ge_min_v _ _
     -- . exact hb2
     -- . sorry
@@ -304,8 +304,8 @@ def tate_algorithm {R : Type u} [Repr R] [DecidableEq R] [CommRing R] [IsDomain 
     simp only [Model.b6] at hb6
     rw [evr.factor_p_of_le_val h3, evr.factor_p_of_le_val h6, factorize5,
         evr.valtn.v_mul_eq_add_v,
-        val_of_pow_uniformizer, show (3 : ℕ∪∞) = 2 + 1 by rfl] at hb6
-    exact Enat.le_of_add_le_add_left hb6
+        val_of_pow_uniformizer, show (3 : ℕ∞) = 2 + 1 by rfl] at hb6
+    exact ENat.le_of_add_le_add_left hb6
 
   let s1 := evr.double_root 1 e1.a1 (-e1.a2)
   let t1 := evr.double_root 1 a3p (-a6p2)
@@ -330,7 +330,7 @@ def tate_algorithm {R : Type u} [Repr R] [DecidableEq R] [CommRing R] [IsDomain 
     -- sorry -- = d/dt (t - pi*beta)²
     rw [st_of_a3, ←mul_assoc, mul_comm 2, add_comm e1.a3, ←mul_one 2,
       evr.factor_p_of_le_val h3, pow_one, mul_assoc, ←mul_add, evr.valtn.v_mul_eq_add_v,
-      show (2 : Enat) = 1 + 1 by norm_num]
+      show (2 : ENat) = 1 + 1 by norm_num]
     apply add_le_add (le_of_eq evr.valtn.v_uniformizer.symm)
     exact succ_le_of_lt (evr.val_poly_of_double_root 1 a3p (-a6p2) hdr_b6).2
 
@@ -342,7 +342,7 @@ def tate_algorithm {R : Type u} [Repr R] [DecidableEq R] [CommRing R] [IsDomain 
     rw [←val_neg, st_of_a6, sub_eq_add_neg, sub_eq_add_neg, neg_add, neg_add, neg_neg, neg_neg,
       add_comm _ (_ ^ 2), add_comm (-e1.a6), ←add_assoc, mul_pow,
       evr.factor_p_of_le_val h3, evr.factor_p_of_le_val h6, neg_mul_eq_mul_neg (_ : R) (evr.sub_val 2 e1.toModel.a6), factorize6,
-      evr.valtn.v_mul_eq_add_v, show (3 : ℕ∪∞) = 2 + 1 by rfl]
+      evr.valtn.v_mul_eq_add_v, show (3 : ℕ∞) = 2 + 1 by rfl]
     apply add_le_add (le_of_eq (val_of_pow_uniformizer evr.valtn).symm)
     exact succ_le_of_lt (evr.val_poly_of_double_root 1 a3p (-a6p2) hdr_b6).1
 
@@ -381,7 +381,7 @@ def tate_algorithm {R : Type u} [Repr R] [DecidableEq R] [CommRing R] [IsDomain 
   -- if evr.valtn (3 * a4p2 - a2p ^ 2) = 0 then
     let r1 := π * (evr.norm_repr (if evr.residue_char = 2 then a4p2 else a2p * a4p2)) -- TODO wrong
     have e2_cubic_has_double_root : cubic_has_double_root evr e2 :=
-      And.intro (Enat.pos_of_ne_zero test_Δcubic) test_δcubic
+      And.intro (ENat.pos_of_ne_zero test_Δcubic) test_δcubic
     let e3 := move_cubic_double_root_to_origin_iso evr e2
     let r := r + u^2 * r1
     let t := t + u ^ 2 * s * r1
@@ -413,7 +413,7 @@ def tate_algorithm {R : Type u} [Repr R] [DecidableEq R] [CommRing R] [IsDomain 
         rw [r_of_a4, evr.factor_p_of_le_val h4, evr.factor_p_of_le_val h2, factorize7]
         apply val_mul_ge_of_left_ge evr.valtn _
         exact le_of_eq (val_of_pow_uniformizer evr.valtn).symm
-      rw [evr.factor_p_of_le_val h4'', evr.valtn.v_mul_eq_add_v, show (3 : ℕ∪∞) = 2 + 1 by rfl]
+      rw [evr.factor_p_of_le_val h4'', evr.valtn.v_mul_eq_add_v, show (3 : ℕ∞) = 2 + 1 by rfl]
       apply add_le_add
       . exact le_of_eq (val_of_pow_uniformizer evr.valtn).symm
       . exact succ_le_of_lt (move_cubic_double_root_to_origin evr e2 e2_cubic_has_double_root).2.1
@@ -424,7 +424,7 @@ def tate_algorithm {R : Type u} [Repr R] [DecidableEq R] [CommRing R] [IsDomain 
         rw [r_of_a6, evr.factor_p_of_le_val h6, evr.factor_p_of_le_val h4, evr.factor_p_of_le_val h2, factorize8]
         apply val_mul_ge_of_left_ge evr.valtn _
         exact le_of_eq (val_of_pow_uniformizer evr.valtn).symm
-      rw [evr.factor_p_of_le_val h6', evr.valtn.v_mul_eq_add_v, show (4 : ℕ∪∞) = 3 + 1 by rfl]
+      rw [evr.factor_p_of_le_val h6', evr.valtn.v_mul_eq_add_v, show (4 : ℕ∞) = 3 + 1 by rfl]
       apply add_le_add
       . exact le_of_eq (val_of_pow_uniformizer evr.valtn).symm
       . exact succ_le_of_lt (move_cubic_double_root_to_origin evr e2 e2_cubic_has_double_root).2.2
@@ -436,7 +436,7 @@ def tate_algorithm {R : Type u} [Repr R] [DecidableEq R] [CommRing R] [IsDomain 
   else
 
   have e2_cubic_has_triple_root : cubic_has_triple_root evr e2 :=
-    And.intro (Enat.pos_of_ne_zero test_Δcubic) (Enat.pos_of_ne_zero test_δcubic)
+    And.intro (ENat.pos_of_ne_zero test_Δcubic) (ENat.pos_of_ne_zero test_δcubic)
 
   let e3 := move_cubic_triple_root_to_origin_iso evr e2
   -- let r1 := π * (evr.norm_repr (if evr.residue_char == 2 then -a2p else -a6p3))
@@ -447,7 +447,7 @@ def tate_algorithm {R : Type u} [Repr R] [DecidableEq R] [CommRing R] [IsDomain 
 
   have h2' : evr.valtn e3.a2 ≥ 2 := by-- T=0 triple root => a_2,1 = 0
     have h2'' : evr.valtn e3.a2 ≥ 1 := by
-      --erw [←Enat.succ_zero, ← Enat.lt_iff_succ_le]
+      --erw [←ENat.succ_zero, ← ENat.lt_iff_succ_le]
       have := move_cubic_triple_root_to_origin evr e2 e2_cubic_has_triple_root
       -- sorry
       simp only [move_cubic_triple_root_to_origin_iso]
@@ -455,7 +455,7 @@ def tate_algorithm {R : Type u} [Repr R] [DecidableEq R] [CommRing R] [IsDomain 
       -- apply val_mul_ge_of_left_ge
       -- exact le_of_eq evr.valtn.v_uniformizer.symm
       sorry
-    rw [evr.factor_p_of_le_val h2'', evr.valtn.v_mul_eq_add_v, pow_one, show (2 : ℕ∪∞) = 1 + 1 by rfl]
+    rw [evr.factor_p_of_le_val h2'', evr.valtn.v_mul_eq_add_v, pow_one, show (2 : ℕ∞) = 1 + 1 by rfl]
     apply add_le_add
     . exact le_of_eq evr.valtn.v_uniformizer.symm
     . exact succ_le_of_lt (move_cubic_triple_root_to_origin evr e2 e2_cubic_has_triple_root).1
@@ -477,7 +477,7 @@ def tate_algorithm {R : Type u} [Repr R] [DecidableEq R] [CommRing R] [IsDomain 
       --   evr.factor_p_of_le_val h2, factorize8]
       -- apply val_mul_ge_of_left_ge evr.valtn _
       -- exact le_of_eq (val_of_pow_uniformizer evr.valtn).symm
-    rw [evr.factor_p_of_le_val h6', evr.valtn.v_mul_eq_add_v, show (4 : ℕ∪∞) = 3 + 1 by rfl]
+    rw [evr.factor_p_of_le_val h6', evr.valtn.v_mul_eq_add_v, show (4 : ℕ∞) = 3 + 1 by rfl]
     apply add_le_add
     . exact le_of_eq (val_of_pow_uniformizer evr.valtn).symm
     . exact succ_le_of_lt (move_cubic_triple_root_to_origin evr e2 e2_cubic_has_triple_root).2.2
@@ -496,7 +496,7 @@ def tate_algorithm {R : Type u} [Repr R] [DecidableEq R] [CommRing R] [IsDomain 
   else
 
   have h_b6p4 : evr.has_double_root 1 a3p2 (-a6p4) := by -- this should be a lemma
-    -- refine And.intro (val_of_one evr.valtn) (Enat.pos_of_ne_zero (by simpa))
+    -- refine And.intro (val_of_one evr.valtn) (ENat.pos_of_ne_zero (by simpa))
     sorry
 
   -- let a := if evr.residue_char = 2 then evr.norm_repr a6p4 else evr.norm_repr (2 * a3p2)
@@ -509,7 +509,7 @@ def tate_algorithm {R : Type u} [Repr R] [DecidableEq R] [CommRing R] [IsDomain 
   --have h6 : evr.valtn e.a6 ≥ 5 := sorry
   have h3 : evr.valtn e4.a3 ≥ 3 := by
     rw [t_of_a3, ←mul_one 2, evr.factor_p_of_le_val h3, ←mul_assoc (2*1), mul_comm ((2*1) * _),
-      ←mul_add, add_comm, show (3 : ℕ∪∞) = 2 + 1 by rfl, evr.valtn.v_mul_eq_add_v]
+      ←mul_add, add_comm, show (3 : ℕ∞) = 2 + 1 by rfl, evr.valtn.v_mul_eq_add_v]
     apply add_le_add
     . exact le_of_eq (val_of_pow_uniformizer evr.valtn).symm
     . exact succ_le_of_lt (evr.val_poly_of_double_root 1 a3p2 (-a6p4) h_b6p4).2

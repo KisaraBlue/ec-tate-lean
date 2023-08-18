@@ -16,7 +16,6 @@ def is_atom (e : Expr) : Mathlib.Tactic.AtomM (Bool × Bool) :=
       | _ => pure (.false, .false)
     catch _ => pure (.false, .false)
 
-
 -- /-- Run a computation in the `AtomM` monad and return the atoms. -/
 -- def Mathlib.Tactic.AtomM.run' (red : TransparencyMode) (m : AtomM α)
 --     (evalAtom : Expr → MetaM Simp.Result := fun e ↦ pure { expr := e }) :
@@ -45,13 +44,13 @@ elab "elinarith" : tactic => do
   let mut goals := [← getMainGoal]
   for e in a do
     let tac ←
-      `(tactic| cases h : ($(←delab e):term : Enat) <;>
+      `(tactic| cases h : ($(←delab e):term : ENat) <;>
                 -- trace_state <;>
-                simp_safe only [h, Enat.ofN_eq_ofNat, Enat.top_add, Enat.add_top,
-                  Enat.infty_mul, Enat.mul_infty, ite_true, ite_false,
+                simp_safe only [h, ENat.ofN_eq_ofNat, ENat.top_add, ENat.add_top,
+                  ENat.infty_mul, ENat.mul_infty, ite_true, ite_false,
                   Nat.cast_add, Nat.cast_one, Nat.cast_mul, Nat.cast_ofNat,
                   Nat.cast_zero, Nat.zero_eq, Nat.mul_zero, Nat.zero_le,
-                  Enat.le_top, Enat.lt_top
+                  ENat.le_top, ENat.lt_top
                 ] at * <;>
                 -- trace_state <;>
                 norm_cast at * <;>
@@ -64,12 +63,6 @@ elab "elinarith" : tactic => do
       newgs := newgs ++ o.1
     goals := newgs
   appendGoals goals
--- TODO spell check all comments / docstrings
--- TODO minimiser
--- TODO go to definition in doc comments eg `Mathlib.Tactic.casesMatching`
-
--- #check Mathlib.Tactic.casesMatching
-
 
 
 /-

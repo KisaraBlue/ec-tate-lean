@@ -3,7 +3,7 @@ import ECTate.Algebra.EllipticCurve.Kronecker
 import ECTate.Algebra.EllipticCurve.Model
 import ECTate.Algebra.ValuedRing
 import ECTate.Algebra.EllipticCurve.KodairaTypes
-import ECTate.Data.Nat.Enat
+-- import ECTate.Data.Nat.ENat
 import Mathlib.Data.Int.Basic
 import Mathlib.Tactic.LibrarySearch
 import ECTate.Algebra.EllipticCurve.LocalEC
@@ -32,8 +32,8 @@ Mathlib TODOs:
 -/
 
 
-open Enat
-open EnatValRing
+open ENat
+open ENatValRing
 
 open Kodaira
 
@@ -53,7 +53,7 @@ def tate_big_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) :
   let c4 := e.c4
   let ⟨vpj, k, integralInv⟩ :=
     match 3 * (primeEVR hp).valtn c4 with
-    | ∞ => (0, n, true)
+    | ⊤ => (0, n, true)
     | ofN v_c4_3 => if v_c4_3 < n then ((v_c4_3 : ℤ) - (n : ℤ), v_c4_3, false) else (v_c4_3 - n, n, true)
   let ⟨u, r, s, t⟩ :=
     if k < 12 then (1, 0, 0, 0) else
@@ -135,7 +135,7 @@ def kodaira_type_Is (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 r0 s0 
   else
   have hdr : has_double_root 1 a3q (-a6q2) hp := by
     apply And.intro (val_of_one surjvalp) _
-    apply Enat.pos_of_ne_zero
+    apply ENat.pos_of_ne_zero
     rw [mul_one, ←neg_mul_eq_mul_neg, sub_eq_add_neg, neg_neg]
     exact discr_1
   let a := double_root 1 a3q (-a6q2) p
@@ -191,7 +191,7 @@ def kodaira_type_Is (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 r0 s0 
       rw [←rw_a2', val_sub_val_eq evrp e1.a2 1 h2']
       simp
     apply And.intro v_a2p _
-    apply Enat.pos_of_ne_zero
+    apply ENat.pos_of_ne_zero
     assumption
   let a' := double_root a2p a4pq a6pq2 p
   have rw_a' : double_root a2p a4pq a6pq2 p = a' := rfl
@@ -220,7 +220,7 @@ def kodaira_type_Is (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 r0 s0 
     apply le_trans (le_min _ _) (surjvalp.v_add_ge_min_v _ _)
     . rw [Nat.add_succ q, Nat.succ_eq_add_one, surjvalp.v_mul_eq_add_v, val_of_pow_uniformizer]
       rw [Nat.cast_add, Nat.cast_one, add_assoc]
-      rw [show (2 : ℕ∪∞) = 1 + 1 by norm_num, ← add_assoc, ← add_assoc]
+      rw [show (2 : ℕ∞) = 1 + 1 by norm_num, ← add_assoc, ← add_assoc]
       apply add_le_add (le_of_eq rfl)
       exact (succ_le_of_lt (val_poly_of_double_root hp a2p a4pq a6pq2 hdr').2)
     . rw [pow_two, factorize3 a' p q, ←pow_add]
@@ -236,7 +236,7 @@ def kodaira_type_Is (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 r0 s0 
         ←add_self_eq_mul_two 1, ←add_assoc, surjvalp.v_mul_eq_add_v, val_of_pow_uniformizer]
       push_cast
       apply add_le_add (le_of_eq rfl)
-      rw [show 1 = Enat.succ 0 by rfl]
+      rw [show 1 = ENat.succ 0 by rfl]
       apply succ_le_of_lt
       have := (val_poly_of_double_root hp a2p a4pq a6pq2 hdr').1
       push_cast at this
@@ -360,8 +360,8 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
     rw [mul_one, ←neg_mul_eq_mul_neg, sub_eq_add_neg, neg_neg, pow_succ, pow_one]
     simp only [Model.b6] at hb6
     rw [factor_p_of_le_val evrp h3, factor_p_of_le_val evrp h6, factorize5, navp.v_mul_eq_add_v,
-      val_of_pow_uniformizer, show (3 : ℕ∪∞) = 2 + 1 by rfl] at hb6
-    exact Enat.le_of_add_le_add_left hb6
+      val_of_pow_uniformizer, show (3 : ℕ∞) = 2 + 1 by rfl] at hb6
+    exact ENat.le_of_add_le_add_left hb6
 
   let s1 := double_root 1 e1.a1 (-e1.a2) p
   let t1 := double_root 1 a3p (-a6p2) p
@@ -383,7 +383,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
   have h3' : navp e2.a3 ≥ 2 := by
     rw [st_of_a3, ←mul_assoc, mul_comm 2, add_comm e1.a3, ←mul_one 2,
       factor_p_of_le_val evrp h3, pow_one, mul_assoc, ←mul_add, navp.v_mul_eq_add_v,
-      show (2 : Enat) = 1 + 1 by norm_num]
+      show (2 : ENat) = 1 + 1 by norm_num]
     apply add_le_add (le_of_eq navp.v_uniformizer.symm)
     exact succ_le_of_lt (val_poly_of_double_root hp 1 a3p (-a6p2) hdr_b6).2
 
@@ -395,7 +395,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
     rw [←val_neg, st_of_a6, sub_eq_add_neg, sub_eq_add_neg, neg_add, neg_add, neg_neg, neg_neg,
       add_comm _ (_ ^ 2), add_comm (-e1.a6), ←add_assoc, mul_pow,
       factor_p_of_le_val evrp h3, factor_p_of_le_val evrp h6, neg_mul_eq_mul_neg (_ : ℤ) (sub_val evrp 2 e1.toModel.a6), factorize6,
-      navp.v_mul_eq_add_v, show (3 : ℕ∪∞) = 2 + 1 by rfl]
+      navp.v_mul_eq_add_v, show (3 : ℕ∞) = 2 + 1 by rfl]
     apply add_le_add (le_of_eq (val_of_pow_uniformizer navp).symm)
     exact succ_le_of_lt (val_poly_of_double_root hp 1 a3p (-a6p2) hdr_b6).1
 
@@ -432,7 +432,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
   -- dbg_trace (model_to_cubic evrp e2)
   if test_δcubic : navp (δmultiplicity (model_to_cubic evrp e2)) = 0 then
     have e2_cubic_has_double_root : cubic_has_double_root evrp e2 :=
-      And.intro (Enat.pos_of_ne_zero test_Δcubic) test_δcubic
+      And.intro (ENat.pos_of_ne_zero test_Δcubic) test_δcubic
 
     --let r1 := p * (modulo (if p = 2 then a4p2 else a2p * a4p2) p)
     let e3 := move_cubic_double_root_to_origin_iso evrp e2
@@ -467,7 +467,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
         rw [r_of_a4, factor_p_of_le_val evrp h4, factor_p_of_le_val evrp h2, factorize7]
         apply val_mul_ge_of_left_ge navp _
         exact le_of_eq (val_of_pow_uniformizer navp).symm
-      rw [factor_p_of_le_val evrp h4'', navp.v_mul_eq_add_v, show (3 : ℕ∪∞) = 2 + 1 by rfl]
+      rw [factor_p_of_le_val evrp h4'', navp.v_mul_eq_add_v, show (3 : ℕ∞) = 2 + 1 by rfl]
       apply add_le_add
       . exact le_of_eq (val_of_pow_uniformizer navp).symm
       . exact succ_le_of_lt (move_cubic_double_root_to_origin evrp e2 e2_cubic_has_double_root).2.1
@@ -478,7 +478,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
         rw [r_of_a6, factor_p_of_le_val evrp h6, factor_p_of_le_val evrp h4, factor_p_of_le_val evrp h2, factorize8]
         apply val_mul_ge_of_left_ge navp _
         exact le_of_eq (val_of_pow_uniformizer navp).symm
-      rw [factor_p_of_le_val evrp h6', navp.v_mul_eq_add_v, show (4 : ℕ∪∞) = 3 + 1 by rfl]
+      rw [factor_p_of_le_val evrp h6', navp.v_mul_eq_add_v, show (4 : ℕ∞) = 3 + 1 by rfl]
       apply add_le_add
       . exact le_of_eq (val_of_pow_uniformizer navp).symm
       . exact succ_le_of_lt (move_cubic_double_root_to_origin evrp e2 e2_cubic_has_double_root).2.2
@@ -488,7 +488,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
   else
 
   have e2_cubic_has_triple_root : cubic_has_triple_root evrp e2 :=
-    And.intro (Enat.pos_of_ne_zero test_Δcubic) (Enat.pos_of_ne_zero test_δcubic)
+    And.intro (ENat.pos_of_ne_zero test_Δcubic) (ENat.pos_of_ne_zero test_δcubic)
 
   let e3 := move_cubic_triple_root_to_origin_iso evrp e2
   --let r1 := p * (modulo (if p = 2 then -a2p else -a6p3) p)
@@ -505,7 +505,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
       -- apply val_mul_ge_of_left_ge
       -- exact le_of_eq navp.v_uniformizer.symm
       sorry
-    rw [factor_p_of_le_val evrp h2'', navp.v_mul_eq_add_v, pow_one, show (2 : ℕ∪∞) = 1 + 1 by rfl]
+    rw [factor_p_of_le_val evrp h2'', navp.v_mul_eq_add_v, pow_one, show (2 : ℕ∞) = 1 + 1 by rfl]
     apply add_le_add
     . exact le_of_eq navp.v_uniformizer.symm
     . exact succ_le_of_lt (move_cubic_triple_root_to_origin evrp e2 e2_cubic_has_triple_root).1
@@ -527,7 +527,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
       --   factor_p_of_le_val evrp h2, factorize8]
       -- apply val_mul_ge_of_left_ge navp _
       -- exact le_of_eq (val_of_pow_uniformizer navp).symm
-    rw [factor_p_of_le_val evrp h6', navp.v_mul_eq_add_v, show (4 : ℕ∪∞) = 3 + 1 by rfl]
+    rw [factor_p_of_le_val evrp h6', navp.v_mul_eq_add_v, show (4 : ℕ∞) = 3 + 1 by rfl]
     apply add_le_add
     . exact le_of_eq (val_of_pow_uniformizer navp).symm
     . exact succ_le_of_lt (move_cubic_triple_root_to_origin evrp e2 e2_cubic_has_triple_root).2.2
@@ -543,7 +543,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
   have h_b6p4 : has_double_root 1 a3p2 (-a6p4) hp := by
     constructor
     exact val_of_one navp
-    apply Enat.pos_of_ne_zero
+    apply ENat.pos_of_ne_zero
     simpa (config := {zeta := false})
 
   let a := double_root 1 a3p2 (-a6p4) p
@@ -555,7 +555,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
   let t := t + k * u ^ 3
   have h3 : navp e4.a3 ≥ 3 := by
     rw [t_of_a3, ←mul_one 2, factor_p_of_le_val evrp h3, ←mul_assoc (2*1), mul_comm ((2*1) * _),
-      Nat.cast_pow, ←mul_add, add_comm, show (3 : ℕ∪∞) = 2 + 1 by rfl, navp.v_mul_eq_add_v]
+      Nat.cast_pow, ←mul_add, add_comm, show (3 : ℕ∞) = 2 + 1 by rfl, navp.v_mul_eq_add_v]
     apply add_le_add
     . exact le_of_eq (val_of_pow_uniformizer navp).symm
     . exact succ_le_of_lt (val_poly_of_double_root hp 1 a3p2 (-a6p4) h_b6p4).2
