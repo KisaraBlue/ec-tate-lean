@@ -3,12 +3,17 @@ import ECTate.Data.Nat.Enat
 import ECTate.Tactic.SimpSafe
 open Qq Lean Meta Tactic Mathlib.Tactic.Ring
 
-def is_atom (e : Expr) : Mathlib.Tactic.AtomM (Bool × Bool) :=
+
+-- TODO double check for upstream changes
+-- TODO make it less enat specific
+-- TODO would be better to make it work bottom up
+def is_enat_atom (e : Expr) : Mathlib.Tactic.AtomM (Bool × Bool) :=
   fun rctx ↦ do
     try
       let e ← withReducible <| whnf e
-      let ⟨.succ u, α, e⟩ ← inferTypeQ e | failure
-      let sα ← synthInstanceQ (q(CommSemiring $α) : Q(Type u))
+      let ⟨.zero, α, e⟩ ← inferTypeQ' e | failure
+      guard (α == q(ENat))
+      let sα ← synthInstanceQ (q(CommSemiring $α) : Q(Type 0)) -- TODO this will be enat every time.
       let c ← mkCache sα
       match ← isAtomOrDerivable sα c e rctx with
       | some none => pure (.true, .false)
@@ -21,6 +26,17 @@ def is_atom (e : Expr) : Mathlib.Tactic.AtomM (Bool × Bool) :=
 --     (evalAtom : Expr → MetaM Simp.Result := fun e ↦ pure { expr := e }) :
 --     MetaM (α × AtomM.State)  :=
 --   (m { red, evalAtom }).run {}
+-- example : (⊤ : ℕ∞) * 2 = a := by simp? -- TODO why does this not return top_add?? is decide taking precedence
+-- example : (⊤ : ℕ∞) + 1 = ⊤ := by simp? -- TODO why does this not return top_add?? is decide taking precedence
+-- example : (⊤ : ℕ∞) + 1 = a := by simp
+-- example : (⊤ : ℕ∞) + (0: ℕ) = a := by simp [-CharP.cast_eq_zero, add_zero]
+-- example : (1 : ZMod 3) + (0: ℕ) = a := by simp only [Nat.cast_zero, add_zero]
+-- example : (a : ℕ∞) ≤ ⊤ := by
+--   simp?
+-- example : (a : ℕ∞) + (0: ℕ) = a := by
+--   cases a
+
+--
 
 open Lean Meta Elab Tactic Term PrettyPrinter in
 elab "elinarith" : tactic => do
@@ -35,7 +51,7 @@ elab "elinarith" : tactic => do
     StateT.run (σ := Array Expr) do
         mvarId.forEach' fun e' =>
           do
-            let b ← is_atom e'
+            let b ← is_enat_atom e'
             if b.1 then
               set ((← get).push e')
             pure ¬ (b.1 ∨ b.2)
@@ -44,18 +60,20 @@ elab "elinarith" : tactic => do
   let mut goals := [← getMainGoal]
   for e in a do
     let tac ←
-      `(tactic| cases h : ($(←delab e):term : ENat) <;>
+      `(tactic| cases h : ($(← Expr.toSyntax e):term : ENat) <;>
                 -- trace_state <;>
-                simp_safe only [h, ENat.ofN_eq_ofNat, ENat.top_add, ENat.add_top,
+                -- how to check these lemmas exist at compile time?
+                simp_safe only [h, --ENat.ofN_eq_ofNat,
+                  top_add, add_top,
                   ENat.infty_mul, ENat.mul_infty, ite_true, ite_false,
                   Nat.cast_add, Nat.cast_one, Nat.cast_mul, Nat.cast_ofNat,
                   Nat.cast_zero, Nat.zero_eq, Nat.mul_zero, Nat.zero_le,
-                  ENat.le_top, ENat.lt_top
+                  le_top, ENat.lt_top
                 ] at * <;>
                 -- trace_state <;>
                 norm_cast at * <;>
                 -- trace_state <;>
-                try linarith) -- TODO move after
+                try linarith) -- TODO move after everything
     -- logInfo e
     let mut newgs := []
     for g in goals do

@@ -3,10 +3,11 @@ import Mathlib.Algebra.Ring.Pi
 
 
 
-lemma v_b6_of_v_a3_a {q : ℕ} (h : (q : ENat) ≥ 2): q ≥ (1 : ENat) := by
+lemma v_b6_of_v_a3_a {q : ℕ} (h : (q : ENat) ≥ 2) : q ≥ (1 : ENat) := by
   elinarith
 
-
+-- set_option trace.profiler true
+-- set_option profiler true
 def tt : ENat -> ENat := sorry
 example (x : ENat) (h : 1 ≤ tt x) : 2 ≤ 1 + tt x :=
 by
@@ -30,7 +31,6 @@ by
   simp at *
   norm_cast at *
   linarith
-  simp
 
 
 example (y  x : ENat) (h : 0 < y) (g : y ≤ 3) : y < 2 * y :=
@@ -44,6 +44,11 @@ example (y : Nat) (h : 0 < (y : ENat)) (g : (y : ENat) ≤ 3) : (y : ENat) < 2 *
 by
   elinarith
 
+
+-- TODO should also be able to prove this
+example (x y z : ENat) (g : x < y) (h : y < z) : x < z :=
+by
+  elinarith
 
 
 #check NonAssocRing.toNatCast

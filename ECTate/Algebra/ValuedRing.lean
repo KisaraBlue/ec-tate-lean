@@ -17,25 +17,33 @@ import Mathlib.Data.Int.GCD
 import Mathlib.Algebra.EuclideanDomain.Instances
 import Mathlib
 
-instance : CanonicallyOrderedCommSemiring ℕ∞ where
-  zero_mul := sorry
-  left_distrib := sorry
-  right_distrib := sorry
-  mul_zero := sorry
-  mul_assoc := sorry
-  one_mul := sorry
-  mul_one := sorry
-  -- natCast := sorry
-  -- natCast_zero := sorry
-  -- natCast_succ := sorry
-  mul_comm := sorry
-  eq_zero_or_eq_zero_of_mul_eq_zero := sorry
 --class ValueMonoid (A : Type u) extends AddCommMonoid A, LinearOrder A
 
 -- TODO is this lemma true? useful?
--- @[simp]
--- lemma mod_mod [EuclideanDomain K] : (a : K) % b % b = a % b := by
---   sorry
+@[simp]
+lemma mod_mod [EuclideanDomain K] : (a : K) % b % b = a % b := by
+  -- by_cases hb: b = 0
+  sorry
+  -- · simp [hb]
+  -- rw [EuclideanDomain.mod_eq_sub_mul_div]
+  -- simp [hb]
+  -- have := EuclideanDomain.remainder_lt a hb
+  -- have  kk : b ∣ a- a % b -- TODO variants on this should be a lemma?
+  -- · rw [@EuclideanDomain.mod_eq_sub_mul_div]
+  --   simp
+  -- have := EuclideanDomain.mul_left_not_lt ((a - a % b) / b) hb
+  -- rw [mul_comm] at this
+  -- rw [EuclideanDomain.mul_div_cancel' hb kk] at this
+  -- rw [EuclideanDomain.mod_eq_sub_mul_div] at this
+  -- simp [hb] at this
+  -- rw [mul_comm, EuclideanDomain.mul_div_cancel _ hb] at this
+  -- simp at this
+  -- rw [EuclideanDomain.mod_eq_sub_mul_div]
+  -- simp
+  -- right
+  -- refine Eq.symm (EuclideanDomain.eq_div_of_mul_eq_left hb ?_)
+  -- simp
+  -- sorry
 
 open ENat
 
@@ -268,17 +276,17 @@ lemma sub_val_zero_n {p : R} (evr : ENatValRing p) (n : ℕ) : sub_val evr n 0 =
 lemma sub_val_x_zero {p : R} (evr : ENatValRing p) (x : R) : sub_val evr 0 x = x := by simp [sub_val_eq]
 
 lemma sub_val_val_zero {p : R} (evr : ENatValRing p) (x : R) (m : ℕ) (h : evr.valtn x = 0) :
-  sub_val evr m x = x := by
+    sub_val evr m x = x := by
   induction m with
   | zero => exact sub_val_x_zero evr x
   | succ m ih => simpa [sub_val_eq, zero_valtn_decr _ h] using ih
 
 lemma sub_val_val_pos_succ {p : R} (evr : ENatValRing p) (x : R) (m : ℕ) :
-  sub_val evr (Nat.succ m) x = sub_val evr m (evr.decr_val x) := by
+    sub_val evr (Nat.succ m) x = sub_val evr m (evr.decr_val x) := by
   simp [sub_val_eq]
 
 lemma val_decr_val {p : R} (evr : ENatValRing p) {m : Nat} (x : R) (h : evr.valtn x = m) :
-  evr.valtn (evr.decr_val x) = m - 1 := by
+    evr.valtn (evr.decr_val x) = m - 1 := by
   cases m with
   | zero => rwa [evr.zero_valtn_decr h]
   | succ m =>
@@ -294,13 +302,13 @@ lemma val_decr_val {p : R} (evr : ENatValRing p) {m : Nat} (x : R) (h : evr.valt
     --   ←evr.pos_valtn_decr x_pos_val, h, evr.valtn.v_uniformizer]
 
 lemma sub_val_decr_val_comm {p : R} (evr : ENatValRing p) (x : R) (n : ℕ) :
-  sub_val evr n (evr.decr_val x) = evr.decr_val (sub_val evr n x) := by
+    sub_val evr n (evr.decr_val x) = evr.decr_val (sub_val evr n x) := by
   simp [sub_val_eq]
   rw [← Function.iterate_succ_apply' evr.decr_val]
   rw [← Function.iterate_succ_apply evr.decr_val]
 
 lemma val_sub_val_eq {p : R} (evr : ENatValRing p) (x : R) {m : ℕ} (n : ℕ) (h : evr.valtn x = m) :
-  evr.valtn (sub_val evr n x) = m - n := by
+    evr.valtn (sub_val evr n x) = m - n := by
   induction n with
   | zero =>
     simpa [sub_val_x_zero]
@@ -317,7 +325,7 @@ lemma val_sub_val_eq {p : R} (evr : ENatValRing p) (x : R) {m : ℕ} (n : ℕ) (
       norm_cast
 
 lemma val_sub_val_le {p : R} (evr : ENatValRing p) (x : R) {m : ℕ} (n : ℕ) (h : m ≤ evr.valtn x) :
-  evr.valtn (sub_val evr n x) ≥ m - n := by
+    evr.valtn (sub_val evr n x) ≥ m - n := by
   -- have := val_sub_val_eq evr x _ (tsub_add_cancel_of_le h).symm
   sorry
   -- revert h
@@ -932,6 +940,18 @@ def count_roots_cubic_aux (a b c d : ℤ) (p : ℕ) (x : ℕ) : ℕ := match x w
 def count_roots_cubic (a b c d : ℤ) (p : ℕ) : ℕ :=
   count_roots_cubic_aux (modulo a p) (modulo b p) (modulo c p) (modulo d p) p (p - 1)
 
+/-- **Fermat's Little Theorem**: for all `a : ℤ`, we have
+`a ^ p ≡ a [ZMOD p]`. -/
+theorem Int.ModEq.pow_card_eq_self {p : ℕ} (hp : Nat.Prime p) (n : ℤ) :
+    n ^ p ≡ n [ZMOD p] := by
+  haveI : Fact p.Prime := ⟨hp⟩
+  by_cases this : (n : ZMod p) = 0
+  · simp [← ZMod.int_cast_eq_int_cast_iff, this]
+  conv_lhs =>
+    rw [← show p - 1 + 1 = p from Nat.sub_add_cancel hp.one_lt.le]
+  rw [pow_add, pow_one]
+  simp [← ZMod.int_cast_eq_int_cast_iff, ZMod.pow_card_sub_one_eq_one this]
+
 -- TODO use https://github.com/leanprover-community/mathlib4/pull/5158
 
 def primeEVR {p : ℕ} (hp : Nat.Prime p) : ENatValRing (p : ℤ) := {
@@ -955,9 +975,16 @@ def primeEVR {p : ℕ} (hp : Nat.Prime p) : ENatValRing (p : ℤ) := {
   inv_mod := (inv_mod . p)
   inv_mod_spec := by
     intro r h
-    simp [inv_mod, pos_iff_ne_zero, Int.sub_emod]
-    simp
-    sorry
+    simp only [inv_mod, gt_iff_lt, pos_iff_ne_zero, ne_eq, primeVal_eq_zero_iff, not_not]
+    have : gcd r p = 1
+    · rw [gcd_eq_one_iff_coprime, isCoprime_comm, coprime_iff_nat_coprime, natAbs_ofNat,
+        Nat.Prime.coprime_iff_not_dvd hp, ← coe_nat_dvd, coe_natAbs, dvd_abs]
+      rwa [primeVal_eq_zero_iff] at h
+    rw [← dvd_neg, neg_sub]
+    have kk := gcd_eq_gcd_ab r p
+    simp only [this, Nat.cast_one, ← sub_eq_iff_eq_add'] at kk
+    convert dvd_mul_right _ (gcdB r p)
+
   inv_mod_spec' := sorry
   inv_mod_spec'' := sorry
 
@@ -965,9 +992,11 @@ def primeEVR {p : ℕ} (hp : Nat.Prime p) : ENatValRing (p : ℤ) := {
   pth_root_spec := by
     right
     intro r
-    simp [inv_mod, pos_iff_ne_zero, ← Int.sub_emod]
-    -- rw [←Int.sub_emod]
-    sorry -- needs fermat's little theorem
+    simp only [id_eq, gt_iff_lt, pos_iff_ne_zero, ne_eq, primeVal_eq_zero_iff, not_not]
+    rw [dvd_iff_emod_eq_zero]
+    suffices : r ^ (p ) ≡ r [ZMOD p]
+    · rwa [← emod_eq_emod_iff_emod_sub_eq_zero]
+    exact Int.ModEq.pow_card_eq_self hp r
 
   count_roots_cubic :=
     -- TODO fix this, should we way quicker to count roots, probably in cohen
