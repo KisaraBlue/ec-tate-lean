@@ -38,6 +38,8 @@ def is_enat_atom (e : Expr) : Mathlib.Tactic.AtomM (Bool × Bool) :=
 
 --
 
+
+#check Nat.cast_add
 open Lean Meta Elab Tactic Term PrettyPrinter in
 elab "elinarith" : tactic => do
   let mvarId ← getMainTarget
@@ -59,16 +61,17 @@ elab "elinarith" : tactic => do
   -- logInfo (← getMainGoal)
   let mut goals := [← getMainGoal]
   for e in a do
+    let id := mkIdent <| Name.str .anonymous (toString <| ← delab e)
     let tac ←
-      `(tactic| cases h : ($(← Expr.toSyntax e):term : ENat) <;>
+      `(tactic| cases $id : ($(← Expr.toSyntax e):term : ENat) <;>
                 -- trace_state <;>
                 -- how to check these lemmas exist at compile time?
-                simp_safe only [h, --ENat.ofN_eq_ofNat,
+                simp_safe (config := {failIfUnchanged := false, zeta := false}) only [$id:ident, --ENat.ofN_eq_ofNat,
                   top_add, add_top,
                   ENat.infty_mul, ENat.mul_infty, ite_true, ite_false,
                   Nat.cast_add, Nat.cast_one, Nat.cast_mul, Nat.cast_ofNat,
                   Nat.cast_zero, Nat.zero_eq, Nat.mul_zero, Nat.zero_le,
-                  le_top, ENat.lt_top
+                  le_top, top_le_iff, ENat.lt_top
                 ] at * <;>
                 -- trace_state <;>
                 norm_cast at * <;>

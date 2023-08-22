@@ -54,7 +54,7 @@ def tate_big_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) :
   let ⟨vpj, k, integralInv⟩ :=
     match 3 * (primeEVR hp).valtn c4 with
     | ⊤ => (0, n, true)
-    | ofN v_c4_3 => if v_c4_3 < n then ((v_c4_3 : ℤ) - (n : ℤ), v_c4_3, false) else (v_c4_3 - n, n, true)
+    | some v_c4_3 => if v_c4_3 < n then ((v_c4_3 : ℤ) - (n : ℤ), v_c4_3, false) else (v_c4_3 - n, n, true)
   let ⟨u, r, s, t⟩ :=
     if k < 12 then (1, 0, 0, 0) else
     let u' := p ^ (k / 12)
@@ -113,6 +113,7 @@ def tate_big_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) :
 
 open SurjVal
 
+-- TODO move
 macro "simp_wf'" : tactic =>
   `(tactic| simp (config := { zeta := false }) only [invImage, InvImage, Prod.lex, sizeOfWFRel,
           measure, Nat.lt_wfRel, WellFoundedRelation.rel, sizeOf_nat, Nat.lt_eq] )
@@ -135,8 +136,7 @@ def kodaira_type_Is (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 r0 s0 
   else
   have hdr : has_double_root 1 a3q (-a6q2) hp := by
     apply And.intro (val_of_one surjvalp) _
-    apply ENat.pos_of_ne_zero
-    rw [mul_one, ←neg_mul_eq_mul_neg, sub_eq_add_neg, neg_neg]
+    rw [mul_one, ←neg_mul_eq_mul_neg, sub_eq_add_neg, neg_neg, pos_iff_ne_zero]
     exact discr_1
   let a := double_root 1 a3q (-a6q2) p
 
@@ -149,29 +149,34 @@ def kodaira_type_Is (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 r0 s0 
       Nat.cast_pow, ←mul_add, surjvalp.v_mul_eq_add_v, val_of_pow_uniformizer]
     apply add_le_add (le_of_eq rfl)
     rw [add_comm, ←mul_one 2]
-    exact succ_le_of_lt (val_poly_of_double_root hp 1 a3q (-a6q2) hdr).2
+    rw [one_le_iff_pos]
+    exact (val_poly_of_double_root hp 1 a3q (-a6q2) hdr).2
   have h4' : surjvalp e1.a4 ≥ q + 1 := by
     rw [t_of_a4]
     apply le_trans _ (surjvalp.v_add_ge_min_v _ _)
     apply le_min h4
-    rw [mul_assoc, val_neg, surjvalp.v_mul_eq_add_v, add_comm, surjvalp.v_mul_eq_add_v,
-      Nat.cast_pow, val_of_pow_uniformizer]
-    conv =>
-      rhs
-      rw [add_comm, add_assoc]
-    rw [add_comm]
-    apply add_le_add (le_of_eq rfl)
-    exact le_trans h1 (le_add_right (surjvalp e.a1) _)
+    simp (config := {zeta := false})
+    -- rw [mul_assoc, val_neg, surjvalp.v_mul_eq_add_v, add_comm, surjvalp.v_mul_eq_add_v,
+    --   Nat.cast_pow, val_of_pow_uniformizer]
+    elinarith
+    -- conv =>
+    --   rhs
+    --   rw [add_comm, add_assoc]
+    -- rw [add_comm]
+    -- apply add_le_add (le_of_eq rfl) -- TOOD simplify
+    -- exact le_trans h1 le_self_add
   have h6' : (primeEVR hp).valtn e1.a6 ≥ 2 * q + 1 := by
-    rw [t_of_a6, factor_p_of_le_val evrp h6, factor_p_of_le_val evrp h3, rw_a6, ←val_neg,
-      sub_eq_add_neg, sub_eq_add_neg, neg_add, neg_add, neg_neg, neg_neg,
-      Nat.cast_pow, pow_two]
-    erw [ add_assoc (-((↑p : ℤ) ^ (2 * q) * a6q2) : ℤ)]
-    rw [neg_mul_eq_mul_neg _ a6q2, factorize1 a a3q ↑p q, ←pow_add, add_self_eq_mul_two,
-      ←mul_add, surjvalp.v_mul_eq_add_v, val_of_pow_uniformizer, add_mul, ←pow_two a,
-      ←one_mul (a ^ 2), add_comm (-a6q2)]
-    push_cast
-    exact add_le_add (le_of_eq rfl) (succ_le_of_lt (val_poly_of_double_root hp 1 a3q (-a6q2) hdr).1)
+    rw [t_of_a6]
+    sorry
+    -- rw [factor_p_of_le_val evrp h6, factor_p_of_le_val evrp h3, rw_a6, ←val_neg,
+    --   sub_eq_add_neg, sub_eq_add_neg, neg_add, neg_add, neg_neg, neg_neg,
+    --   Nat.cast_pow, pow_two]
+    -- erw [ add_assoc (-((↑p : ℤ) ^ (2 * q) * a6q2) : ℤ)]
+    -- rw [neg_mul_eq_mul_neg _ a6q2, factorize1 a a3q ↑p q, ←pow_add, add_self_eq_mul_two,
+    --   ←mul_add, surjvalp.v_mul_eq_add_v, val_of_pow_uniformizer, add_mul, ←pow_two a,
+    --   ←one_mul (a ^ 2), add_comm (-a6q2)]
+    -- push_cast
+    -- exact add_le_add (le_of_eq rfl) (succ_le_of_lt (val_poly_of_double_root hp 1 a3q (-a6q2) hdr).1)
   let t := t + u0 ^ 3 * a * (p ^ q : ℕ)
   let a2p := sub_val evrp 1 e1.a2
   let a4pq := sub_val evrp (q + 1) e1.a4
@@ -188,11 +193,10 @@ def kodaira_type_Is (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 r0 s0 
   else
   have hdr' : has_double_root a2p a4pq a6pq2 hp := by
     have v_a2p : surjvalp a2p = 0 := by
-      rw [←rw_a2', val_sub_val_eq evrp e1.a2 1 h2']
+      rw [← rw_a2', val_sub_val_eq evrp e1.a2 1 h2']
       simp
     apply And.intro v_a2p _
-    apply ENat.pos_of_ne_zero
-    assumption
+    rwa [pos_iff_ne_zero]
   let a' := double_root a2p a4pq a6pq2 p
   have rw_a' : double_root a2p a4pq a6pq2 p = a' := rfl
   --if p = 2 then modulo a6pq2 2 else modulo (2 * a2p * -a4pq) 3
@@ -202,12 +206,14 @@ def kodaira_type_Is (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 r0 s0 
   have h2'' : surjvalp e2.a2 = 1 := by
     rwa [r_of_a2, v_add_eq_min_v surjvalp]
     rw [h2']
-    apply lt_of_succ_le
+    have : ¬IsMax (1 : ℕ∞)
+    · norm_num
+    rw [← Order.succ_le_iff_of_not_isMax this] -- TODO this is asking for better abstraction
     apply val_mul_ge_of_right_ge surjvalp
     apply val_mul_ge_of_right_ge surjvalp
     rw [Nat.cast_pow, val_of_pow_uniformizer surjvalp]
-    rw [← lt_ofN 1 q] at hq
-    exact succ_le_of_lt hq
+    rw [Order.succ_le_iff_of_not_isMax this]
+    exact_mod_cast hq
   have h3'' : surjvalp e2.a3 ≥ q + 1 := by
     rw [r_of_a3]
     apply le_trans _ (surjvalp.v_add_ge_min_v _ _)
@@ -215,36 +221,39 @@ def kodaira_type_Is (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 r0 s0 
     rw [mul_comm a', mul_assoc, surjvalp.v_mul_eq_add_v, Nat.cast_pow, val_of_pow_uniformizer]
     exact add_le_add (le_of_eq rfl) (val_mul_ge_of_right_ge surjvalp h1')
   have h4'' : surjvalp e2.a4 ≥ q + 2 := by
-    rw [r_of_a4, factor_p_of_le_val evrp h4', rw_a4', factor_p_of_le_val evrp (le_of_eq h2'.symm),
-      rw_a2', Nat.cast_pow, factorize2 a' a2p (↑p) q, ←pow_add, ←mul_add, add_comm a4pq]
-    apply le_trans (le_min _ _) (surjvalp.v_add_ge_min_v _ _)
-    . rw [Nat.add_succ q, Nat.succ_eq_add_one, surjvalp.v_mul_eq_add_v, val_of_pow_uniformizer]
-      rw [Nat.cast_add, Nat.cast_one, add_assoc]
-      rw [show (2 : ℕ∞) = 1 + 1 by norm_num, ← add_assoc, ← add_assoc]
-      apply add_le_add (le_of_eq rfl)
-      exact (succ_le_of_lt (val_poly_of_double_root hp a2p a4pq a6pq2 hdr').2)
-    . rw [pow_two, factorize3 a' p q, ←pow_add]
-      apply val_mul_ge_of_left_ge surjvalp _
-      rw [val_of_pow_uniformizer]
-      exact (le_ofN _ _).2 (Nat.add_le_add (le_of_eq rfl) (Nat.succ_le_of_lt hq))
+    sorry
+    -- rw [r_of_a4, factor_p_of_le_val evrp h4', rw_a4', factor_p_of_le_val evrp (le_of_eq h2'.symm),
+    --   rw_a2', Nat.cast_pow, factorize2 a' a2p (↑p) q, ←pow_add, ←mul_add, add_comm a4pq]
+    -- apply le_trans (le_min _ _) (surjvalp.v_add_ge_min_v _ _)
+    -- . rw [Nat.add_succ q, Nat.succ_eq_add_one, surjvalp.v_mul_eq_add_v, val_of_pow_uniformizer]
+    --   rw [Nat.cast_add, Nat.cast_one, add_assoc]
+    --   rw [show (2 : ℕ∞) = 1 + 1 by norm_num, ← add_assoc, ← add_assoc]
+    --   apply add_le_add (le_of_eq rfl)
+    --   exact (succ_le_of_lt (val_poly_of_double_root hp a2p a4pq a6pq2 hdr').2)
+    -- . rw [pow_two, factorize3 a' p q, ←pow_add]
+    --   apply val_mul_ge_of_left_ge surjvalp _
+    --   rw [val_of_pow_uniformizer]
+    --   exact (le_ofN _ _).2 (Nat.add_le_add (le_of_eq rfl) (Nat.succ_le_of_lt hq))
   have h6'' : surjvalp e2.a6 ≥ 2 * (q + 1) := by
     rw [r_of_a6, Nat.cast_pow]
     apply le_trans (le_min _ _) (surjvalp.v_add_ge_min_v _ _)
-    . rw [factor_p_of_le_val evrp h6', rw_a6', factor_p_of_le_val evrp h4', rw_a4',
-        factor_p_of_eq_val evrp h2', rw_a2', factorize4 a' a2p a4pq a6pq2 p q, ←pow_add, ←pow_add,
-        ←pow_add, ←Nat.add_assoc, add_self_eq_mul_two q, ←mul_add, ←mul_add, mul_add,
-        ←add_self_eq_mul_two 1, ←add_assoc, surjvalp.v_mul_eq_add_v, val_of_pow_uniformizer]
-      push_cast
-      apply add_le_add (le_of_eq rfl)
-      rw [show 1 = ENat.succ 0 by rfl]
-      apply succ_le_of_lt
-      have := (val_poly_of_double_root hp a2p a4pq a6pq2 hdr').1
-      push_cast at this
-      exact this
-    . rw [mul_pow a' _ 3, ←pow_mul, mul_add, mul_one, Nat.mul_succ] -- TODO why did this break
-      apply val_mul_ge_of_right_ge surjvalp
-      rw [val_of_pow_uniformizer, mul_comm q]
-      exact (le_ofN _ _).2 (Nat.add_le_add (le_of_eq rfl) (Nat.succ_le_of_lt hq))
+    sorry
+    sorry
+    -- . rw [factor_p_of_le_val evrp h6', rw_a6', factor_p_of_le_val evrp h4', rw_a4',
+    --     factor_p_of_eq_val evrp h2', rw_a2', factorize4 a' a2p a4pq a6pq2 p q, ←pow_add, ←pow_add,
+    --     ←pow_add, ←Nat.add_assoc, add_self_eq_mul_two q, ←mul_add, ←mul_add, mul_add,
+    --     ←add_self_eq_mul_two 1, ←add_assoc, surjvalp.v_mul_eq_add_v, val_of_pow_uniformizer]
+    --   push_cast
+    --   apply add_le_add (le_of_eq rfl)
+    --   rw [show 1 = ENat.succ 0 by rfl]
+    --   apply succ_le_of_lt
+    --   have := (val_poly_of_double_root hp a2p a4pq a6pq2 hdr').1
+    --   push_cast at this
+    --   exact this
+    -- . rw [mul_pow a' _ 3, ←pow_mul, mul_add, mul_one, Nat.mul_succ] -- TODO why did this break
+    --   apply val_mul_ge_of_right_ge surjvalp
+    --   rw [val_of_pow_uniformizer, mul_comm q]
+    --   exact (le_ofN _ _).2 (Nat.add_le_add (le_of_eq rfl) (Nat.succ_le_of_lt hq))
   let r := r + u0 ^ 2 + a' * (p ^ q : ℕ) -- TODO check these
   let t := t + u0 ^ 2 * s0 * a' * (p ^ q : ℕ)
   kodaira_type_Is p hp e2 u0 r s0 t (m + 2) (q + 1) (Nat.lt_succ_of_lt hq) h1'' h2'' h3'' h4'' h6''
@@ -255,8 +264,11 @@ decreasing_by
   simp only [Nat.cast_pow, rst_iso_a2, zero_mul, sub_zero, mul_zero, add_zero, rst_iso_a4,
     rst_iso_a6, iso_rst_val_discr_to_nat, ge_iff_le, Nat.lt_eq]
   apply Nat.sub_lt_sub_left _ _
-  . rw [← lt_ofN, ofN_val_discr_to_nat]
-    exact lt_of_succ_le (v_discr_of_v_ai surjvalp e hq h1 h2 h3 h4 h6)
+  . rw [← Nat.succ_le_iff]
+    suffices : 2 * q + 3 ≤ (primeEVR hp).valtn e.discr
+    · rw [← ofN_val_discr_to_nat] at this
+      exact_mod_cast this
+    exact v_discr_of_v_ai surjvalp e hq h1 h2 h3 h4 h6
   . exact Nat.add_lt_add_right (Nat.mul_lt_mul_of_pos_left q.lt_succ_self (Nat.zero_lt_succ 1)) 2
 
 
@@ -280,7 +292,7 @@ def tate_small_prime (p : ℕ) (hp : Nat.Prime p) (e : ValidModel ℤ) (u0 : ℤ
   let n := val_discr_to_nat navp e
   if testΔ : n = 0 then (I 0, 0, 1, .Good, (u, r, s, t)) else -- TODO check
   have hΔ : navp e.discr ≥ 1 := by
-    rw [show ¬n = 0 ↔ 0 < n by simp [Nat.pos_iff_ne_zero], ← lt_ofN, ofN_val_discr_to_nat] at testΔ
+    rw [show ¬n = 0 ↔ 0 < n by simp [Nat.pos_iff_ne_zero], ofN_val_discr_to_nat] at testΔ
     exact succ_le_of_lt testΔ
 
   if test_b2 : navp e.b2 < 1 then

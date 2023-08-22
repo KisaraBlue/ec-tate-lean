@@ -34,9 +34,7 @@ lemma div2_succ_le_self (x : ℕ) : Nat.succ x / 2 ≤ x := by
   cases x with
   | zero => simp
   | succ x =>
-    have ssxd2_le_s_sxd2 := div_succ_le_succ_div (Nat.succ x) 1
-    have s_sxd2_le_sx := succ_le_of_lt (div2_lt_self (succ_pos x))
-    exact le_trans ssxd2_le_s_sxd2 s_sxd2_le_sx
+    exact (div_succ_le_succ_div (Nat.succ x) 1).trans (succ_le_of_lt (div2_lt_self (succ_pos x)))
 
 
 def val_bin_nat (x : ℕ) : ℕ × ℕ :=

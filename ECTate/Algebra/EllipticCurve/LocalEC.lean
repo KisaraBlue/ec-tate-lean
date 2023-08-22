@@ -96,25 +96,25 @@ def pi_scaling (evr : ENatValRing p) (e : Model R) : Model R :=
 open SurjVal
 
 lemma pi_scaling_of_b2 (evr : ENatValRing p) (e : Model R) (h1 : evr.valtn e.a1 ≥ 1)
-  (h2 : evr.valtn e.a2 ≥ 2) :
+    (h2 : evr.valtn e.a2 ≥ 2) :
   evr.sub_val 2 e.b2 = evr.sub_val 1 e.a1 * evr.sub_val 1 e.a1 + 4 * evr.sub_val 2 e.a2 := by
-  rw [←evr.sub_val_mul_right h1, ←evr.sub_val_mul_left h1, evr.sub_val_sub_val,
+  erw [←evr.sub_val_mul_right h1, ←evr.sub_val_mul_left h1, evr.sub_val_sub_val,
     ←evr.sub_val_mul_right h2, ←evr.sub_val_add _ _]
   . rfl
   . exact val_mul_ge_of_both_ge evr.valtn h1 h1
   . exact val_mul_ge_of_right_ge evr.valtn h2
 
 lemma pi_scaling_of_b4 (evr : ENatValRing p) (e : Model R) (h1 : evr.valtn e.a1 ≥ 1)
-  (h3 : evr.valtn e.a3 ≥ 3) (h4 : evr.valtn e.a4 ≥ 4) :
+    (h3 : evr.valtn e.a3 ≥ 3) (h4 : evr.valtn e.a4 ≥ 4) :
   evr.sub_val 4 e.b4 = evr.sub_val 1 e.a1 * evr.sub_val 3 e.a3 + 2 * evr.sub_val 4 e.a4 := by
-  rw [←evr.sub_val_mul_right h3, ←evr.sub_val_mul_left h1, evr.sub_val_sub_val,
+  erw [←evr.sub_val_mul_right h3, ←evr.sub_val_mul_left h1, evr.sub_val_sub_val,
     ←evr.sub_val_mul_right h4, ←evr.sub_val_add _ _]
   . rfl
   . exact val_mul_ge_of_both_ge evr.valtn h1 h3
   . exact val_mul_ge_of_right_ge evr.valtn h4
 
 lemma pi_scaling_of_b6 (evr : ENatValRing p) (e : Model R) (h3 : evr.valtn e.a3 ≥ 3)
-  (h6 : evr.valtn e.a6 ≥ 6) :
+    (h6 : evr.valtn e.a6 ≥ 6) :
   evr.sub_val 6 e.b6 = evr.sub_val 3 e.a3 * evr.sub_val 3 e.a3 + 4 * evr.sub_val 6 e.a6 := by
   rw [←evr.sub_val_mul_right h3, ←evr.sub_val_mul_left h3, evr.sub_val_sub_val,
     ←evr.sub_val_mul_right h6, ←evr.sub_val_add _ _]
@@ -131,13 +131,13 @@ lemma pi_scaling_of_b8 (evr : ENatValRing p) (e : Model R) (h1 : evr.valtn e.a1 
     + evr.sub_val 2 e.a2 * evr.sub_val 3 e.a3 * evr.sub_val 3 e.a3
     - evr.sub_val 4 e.a4 * evr.sub_val 4 e.a4 :=
 by
-  rw [←evr.sub_val_mul_right h1, ←evr.sub_val_mul_left h1, evr.sub_val_sub_val,
+  erw [←evr.sub_val_mul_right h1, ←evr.sub_val_mul_left h1, evr.sub_val_sub_val,
     ←evr.sub_val_mul_right h6, ←evr.sub_val_mul_left (val_mul_ge_of_both_ge evr.valtn h1 h1), evr.sub_val_sub_val]
-  rw [←evr.sub_val_mul_right h3, ←evr.sub_val_mul_left h1, evr.sub_val_sub_val,
+  erw [←evr.sub_val_mul_right h3, ←evr.sub_val_mul_left h1, evr.sub_val_sub_val,
     ←evr.sub_val_mul_right h4, ←evr.sub_val_mul_left (val_mul_ge_of_both_ge evr.valtn h1 h3), evr.sub_val_sub_val]
   rw [←evr.sub_val_mul_right h2, ←evr.sub_val_mul_right h6,
     ←evr.sub_val_mul_left (val_mul_ge_of_right_ge evr.valtn h2), evr.sub_val_sub_val]
-  rw [←evr.sub_val_mul_left h2, ←evr.sub_val_mul_right h3, ←evr.sub_val_mul_right h3,
+  erw [←evr.sub_val_mul_left h2, ←evr.sub_val_mul_right h3, ←evr.sub_val_mul_right h3,
     evr.sub_val_sub_val, ←evr.sub_val_mul_left (val_mul_ge_of_both_ge evr.valtn h2 h3), evr.sub_val_sub_val]
   rw [←evr.sub_val_mul_right h4, ←evr.sub_val_mul_left h4, evr.sub_val_sub_val]
   have h116 := val_mul_ge_of_both_ge evr.valtn (val_mul_ge_of_both_ge evr.valtn h1 h1) h6
@@ -145,11 +145,10 @@ by
   have h26 := val_mul_ge_of_both_ge evr.valtn (@val_mul_ge_of_right_ge R _ _ 2 p evr.valtn 4 e.a2 h2) h6
   have h233 := val_mul_ge_of_both_ge evr.valtn (val_mul_ge_of_both_ge evr.valtn h2 h3) h3
   have h44 := val_mul_ge_of_both_ge evr.valtn h4 h4
-  simp only [add_ofN] at h116 h134 h44 h26 h233
   rw [←val_neg] at h134
   rw [←val_neg] at h44
 
-  rw [sub_eq_add_neg, sub_eq_add_neg, ←evr.sub_val_neg, ←evr.sub_val_neg,
+  erw [sub_eq_add_neg, sub_eq_add_neg, ←evr.sub_val_neg, ←evr.sub_val_neg,
     ←evr.sub_val_add h116 h134, ←evr.sub_val_add _ h26, ←evr.sub_val_add _ h233,
     ←evr.sub_val_add _ h44, ←sub_eq_add_neg, ←sub_eq_add_neg]
   . rfl
@@ -357,7 +356,7 @@ lemma pi_scaling_val_discr_to_nat {p : R} (evr : ENatValRing p) (e : ValidModel 
   (h3 : evr.valtn e.a3 ≥ 3) (h4 : evr.valtn e.a4 ≥ 4) (h6 : evr.valtn e.a6 ≥ 6) :
   val_discr_to_nat evr.valtn (pi_scaling evr e h1 h2 h3 h4 h6) = val_discr_to_nat evr.valtn e - 12 :=
 by
-  apply_fun (Nat.cast : ℕ → ℕ∞) using Nat.cast_injective (R := ℕ∞) -- TODO this shouldnt need to be specified
+  apply_fun (Nat.cast : ℕ → ℕ∞) using Nat.cast_injective (R := ℕ∞) -- TODO this shouldnt need to be specified should be fixed in mathlib4#6733
   rw [ofN_val_discr_to_nat, pi_scaling_toModel evr e h1 h2 h3 h4 h6,
     Model.discr_of_pi_scaling _ _ h1 h2 h3 h4 h6, evr.val_sub_val_eq]
   norm_cast
@@ -365,10 +364,10 @@ by
 
 lemma v_b2_of_v_a1_a2 {p : R} (valp : SurjVal p) (e : ValidModel R) (h1 : valp e.a1 ≥ 1)
   (h2 : valp e.a2 = 1) : valp e.b2 ≥ 1 :=
-  val_add_ge_of_ge valp (val_mul_ge_of_left_ge valp h1) (val_mul_ge_of_right_ge valp (le_of_eq h2.symm))
+val_add_ge_of_ge valp (val_mul_ge_of_left_ge valp h1) (val_mul_ge_of_right_ge valp (le_of_eq h2.symm))
 
 lemma v_b4_of_v_a1_a3_a4 {p : R} (valp : SurjVal p) (e : ValidModel R) (h1 : valp e.a1 ≥ 1)
-  (h3 : valp e.a3 ≥ q) (h4 : valp e.a4 ≥ q + 1) : valp e.b4 ≥ q + 1 := by
+    (h3 : valp e.a3 ≥ q) (h4 : valp e.a4 ≥ q + 1) : valp e.b4 ≥ q + 1 := by
   apply val_add_ge_of_ge valp <;>
   . simp
     elinarith
@@ -378,7 +377,7 @@ lemma v_b4_of_v_a1_a3_a4 {p : R} (valp : SurjVal p) (e : ValidModel R) (h1 : val
   -- . exact (val_mul_ge_of_right_ge valp h4)
 
 lemma v_b6_of_v_a3_a6 {p : R} {q : ℕ} (valp : SurjVal p) (e : ValidModel R) (h3 : valp e.a3 ≥ q)
-  (h6 : valp e.a6 ≥ 2 * q) : valp e.b6 ≥ 2 * q := by
+    (h6 : valp e.a6 ≥ 2 * q) : valp e.b6 ≥ 2 * q := by
   -- rw [Model.b6]
   apply val_add_ge_of_ge valp <;>
   . simp
@@ -393,8 +392,8 @@ lemma v_b6_of_v_a3_a6 {p : R} {q : ℕ} (valp : SurjVal p) (e : ValidModel R) (h
   -- . exact (val_mul_ge_of_right_ge valp h6)
 
 lemma v_b8_of_v_ai {p : R} {q : ℕ} (valp : SurjVal p) (e : ValidModel R) (h1 : valp e.a1 ≥ 1)
-  (h2 : valp e.a2 = 1) (h3 : valp e.a3 ≥ q) (h4 : valp e.a4 ≥ q + 1)
-  (h6 : valp e.a6 ≥ 2 * q) : valp e.b8 ≥ 2 * q + 1 := by
+    (h2 : valp e.a2 = 1) (h3 : valp e.a3 ≥ q) (h4 : valp e.a4 ≥ q + 1)
+    (h6 : valp e.a6 ≥ 2 * q) : valp e.b8 ≥ 2 * q + 1 := by
   -- rw [Model.b8]
   -- rw [sub_eq_add_neg, sub_eq_add_neg]
   apply_rules [val_add_ge_of_ge, val_sub_ge_of_ge] <;>
@@ -433,12 +432,12 @@ lemma v_b8_of_v_ai {p : R} {q : ℕ} (valp : SurjVal p) (e : ValidModel R) (h1 :
   --   exact le_of_succ_le h4
 
 
-private lemma aux (n q : ℕ) (h : 1 < q) (hn : 2 * q ≤ n) : 2 * q + 3 ≤ n + n :=
-by linarith
+-- private lemma aux (n q : ℕ) (h : 1 < q) (hn : 2 * q ≤ n) : 2 * q + 3 ≤ n + n :=
+-- by linarith
 
-private lemma aux' (n q m t : ℕ) (h : 1 < q) (h2': 1 ≤ n) (h4': q + 1 ≤ m) (h6': 2 * q ≤ t) :
-  2 * q + 3 ≤ n + (m + t) :=
-by linarith
+-- private lemma aux' (n q m t : ℕ) (h : 1 < q) (h2': 1 ≤ n) (h4': q + 1 ≤ m) (h6': 2 * q ≤ t) :
+--   2 * q + 3 ≤ n + (m + t) :=
+-- by linarith
 
 -- set_option trace.profiler true in
 lemma v_discr_of_v_ai {p : R} {q : ℕ} (valp : SurjVal p) (e : ValidModel R) (hq : q > 1)
